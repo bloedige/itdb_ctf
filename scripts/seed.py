@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 from sqlmodel import select, create_engine,Session
-from itdb_ctf.models import (Rol,Categoria,Dificultad,Modalidad,ModoPuntaje,MetodoAuth,EstadoInscripcion,EstadoWriteup)
+from itdb_ctf.models import (Rol,Categoria,Dificultad,Modalidad,ModoPuntaje,MetodoAuth,EstadoInscripcion,EstadoWriteup,Usuario,)
+from itdb_ctf.utils.security import hasher
 
 load_dotenv()
 DATABASE_URL=os.environ["DATABASE_URL"]
@@ -22,19 +23,22 @@ def get_or_create(session,modelo,filtro:dict,valores:dict | None=None):
         return obj
     return existente
 
-ROLES=[
-    ("superadmin","super administrador"),
-    ("admin","administrador"),
-    ("autor","autor de retos"),
-    ("user","estudiante")
-    ]
+
+#---Catalogo---
+
+ROLES= [("superadmin","super administrador"),
+        ("admin","administrador"),
+        ("autor","autor de retos"),
+        ("user","estudiante")]
+        
+METODOS_AUTH = ["google", "local"]
 MODOS_PUNTAJE = ["estatico", "dinamico"]
 MODALIDADES = ["abierto", "cerrado"]
 DIFICULTADES = ["Fácil", "Media", "Difícil"]
 CATEGORIAS = ["Web", "Forensics", "Crypto", "Reversing", "Pwn", "OSINT", "Misc"]
 ESTADOS_WRITEUP = ["borrador", "pendiente", "aprobado", "rechazado"]
 ESTADOS_INSCR = ["inscrito", "invitado", "aceptado", "rechazado"]
-METODOS_AUTH = ["google", "local"]
+
 
 def sembrar_catalogos(session):
     catalogos=[
@@ -54,77 +58,60 @@ def sembrar_catalogos(session):
         for et in datos:
             get_or_create(session,modelo,{"etiqueta":et})
 
-# ==========================================================================
-#  ADMIN SEMILLA + EVENTO ABIERTO
-## ==========================================================================
-## Como resuelve.id_evento y compra.id_evento son OBLIGATORIOS, el evento abierto
-## debe existir antes del primer envio. Y un evento necesita un creador (usuario),
-## por eso primero creamos un admin semilla.
-#
-#ADMIN_SEED_EMAIL = "admin@donbosco.edu.bo"      # << CAMBIA esto al correo real
-#
-#EVENTO_ABIERTO_TITULO = "CTF Abierto Don Bosco"
-#EVENTO_ABIERTO_DESC = (
-#    "Evento de practica libre y permanente. Modalidad abierta, sin fecha de fin. "
-#    "Todo miembro autenticado puede resolver retos aqui."
-#)
-#
-#
-#def sembrar_admin_y_evento(session):
-#    """Crea el usuario admin semilla y el evento abierto permanente."""
-#
-#    # Buscamos el rol 'admin' y el metodo 'google' que ya sembramos arriba.
-#    # .one() obliga a que exista exactamente uno (si no, lanza error: util para detectar problemas).
-#    rol_admin = session.exec(select(Rol).where(Rol.codigo == "admin")).one()
-#    metodo_google = session.exec(
-#        select(MetodoAuth).where(MetodoAuth.etiqueta == "google")
-#    ).one()
-#
-#    # Creamos (o recuperamos) el admin, identificado por su correo.
-#    admin = get_or_create(
-#        session, Usuario,
-#        {"email_inst": ADMIN_SEED_EMAIL},        # filtro: si ya existe este correo, no duplica
-#        {                                        # valores solo para cuando se crea:
-#            "id_rol": rol_admin.id_rol,
-#            "id_metodo_auth": metodo_google.id_metodo_auth,
-#            "nombre": "Administrador",
-#            "paterno": "Sistema",
-#            "alias": "admin",
-#        },
-#    )
-#
-#    # Buscamos la modalidad 'abierto' y el modo de puntaje para el evento.
-#    modalidad_abierto = session.exec(
-#        select(Modalidad).where(Modalidad.etiqueta == "abierto")
-#    ).one()
-#    modo_estatico = session.exec(
-#        select(ModoPuntaje).where(ModoPuntaje.etiqueta == "estatico")
-#    ).one()
-#
-#    # Creamos (o recuperamos) el evento abierto, identificado por su titulo.
-#    get_or_create(
-#        session, Evento,
-#        {"titulo": EVENTO_ABIERTO_TITULO},
-#        {
-#            "id_usuario": admin.id_usuario,              # el creador es el admin
-#            "id_modalidad": modalidad_abierto.id_modalidad,
-#            "id_modo_puntaje": modo_estatico.id_modo_puntaje,
-#            "descripcion": EVENTO_ABIERTO_DESC,
-#            "fec_inicio": datetime.now(timezone.utc),
-#            "fec_fin": None,                             # None = permanente, sin fin
-#        },
-#    )
-#
-#
-# ==========================================================================
-#  EJECUCION
-# ==========================================================================
+#---Creacion superadmin---
+
+EMAIL_SEED = os.environ["SUPERADMIN_ITDB"]
+ALIAS_SEED= os.environ["SUPERADMIN_ITDB_ALIAS"]
+PW_SEED= os.environ["SUPERADMIN_ITDB_PASS"]     
+
+def sembrar_superadmin(session):
+   
+    rol = session.exec(select(Rol).where(Rol.codigo == "superadmin")).one()
+    metodo_auth = session.exec(select(MetodoAuth).where(MetodoAuth.etiqueta == "local")).one()
+
+    # Creamos (o recuperamos), identificando por su correo.
+    admin = get_or_create(
+        session,Usuario,
+        {"email_inst": EMAIL_SEED},        # filtro: si ya existe este correo, no duplica
+        {                                        # valores solo para cuando se crea:
+            "id_rol": rol.id_rol,
+            "id_metodo_auth": metodo_auth.id_metodo_auth,
+            "nombre": "ITDB",
+            "paterno": "Sistema",
+            "password_hash": hasher.hashear(PW_SEED),
+            "alias": ALIAS_SEED,
+        },
+    )
+
+#####-----    # Buscamos la modalidad 'abierto' y el modo de puntaje para el evento.
+#####-----    modalidad_abierto = session.exec(        select(Modalidad).where(Modalidad.etiqueta == "abierto")).one()
+#####-----    modo_estatico = session.exec(select(ModoPuntaje).where(ModoPuntaje.etiqueta == "estatico")).one()
+#####-----
+#####-----    # Creamos (o recuperamos) el evento abierto, identificado por su titulo.
+#####-----    get_or_create(
+#####-----        session, Evento,
+#####-----        {"titulo": EVENTO_ABIERTO_TITULO},
+#####-----        {
+#####-----            "id_usuario": admin.id_usuario,              # el creador es el admin
+#####-----            "id_modalidad": modalidad_abierto.id_modalidad,
+#####-----            "id_modo_puntaje": modo_estatico.id_modo_puntaje,
+#####-----            "descripcion": EVENTO_ABIERTO_DESC,
+#####-----            "fec_inicio": datetime.now(timezone.utc),
+#####-----            "fec_fin": None,                             # None = permanente, sin fin
+#####-----        },
+#####-----    )
+#####-----
+
+ #==========================================================================
+ # EJECUCION
+ #==========================================================================
 
 def main():
     with Session(engine) as lm:
-        sembrar_catalogos(lm)                   # 1. los 8 catalogos
-        # sembrar_admin_y_evento(session)       # 2. admin + evento abierto
-        lm.commit()                             # 3. guardar TODO de golpe
+        sembrar_catalogos(lm)  
+        sembrar_superadmin(lm)                 
+        # sembrar_admin_y_evento(session)       
+        lm.commit()                             
     print("seed catalogos implementados")
 # Esto hace que main() se ejecute solo si corres el archivo directamente
 # (python scripts/seed.py), pero no si alguien lo importa.
