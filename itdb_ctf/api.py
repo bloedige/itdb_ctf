@@ -21,7 +21,6 @@ async def callback(request: Request, code: str, state: str):
     if request.cookies.get("oauth_state") != state:
         return RedirectResponse("/login?error=csrf")
     info = canjear_codigo(code)
-
     try: 
         usuario = obtener_crear_usuario(info)
     except DominiNoPermitido:
@@ -33,5 +32,5 @@ async def callback(request: Request, code: str, state: str):
     resp.delete_cookie("oauth_state")
     return resp
 
-
+###---AÑADIR SEGURIDAD A LA CREACIÓN DE COOKIES
 app = rx.App(api_transformer=fastapi_app)
