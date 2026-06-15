@@ -1,4 +1,5 @@
 import os
+os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"   # ← relaja la validación de scopes
 from google_auth_oauthlib.flow import Flow
 from google.oauth2 import id_token
 from google.auth.transport import requests as g_requests
@@ -19,8 +20,13 @@ CLIENT_CONFIG={
 }
 
 def _crear_flow() -> Flow:
-    return Flow.from_client_config(CLIENT_CONFIG, scopes=SCOPES, redirect_uri=REDIRECT_URI)
+    return Flow.from_client_config(
+        CLIENT_CONFIG, 
+        scopes=SCOPES, 
+        redirect_uri=REDIRECT_URI, 
+        autogenerate_code_verifier=False # ← desactiva PKCE
 
+        )    
 def url_de_autorizacion() -> tuple[str, str]:
     flow = _crear_flow()
     return flow.authorization_url(access_type="offline",include_granted_scopes="true",prompt="select_account")  # devuelve (url, state)

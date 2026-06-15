@@ -8,6 +8,12 @@ class LoginLocalState(AuthState):
     password: str = ""
     error: str = ""
 
+    def set_emai(self, v: str):
+        self.email=v
+
+    def set_password(self, v: str):
+        self.password = v
+
     def entrar_local(self):
         usuario = verificar_credenciales(self.email,self.password)
         if not usuario:
@@ -28,24 +34,26 @@ def login_page() -> rx.Component:
                     rx.hstack(
                         rx.text("Iniciar sesión con google"),
                         rx.spacer(),
-                        rx.icon("google")
+                        rx.icon("heart", color="red"),
+                        width="100%"
                     ),
                     width = "100%"
                     ),
-                href="/auth/login"
+                href="http://localhost:8000/auth/login",
+                width="100%",
             ),
             rx.divider(),
             rx.text("Acceso local"), 
             ### --- login local autores......
-            rx.input(placeholder="Correo electronico", on_change=LoginLocalState.set_email),
-            rx.input(placeholder="Contraseña",type="password", on_change=LoginLocalState.set_password),
+            rx.input(placeholder="Correo electronico", on_change=LoginLocalState.set_emai ,width="100%"),
+            rx.input(placeholder="Contraseña",type="password", on_change=LoginLocalState.set_password,width="100%"),
             rx.button("Ingresar", on_click=LoginLocalState.entrar_local, width="100%"),
             rx.cond(
                 LoginLocalState.error != "",    
                 rx.text(LoginLocalState.error, color="red"),
             ),
             spacing="4",
-            width="320px",     
+            width="400px",     
         ),
         height="100vh"
     )

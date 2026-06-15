@@ -1,37 +1,8 @@
-"""Welcome to Reflex! This file outlines the steps to create a basic app."""
-
-import reflex as rx
-
-from rxconfig import config
-from itdb_ctf import models
-
-
-class State(rx.State):
-    """The app state."""
-
-
-def index() -> rx.Component:
-    # Welcome Page (Index)
-    return rx.container(
-        rx.color_mode.button(position="top-right"),
-        rx.vstack(
-            rx.heading("Welcome to Reflex!", size="9"),
-            rx.text(
-                "Get started by editing ",
-                rx.code(f"{config.app_name}/{config.app_name}.py"),
-                size="5",
-            ),
-            rx.link(
-                rx.button("Check out our docs!"),
-                href="https://reflex.dev/docs/getting-started/introduction/",
-                is_external=True,
-            ),
-            spacing="5",
-            justify="center",
-            min_height="85vh",
-        ),
-    )
-
-
-app = rx.App()
-app.add_page(index)
+from itdb_ctf.api import app
+from itdb_ctf.auth.auth_state import AuthState
+from itdb_ctf.pages.login import login_page
+from itdb_ctf.pages.retos import retos_page
+from itdb_ctf.pages.admin import admin_page
+app.add_page(login_page, route="/login")
+app.add_page(retos_page, route="/retos", on_load=AuthState.requiere_login)
+app.add_page(admin_page, route="/admin", on_load=AuthState.require_staff)
