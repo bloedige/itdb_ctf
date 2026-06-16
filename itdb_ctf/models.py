@@ -96,7 +96,7 @@ class Reto(SQLModel, table=True):
 
     titulo: str = Field(max_length=100)
     descripcion: Optional[str] = Field(default=None, sa_column=Column(Text))
-    flag: str =  Field(sa_column=Column(CHAR(60)))
+    flag: str =  Field(sa_column=Column(CHAR(64)))
     puntaje_inicial: int
     puntaje_minimo: Optional[int] = Field(default=None)
     archivo_original: Optional[str] =  Field(default=None, max_length=100)
