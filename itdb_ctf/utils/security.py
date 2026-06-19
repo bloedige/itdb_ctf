@@ -1,14 +1,16 @@
-from abc import ABC, abstractclassmethod
+from abc import ABC, abstractmethod
 import bcrypt
+import hashlib  
+
 
 class HasherBase(ABC):
 
-    @abstractclassmethod
-    def hashear (self, pw:str)->str:
+    @abstractmethod
+    def hashear (self, cadena:str)->str:  # GENERAR HASH DE CADENA DE TEXTO
         ...
     
-    @abstractclassmethod
-    def verificar(sef, pw:str, pwdb:str)->bool:
+    @abstractmethod
+    def verificar(self, cadena:str, cadena_db:str)->bool:  # VALIDAR CADENA DE TEXTO CON HASH GUARDADO
         ...
 
 class BcryptHasher(HasherBase):
@@ -21,8 +23,16 @@ class BcryptHasher(HasherBase):
         hash_bytes = bcrypt.hashpw(pw.encode("utf-8"),salt)
         return hash_bytes.decode("utf-8")
     
-    def verificar(sef, pw, pwdb):
-        return bcrypt.checkpw(pw.encode("utf-8"),pwdb.encode("utf-8"))
+    def verificar(self, pw, pw_db):
+        return bcrypt.checkpw(pw.encode("utf-8"),pw_db.encode("utf-8"))
     
-
 hasher: HasherBase = BcryptHasher()
+
+class FlagHasher(HasherBase):
+    def hashear(self, flag)->str:
+        return hashlib.sha256(flag.encode("utf-8")).hexdigest()
+    
+    def verificar(self, flag, hash_db)->bool:
+        return self.hashear(flag)==hash_db
+
+flag_hasher: HasherBase = FlagHasher()

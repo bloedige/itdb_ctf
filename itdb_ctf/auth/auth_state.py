@@ -4,7 +4,7 @@ from itdb_ctf.models import Usuario, Rol
 from itdb_ctf.db import engine
 from itdb_ctf.auth.jwt_utils import validar_jwt
 
-ROLES_STAF ={"superadmin","admin","autor"}
+ROLES_STAFF ={"superadmin","admin","autor"}
 
 class AuthState(rx.State):
     # El JWT guardado como cookie (1 hora).
@@ -40,7 +40,7 @@ class AuthState(rx.State):
         
     @rx.var
     def es_staff(self) -> bool:
-        return self.codigo_rol in ROLES_STAF
+        return self.codigo_rol in ROLES_STAFF
     
  # --- EVENT HANDLERS (sin @rx.var): HACEN acciones (redirigen, borran) ---
 
@@ -49,7 +49,7 @@ class AuthState(rx.State):
             return rx.redirect("/login")
         
    
-    def require_staff(self):
+    def requiere_staff(self):
         if not self.autenticado:
             return rx.redirect("/login")
         if not self.es_staff:

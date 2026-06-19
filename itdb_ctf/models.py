@@ -99,8 +99,8 @@ class Reto(SQLModel, table=True):
     flag: str =  Field(sa_column=Column(CHAR(64)))
     puntaje_inicial: int
     puntaje_minimo: Optional[int] = Field(default=None)
-    archivo_original: Optional[str] =  Field(default=None, max_length=100)
-    archivo_ruta: Optional[str] =    Field(default=None, max_length=255)
+    archivo_original: Optional[str] =  Field(default=None, max_length=255)
+    archivo_ruta: Optional[str] =    Field(default=None, max_length=35)
     fec_creacion: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now()))
     activo: bool = Field(default=True)
 
@@ -120,7 +120,7 @@ class Writeup(SQLModel, table=True):
     id_reto: int = Field(foreign_key="reto.id_reto")
     id_estado_writeup: int = Field(foreign_key="estado_writeup.id_estado_writeup")
 
-    writeup_ruta: str = Field(max_length=255)
+    writeup_ruta: str = Field(max_length=25)
     fec_creacion: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now())) 
     activo: bool = Field(default=True)
 

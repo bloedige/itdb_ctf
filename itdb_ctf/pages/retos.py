@@ -1,5 +1,5 @@
 import reflex as rx    
-from itdb_ctf.componets.navbar import navbar
+from itdb_ctf.components.navbar import navbar
 
 def retos_page() -> rx.components:
     return rx.vstack(
