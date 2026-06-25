@@ -34,4 +34,4 @@ def url_de_autorizacion() -> tuple[str, str]:
 def canjear_codigo(code: str) -> dict:
     flow = _crear_flow()
     flow.fetch_token(code=code)
-    return id_token.verify_oauth2_token(flow.credentials.id_token,g_requests.Request(), CLIENT_ID)
+    return id_token.verify_oauth2_token(flow.credentials.id_token,g_requests.Request(), CLIENT_ID,clock_skew_in_seconds=10)

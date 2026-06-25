@@ -64,6 +64,15 @@ def desactivar_reto(id_reto) -> bool:
         s.commit()
         return True
     
+def activar_desactivar_reto(id_reto) -> bool:
+    with Session(engine) as s:
+        reto = s.get(Reto,id_reto)
+        if not reto: return False
+        reto.activo = not reto.activo
+        s.add(reto)
+        s.commit()
+        return True
+    
 def puede_editar(reto:Reto, id_usuario:int, codigo_rol:str ) -> bool:
     if codigo_rol in ("superadmin","admin"):
         return True

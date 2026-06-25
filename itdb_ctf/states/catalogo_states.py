@@ -1,7 +1,7 @@
 import reflex as rx
 from sqlmodel import select, Session
 from itdb_ctf.db import engine
-from itdb_ctf.models import Reto, Categoria, Dificultad, Usuario, Resuelve
+from itdb_ctf.models import Reto, Categoria, Dificultad, Usuario, Resuelve, EstadoInscripcion, Participa, Contiene
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.retos.envio_logic import enviar_flag
 from itdb_ctf.retos.evento_logic import id_evento_abierto
@@ -13,6 +13,7 @@ class CatalogoState(AuthState):
     # --- Opciones de filtro
     cat_opciones:list[tuple[str,str]]=[]
     dif_opciones:list[tuple[str,str]]=[]
+    
     def set_filtro_categoria(self, v:str):
         self.filtro_categoria=v
 
@@ -24,8 +25,24 @@ class CatalogoState(AuthState):
         guard = self.requiere_login()
         if guard:
             return guard
+        
+        id_evento=id_evento_abierto()
+
         with Session(engine) as s:
 
+            est_aceptado = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="aceptado")).first()
+            aceptado = s.exec(select(Participa).where(
+                Participa.id_usuario==self.id_usuario,
+                Participa.id_evento==id_evento,
+                Participa.id_estado_inscripcion==est_aceptado,
+            )).first()
+
+            if not aceptado:
+                self.retos=[]
+                self.cat_opciones=[]
+                self.dif_opciones=[]
+                return
+            
             self.cat_opciones=[(str(c.id_categoria),c.etiqueta) for c in s.exec(select(Categoria)).all()] 
             self.dif_opciones=[(str(d.id_dificultad),d.etiqueta) for d in s.exec(select(Dificultad)).all()]
 
@@ -36,7 +53,8 @@ class CatalogoState(AuthState):
                 .join(Categoria, Reto.id_categoria == Categoria.id_categoria)
                 .join(Dificultad, Reto.id_dificultad == Dificultad.id_dificultad)
                 .join(Usuario, Reto.id_usuario == Usuario.id_usuario)
-                .where(Reto.activo==True)
+                .join(Contiene, Reto.id_reto == Contiene.id_reto)
+                .where(Reto.activo==True, Contiene.id_evento==id_evento)
             )
             if self.filtro_categoria:
                 stmt=stmt.where(Reto.id_categoria==int(self.filtro_categoria))

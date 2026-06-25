@@ -1,6 +1,6 @@
 from sqlmodel import select,Session
 from itdb_ctf.db import engine
-from itdb_ctf.models import Resuelve,Contiene,Evento,Reto
+from itdb_ctf.models import Resuelve,Contiene,Evento,Reto,EstadoInscripcion,Participa
 from itdb_ctf.retos.puntaje_logic import calcular_puntaje
 from itdb_ctf.utils.security import flag_hasher
 
@@ -15,8 +15,19 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, di
 
         if not rel:
             return {"ok":False, "msg":"El reto no pertenece a este evento"}
+        
+        # --- El usuario debe estar ACEPTADO en el evento
+        est_aceptado = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="aceptado")).first()
+        aceptado = s.exec(select(Participa).where(
+            Participa.id_usuario==id_usuario,
+            Participa.id_evento==id_evento,
+            Participa.id_estado_inscripcion==est_aceptado,
+        )).first()
 
+        if not aceptado:
+            return{"ok":False,"msg":"No estás aceptado en este evento."}
 
+        # --- Anti-resubmit
         resuelto = s.exec(select(Resuelve).where(
             Resuelve.id_usuario==id_usuario,
             Resuelve.id_evento==id_evento,

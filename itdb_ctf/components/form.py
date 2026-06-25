@@ -1,6 +1,6 @@
 import reflex as rx
 
-def select_catalog(opciones,placeholder,on_change)->rx.Component:
+def select_catalog(opciones,placeholder,on_change,value=None)->rx.Component:
     return rx.select.root(
         rx.select.trigger(placeholder=placeholder),
         rx.select.content(
@@ -9,7 +9,8 @@ def select_catalog(opciones,placeholder,on_change)->rx.Component:
                 lambda par: rx.select.item(par[1],value=par[0])
             )
         ),
-        on_change=on_change
+        on_change=on_change,
+        value=value,
     )
 
 def input_box(placeholder,value,on_change,type)->rx.Component:
@@ -17,7 +18,7 @@ def input_box(placeholder,value,on_change,type)->rx.Component:
         placeholder=placeholder,
         on_change=on_change,
         value=value,
-        type=type
+        type=type,
     )
 
 
@@ -25,5 +26,5 @@ def text_area(placeholder,value,on_change)->rx.Component:
     return rx.text_area(
         placeholder=placeholder,
         value=value,
-        on_change=on_change
+        on_change=on_change,
     )
