@@ -11,6 +11,7 @@ def select_catalog(opciones,placeholder,on_change,value=None)->rx.Component:
         ),
         on_change=on_change,
         value=value,
+        width="100%",
     )
 
 def input_box(placeholder,value,on_change,type)->rx.Component:
@@ -19,6 +20,7 @@ def input_box(placeholder,value,on_change,type)->rx.Component:
         on_change=on_change,
         value=value,
         type=type,
+        width="100%",
     )
 
 
@@ -27,4 +29,5 @@ def text_area(placeholder,value,on_change)->rx.Component:
         placeholder=placeholder,
         value=value,
         on_change=on_change,
+        width="100%",
     )

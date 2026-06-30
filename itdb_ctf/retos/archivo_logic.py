@@ -23,5 +23,16 @@ def guardar_archivo(contenido: bytes, nombre_original: str) -> tuple[str, str]:
         f.write(contenido)
     return limpio,nombre_fisico
 
+def borrar_archivo(nombre_fisico: str) -> bool:
+    if not nombre_fisico:
+        return False
+    ruta = (RUTA_ARCHIVOS/nombre_fisico).resolve()
 
-
+    if RUTA_ARCHIVOS.resolve() not in ruta.parents:
+        return False
+    
+    if ruta.exists():
+        ruta.unlink()
+        return True
+    return False
+    

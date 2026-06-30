@@ -4,7 +4,7 @@ from itdb_ctf.views.form_editar_reto_view import form_editar_reto_view
 
 def fila_reto(reto:dict) -> rx.Component:
     return rx.table.row(
-        rx.table.cell(f"LM22{reto['id']}"),
+        rx.table.cell(reto['id']),
         rx.table.cell(reto['titulo']),
         rx.table.cell(reto['categoria']),
         rx.table.cell(reto['dificultad']),
