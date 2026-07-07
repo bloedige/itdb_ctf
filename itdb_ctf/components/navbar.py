@@ -1,6 +1,9 @@
 import reflex as rx 
 from itdb_ctf.auth.auth_state import AuthState
 
+
+def icon():return
+
 def navbar() -> rx.Component:
     return rx.desktop_only(
         rx.hstack(

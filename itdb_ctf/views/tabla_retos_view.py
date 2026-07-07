@@ -38,19 +38,11 @@ def fila_reto(reto:dict) -> rx.Component:
 
 def tabla_retos_view()->rx.Component:
     return rx.vstack(
-        rx.hstack(
-            rx.heading("Retos",size="5"),
-            rx.spacer(),
-            rx.input(
-                placeholder="Buscar por nombre...",
-                value=ListarRetosState.busqueda,
-                on_change=ListarRetosState.set_busqueda,
-                size="2",
-                width="100%",
-                align="center",
-            ),
+        rx.heading("Retos"),
+        rx.card(
+            rx.hstack(rx.icon("search", size=16 ),rx.text("Buscar",size="1")),
+            rx.input(placeholder="Buscar por titulo...", value=ListarRetosState.busqueda, on_change=ListarRetosState.set_busqueda, size="1", ),
         ),
-
         rx.table.root(
             rx.table.header(
                 rx.table.row(
@@ -70,6 +62,6 @@ def tabla_retos_view()->rx.Component:
             ),  
             width="100%",
         ),
-        spacing="3",
+        spacing="2",
         width="100%",
     )

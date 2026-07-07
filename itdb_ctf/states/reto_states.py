@@ -35,6 +35,8 @@ class CrearRetosState(AuthState):
     # --- Temp
     archivo_temp:str = ""
     contenido_temp:bytes = b""
+    # --- dialog
+    dialog_bool:bool = False
     
     # ---setters
     def set_id_evento(self, v:str):
@@ -63,6 +65,12 @@ class CrearRetosState(AuthState):
     def set_cancelar(self):
         self.archivo_temp = ""
         self.contenido_temp = b""
+    
+    def set_drop_mensaje(self):
+        self.mensaje = ""
+    
+    def open_close_dialog(self):
+        self.dialog_bool = not self.dialog_bool
         
     async def on_drop_file(self,files:list[rx.UploadFile]):
         if not files:
@@ -88,13 +96,13 @@ class CrearRetosState(AuthState):
         self.nombre_subido=original
         self.mensaje=f"Archivo '{original}' listo."
 
-    def guardar_reto(self):
-        if not (self.titulo and self.flag and self.puntaje_inicial):
-            self.mensaje="Titulo, flag y puntaje inicial son obligatorios."
-            return
-        if not (self.id_categoria and self.id_dificultad and self.id_modo_puntaje and self.id_evento):
-            self.mensaje="Seleccione dificultad, categoria, modo y evento."
-            return
+    async def guardar_reto(self):
+        #if not (self.titulo and self.flag and self.puntaje_inicial):
+        #    self.mensaje="Titulo, flag y puntaje inicial son obligatorios."
+        #    return
+        #if not (self.id_categoria and self.id_dificultad and self.id_modo_puntaje and self.id_evento):
+        #    self.mensaje="Seleccione dificultad, categoria, modo y evento."
+        #    return
         try:
             crear_reto(
                 id_evento=int(self.id_evento),
@@ -114,16 +122,20 @@ class CrearRetosState(AuthState):
         except Exception as e:
             self.mensaje=f"Error: {e}"
             return
-        self.mensaje=f"Reto {self.titulo} creado."
-        self.limpiar()
-        ListarRetosState.cargar_lista()
+        self.mensaje=(f"Reto {self.titulo} " + (f"con archivo {self.nombre_subido}" if self.nombre_subido else "") + "creado.")
+        return True
 
     async def guardar_reto_completo(self):
         if not self.validar_campos():
             return
         if self.contenido_temp and self.archivo_temp:
             await self.subir_archivo()
-        self.guardar_reto()
+        if await self.guardar_reto():
+            self.limpiar()
+            self.open_close_dialog()
+            listar = await self.get_state(ListarRetosState)
+            listar.cargar_lista()
+            return rx.toast.success(self.mensaje)
 
     def agregar_pista(self):
         if not self.pista_desc:
@@ -140,13 +152,21 @@ class CrearRetosState(AuthState):
     def quitar_pista(self, indice:int):
         self.pistas = [p for i, p in enumerate(self.pistas) if i != indice]
 
-    def validar_campos(self) -> bool: 
-        if not (self.titulo and self.flag and self.puntaje_inicial):
-            self.mensaje="Titulo, flag y puntaje inicial son obligatorios."
-            return False
-        if not (self.id_categoria and self.id_dificultad and self.id_modo_puntaje and self.id_evento):
-            self.mensaje="Seleccione dificultad, categoria, modo y evento."
-            return False
+    def validar_campos(self) -> bool:
+        validaciones = [
+            (self.titulo, "Se requiere el título"),
+            (self.flag, "Se requiere la flag"),
+            (self.puntaje_inicial, "Se requiere el puntaje inicial"),
+            (self.id_categoria, "Se requiere una categoría"),
+            (self.id_dificultad, "Se requiere una dificultad"),
+            (self.id_modo_puntaje, "Se requiere un modo de puntaje"),
+            (self.id_evento, "Se requiere un evento"),
+        ]
+    
+        for valor, mensaje in validaciones:
+            if not valor:
+                self.mensaje = mensaje
+                return False
         return True
 
     def limpiar(self):
@@ -167,6 +187,7 @@ class ListarRetosState(AuthState):
 
     def set_busqueda(self, v:str):
         self.busqueda=v
+        return ListarRetosState.cargar_lista
 
     def cargar_lista(self):
         guard = self.requiere_staff()
@@ -198,10 +219,6 @@ class ListarRetosState(AuthState):
                 }
                 for r,cat,dif,mod in s.exec(stmt).all()
             ]
-
-    def buscar(self):
-        return ListarRetosState.cargar_lista
-    
 
     def alternar_activo(self, id_reto:int):
         guard = self.requiere_staff()
@@ -241,7 +258,7 @@ class EditarRetosState(AuthState):
     archivo_original: str = ""
     archivo_ruta: str = ""
 
-
+    dialog_bool:bool =False
 
     def set_titulo(self, v: str):
         self.titulo = v    
@@ -265,6 +282,10 @@ class EditarRetosState(AuthState):
         self.pista_costo = v
     def set_pista_desc(self, v:str):
         self.pista_desc = v
+    def open_close_dialog(self):
+        self.dialog_bool = not self.dialog_bool 
+    def set_drop_mensaje(self):
+        self.mensaje = ""
 
     def set_pista_existente_costo(self, indice:int, v:str):
         self.pistas_existentes = [
@@ -313,8 +334,7 @@ class EditarRetosState(AuthState):
             archivo = files[0]
             self.contenido_temp = await archivo.read()
             self.archivo_temp = archivo.name
-            self.set_remplazar()
-            
+            self.set_remplazar()      
     
     def quitar_archivo(self):
         borrar_archivo(self.archivo_ruta)
@@ -338,12 +358,9 @@ class EditarRetosState(AuthState):
             reto = s.get(Reto,id_reto)
             if not reto:
                 return
-            
             if not puede_editar(reto, self.id_usuario,self.codigo_rol):
                 self.mensaje="no puedes editar este reto."
                 return
-            
-            
             self.categorias=[(str(c.id_categoria),c.etiqueta) for c in s.exec(select(Categoria)).all()]
             self.dificultades=[(str(d.id_dificultad),d.etiqueta) for d in s.exec(select(Dificultad)).all()]
             self.modos=[(str(m.id_modo_puntaje),m.etiqueta) for m in s.exec(select(ModoPuntaje)).all()]
@@ -364,22 +381,18 @@ class EditarRetosState(AuthState):
             self.archivo_ruta = reto.archivo_ruta or ""
             self.set_conservar()
 
-
-
     async def guardar(self):
         guard = self.requiere_staff()
         if guard:
             return guard
-        
         with Session(engine) as s:
             reto = s.get(Reto,self.id_reto)
             if not reto:
                 self.mensaje="El reto no existe"
                 return
             if not puede_editar(reto, self.id_usuario, self.codigo_rol):
-                self.mensaje="No cuatas con permiso de edicion de retos"
+                self.mensaje="No cuentas con permiso de edicion de retos"
                 return
-
         values = {
             "titulo": self.titulo,            
             "descripcion": self.descripcion,
@@ -391,23 +404,17 @@ class EditarRetosState(AuthState):
             "archivo_original": self.archivo_original or None,
             "archivo_ruta": self.archivo_ruta or None,
         }
-
         if self.flag:
             values['flag'] = self.flag
-        
         for p in self.pistas_existentes:
             editar_pista(p['id_pista'], p['costo'], p['descripcion'])
-
         for p in self.pistas_nuevas:
             if p['descripcion']:
                 crear_pista(self.id_reto, p['costo'], p['descripcion'])
-
         editar_reto(self.id_reto,values)
-        self.mensaje="Reto actualizado."
-        self.set_conservar()
-        return ListarRetosState.cargar_lista 
+        self.mensaje=f"Reto {self.titulo} actualizado."
+        return True
     
-
     async def guardar_edit_completo(self):
         if not self.validar_campos():
             return
@@ -415,15 +422,35 @@ class EditarRetosState(AuthState):
                 self.quitar_archivo()
         elif self.accion_archivo == "remplazar" and self.contenido_temp:
             await self.remplazar_archivo()
-        return await self.guardar()
+        if await self.guardar():
+            listar = await self.get_state(ListarRetosState)
+            listar.cargar_lista 
+            self.open_close_dialog()
+            self.limpiar()
+            self.set_conservar()
+            return rx.toast.success(self.mensaje)
            
-
-
-    def validar_campos(self) -> bool: 
-        if not (self.titulo and self.puntaje_inicial):
-            self.mensaje="Titulo y puntaje inicial son obligatorios."
-            return False
-        if not (self.id_categoria and self.id_dificultad and self.id_modo_puntaje):
-            self.mensaje="Seleccione dificultad, categoria, modo puntaje "
-            return False
+    def validar_campos(self) -> bool:
+        validaciones = [
+            (self.titulo, "Se requiere el título"),
+            (self.puntaje_inicial, "Se requiere el puntaje inicial"),
+            (self.id_categoria, "Se requiere una categoría"),
+            (self.id_dificultad, "Se requiere una dificultad"),
+            (self.id_modo_puntaje, "Se requiere un modo de puntaje"),
+        ]
+        for valor, mensaje in validaciones:
+            if not valor:
+                self.mensaje = mensaje
+                return False
         return True
+    
+    def limpiar(self):
+            self.titulo = self.descripcion = self.flag = ""
+            self.puntaje_inicial = self.puntaje_minimo = ""
+            self.archivo_original = self.archivo_ruta = ""
+            self.id_categoria = self.id_dificultad = self.id_modo_puntaje = ""
+            self.pistas_nuevas = self.pistas_existentes = []
+            self.pista_desc = self.pista_costo = ""
+            self.contenido_temp = b""
+            self.archivo_temp = ""
+            self.pista_costo = self.pista_desc = ""

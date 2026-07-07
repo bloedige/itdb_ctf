@@ -4,7 +4,7 @@ from itdb_ctf.db import engine
 from itdb_ctf.models import Reto, Categoria, Dificultad, Usuario, Resuelve, EstadoInscripcion, Participa, Contiene
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.retos.envio_logic import enviar_flag
-from itdb_ctf.retos.evento_logic import id_evento_abierto
+from itdb_ctf.evento.evento_logic import id_evento_abierto
 
 class CatalogoState(AuthState):
     retos:list[dict]=[]
