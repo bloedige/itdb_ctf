@@ -1,7 +1,5 @@
 import reflex as rx
 
-
-
 def select_catalog(legend, placeholder, opciones, on_change, value=None)->rx.Component:
     return rx.box(
         rx.text(
@@ -25,7 +23,7 @@ def select_catalog(legend, placeholder, opciones, on_change, value=None)->rx.Com
         width="100%",
     )
 
-def input_box(legend, placeholder, value, on_change, type)->rx.Component:
+def input_box(legend, placeholder, value, on_change, type, disabled=None)->rx.Component:
     return rx.box(
         rx.text(
             legend,
@@ -38,6 +36,7 @@ def input_box(legend, placeholder, value, on_change, type)->rx.Component:
             value=value,
             type=type,
             width="100%",
+            disabled=disabled,
         ),
         width="100%",
     )
@@ -73,7 +72,7 @@ def input_datetime(legend, value, on_change, disabled=False) -> rx.Component:
         )
     )
 
-def checked(legend, checked, on_change, disabled=False) -> rx.Component:
+def checked(legend, checked, on_change, disabled=None) -> rx.Component:
     return rx.box(
         rx.checkbox(
             legend,
@@ -89,6 +88,7 @@ def badge_msg(msg, color) -> rx.Component:
             color_scheme=color,
             size="1",
             aling="center",
+            
         ),
         width="100%",
         spacing="2",
@@ -120,11 +120,13 @@ def close_dialog_button(actions) -> rx.Component:
                 right=".9em",
             ), 
 
-def button(legend, color, actions) -> rx.Component:
+def button(legend, color, actions, disabled=None, size=None) -> rx.Component:
     return rx.button(
         legend,
         color_scheme=color,
         on_click=actions,
         variant="surface",
+        disabled=disabled, 
+        size=size,                      
     )
 

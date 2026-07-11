@@ -5,6 +5,7 @@ from itdb_ctf.models import Categoria,Dificultad,ModoPuntaje,Evento,Reto
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.retos.reto_logic import crear_reto, activar_desactivar_reto, editar_reto, puede_editar, activar_desactivar_pista, crear_pista, editar_pista, listar_pista
 from itdb_ctf.retos.archivo_logic import guardar_archivo, borrar_archivo
+from itdb_ctf.asociar.asociar_logic import aislado, listar_eventos_validos
 
 class CrearRetosState(AuthState):
     
@@ -242,6 +243,7 @@ class EditarRetosState(AuthState):
     categorias:list[tuple[str,str]]=[]
     dificultades:list[tuple[str,str]]=[]
     modos:list[tuple[str,str]]=[]
+    
 
     mensaje: str=""
 
@@ -258,7 +260,11 @@ class EditarRetosState(AuthState):
     archivo_original: str = ""
     archivo_ruta: str = ""
 
-    dialog_bool:bool =False
+    dialog_bool:bool = False
+
+    aislado_bool:bool = False
+    eventos:list[tuple[str,str]]=listar_eventos_validos
+    #conluir selects mas  condicion = view 
 
     def set_titulo(self, v: str):
         self.titulo = v    
@@ -379,6 +385,7 @@ class EditarRetosState(AuthState):
             self.pista_costo = self.pista_desc = ""
             self.archivo_original = reto.archivo_original or ""
             self.archivo_ruta = reto.archivo_ruta or ""
+            self.aislado_bool = aislado(id_reto)
             self.set_conservar()
 
     async def guardar(self):

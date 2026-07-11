@@ -7,15 +7,14 @@ def archivo_up()->rx.Component:
     return rx.vstack(
         rx.cond(
             CrearRetosState.archivo_temp != "",
-            rx.badge(
+            rx.badge(              
                 rx.icon("file_check"),
                 rx.text(CrearRetosState.archivo_temp),
                 rx.spacer(),
-                rx.button("Cancelar", color_scheme="gray", on_click=[CrearRetosState.set_cancelar, rx.clear_selected_files("archivo_reto")]),
-                color_scheme= "green",
-                size="3",
-                width="100%",
-                padding=".9em",
+                rx.button("Cancelar", color_scheme="gray", on_click=[CrearRetosState.set_cancelar, rx.clear_selected_files("archivo_reto")], size="1", aling="right", variant="surface"),
+                color_scheme= "jade",
+                size="2",
+                width="100%",    
             ), 
             rx.badge(
                 rx.spacer(),
@@ -23,9 +22,8 @@ def archivo_up()->rx.Component:
                 rx.text("Sin archivo"),
                 rx.spacer(),
                 color_scheme= "gray",
-                size="3",
-                width="100%",
-                padding=".9em", 
+                size="2",
+                width="100%",   
             ),  
         ),
         ## subida de archivos
@@ -38,7 +36,7 @@ def archivo_up()->rx.Component:
             width="100%",
         ), 
         width="100%", 
-        spacing="2",
+        spacing="3",
     )
 
 def form_reto()->rx.Component:
@@ -68,8 +66,8 @@ def form_pistas()->rx.Component:
         rx.foreach(
             CrearRetosState.pistas,
             lambda p, i: rx.hstack(
-                card_text("Costo de pista", f"{p['costo']}, pts."),
                 card_text("Descripción de pista", f"{p['descripcion']}"),
+                card_text("Costo de pista", f"{p['costo']}, pts."),
                 rx.spacer(),
                 rx.button(
                     "Quitar",
@@ -106,6 +104,7 @@ def form_crear_reto()->rx.Component:
                     form_reto(),
                     archivo_up(),
                     rows="auto",
+                    spacing="2",
                 ),
                 form_pistas(),
                 columns={"base":"1", "md":"2"},
