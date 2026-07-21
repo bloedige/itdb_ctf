@@ -220,7 +220,6 @@ class EditarEventoState(AuthState):
         except Exception as e:
             self.mensaje = f"error: {e}"
             return
-        self.mensaje = f"Evento {self.titulo} actualizado."
         return True 
 
     async def guardar_edit_completo(self):
@@ -232,7 +231,7 @@ class EditarEventoState(AuthState):
             self.open_close_dialog()
             self.limpiar()
             self.set_drop_mensaje()
-            return rx.toast.success(self.mensaje)
+            return rx.toast.success("Datos de evento Actualizado")
 
     def validar_campos(self) -> bool:
         if not (self.titulo and self.id_modalidad):

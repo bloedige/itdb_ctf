@@ -111,26 +111,23 @@ def alert_dialog(id_reto, titulo) -> rx.Component:
     return rx.alert_dialog.root(
         rx.alert_dialog.trigger(
             button("Quitar", "red", [], size="1"),
-            #rx.button("Quitar", color_scheme="red", variant="surface", size="2")
         ),
         rx.alert_dialog.content(
             rx.alert_dialog.title("Quitar reto del evento"),
             rx.alert_dialog.description(f"¿Seguro que quieres quitar '{titulo}' de este evento?"),
-            rx.hstack(
-                rx.spacer(),
+            rx.flex(
                 rx.alert_dialog.cancel(
                     button("Cancelar", "gray", [], size="2"),
-                    #x.button("Cancelar", color_scheme="gray", variant="surface", size="2")
                 ),
                 rx.alert_dialog.action(
                     button("Quitar", "red", [AsociarState.quitar_retos(id_reto)], size="2"),
-                    #rx.button("Quitar", on_click=lambda:AsociarState.quitar_retos(id_reto), color_scheme="red", variant="surface", size="2")
                 ),
+                justify="end",
                 spacing="2",
                 width="100%",
             ),
             spacing="2",
-                width="100%",
+            width="100%",
         ),
     )
 

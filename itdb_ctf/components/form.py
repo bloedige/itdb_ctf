@@ -83,12 +83,11 @@ def checked(legend, checked, on_change, disabled=None) -> rx.Component:
     )
 def badge_msg(msg, color) -> rx.Component:
     return rx.center(
-        rx.badge(
+        rx.text(
             msg,
-            color_scheme=color,
+            color=color,
             size="1",
-            aling="center",
-            
+            weight="light",
         ),
         width="100%",
         spacing="2",

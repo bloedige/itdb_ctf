@@ -182,5 +182,4 @@ class AsociarState(AuthState):
         except ValueError as e:
             self.cargar_gestion()
             toast = rx.toast.error(str(e))
-
         return toast
