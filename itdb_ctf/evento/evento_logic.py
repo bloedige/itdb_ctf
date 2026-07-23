@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento,Modalidad,ModoPuntaje
-
+    
 def validar_evento(id_modadlidad, fec_inicio, fec_fin, id_evento=None):
     etiqueta = etiqueta_modalidad(id_modadlidad) 
     if etiqueta == "abierto":

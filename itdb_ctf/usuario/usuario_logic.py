@@ -3,6 +3,7 @@ from sqlmodel import select, Session
 from itdb_ctf.db import engine
 from itdb_ctf.models import Rol, Usuario, MetodoAuth
 from itdb_ctf.utils.security import hasher
+from itdb_ctf.auth.auth_logic import auto_incripcion_evento_abierto
 
 RANGO={"superadmin":3, "admin":2, "autor":1, "user":0}
 
@@ -90,6 +91,8 @@ def crear_cuenta(nombre:str, paterno:str, materno:str, alias:str, email:str, id_
             password_hash=hasher.hashear(password)
         )
         s.add(user)
+        s.flush()
+        auto_incripcion_evento_abierto(s, user.id_usuario)
         s.commit()
         return password
     

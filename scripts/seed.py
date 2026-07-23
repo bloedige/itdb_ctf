@@ -37,7 +37,7 @@ MODALIDADES = ["abierto", "cerrado"]
 DIFICULTADES = ["Fácil", "Media", "Difícil"]
 CATEGORIAS = ["Web", "Forensics", "Crypto", "Reversing", "Pwn", "OSINT", "Misc"]
 ESTADOS_WRITEUP = ["borrador", "pendiente", "aprobado", "rechazado"]
-ESTADOS_INSCR = ["inscrito", "invitado", "aceptado", "rechazado","descalificado"]
+ESTADOS_INSCR = ["inscrito", "descalificado"]
 
 
 def sembrar_catalogos(session):
@@ -146,6 +146,7 @@ def main():
         sembrar_superadmin_evento(lm)                       
         lm.commit()                             
     print("seed catalogos implementados")
+    print("seed super administrador y evento creados")
 # Esto hace que main() se ejecute solo si corres el archivo directamente
 # (python scripts/seed.py), pero no si alguien lo importa.
 if __name__ == "__main__":

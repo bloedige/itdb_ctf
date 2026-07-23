@@ -44,7 +44,7 @@ class EstadoWriteup(SQLModel, table=True):
 class EstadoInscripcion(SQLModel, table=True):
     __tablename__ = "estado_inscripcion"
     id_estado_inscripcion: Optional[int]=Field(default=None, primary_key=True)
-    etiqueta: str = Field(max_length=15, unique=True)    #inscrito, invitado, aceptado, rechazado
+    etiqueta: str = Field(max_length=15, unique=True)    #inscrito, descalificado
 
 class MetodoAuth(SQLModel, table=True):
     __tablename__ = "metodo_auth"
@@ -144,7 +144,6 @@ class Participa(SQLModel, table=True):
     id_usuario: int = Field(foreign_key="usuario.id_usuario")
     id_evento: int = Field(foreign_key="evento.id_evento")
     id_estado_inscripcion: int = Field(foreign_key="estado_inscripcion.id_estado_inscripcion")
-    fec_invitacion: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True)))
     fec_ingreso: Optional[datetime] =  Field(default=None, sa_column=Column(DateTime(timezone=True)))
 
 class Compra(SQLModel, table=True):

@@ -17,7 +17,7 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, di
             return {"ok":False, "msg":"El reto no pertenece a este evento"}
         
         # --- El usuario debe estar ACEPTADO en el evento
-        est_aceptado = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="aceptado")).first()
+        est_aceptado = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="inscrito")).first()
         aceptado = s.exec(select(Participa).where(
             Participa.id_usuario==id_usuario,
             Participa.id_evento==id_evento,
