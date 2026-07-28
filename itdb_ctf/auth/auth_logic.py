@@ -5,7 +5,6 @@ from ..models import Usuario,Rol, MetodoAuth,Evento,Modalidad,EstadoInscripcion,
 from datetime import datetime, timezone
 
 DOMINIO=os.environ["ALLOWED_EMAIL_DOMAIN"]
-titulo=os.environ.get("EVENTO_ABIERTO_TITULO", "Plataforma ITDB - Práctica Libre CTF")
 
 class DominiNoPermitido(Exception):
     """El correo no pertenece al dominio institucional."""
@@ -31,7 +30,7 @@ def auto_incripcion_evento_abierto(session,id_usuario:int):
     evento = evento_abierto_original(session)
     if not evento:
         return
-    estado = session.exec(select(EstadoInscripcion).where(EstadoInscripcion.etiqueta=="aceptado")).first()
+    estado = session.exec(select(EstadoInscripcion).where(EstadoInscripcion.etiqueta=="inscrito")).first()
     if not estado:
         return
     participa = session.exec(select(Participa).where(

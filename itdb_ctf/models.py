@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import Optional
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, CHAR, Text, DateTime, func
 from sqlalchemy.dialects.postgresql import INET
 

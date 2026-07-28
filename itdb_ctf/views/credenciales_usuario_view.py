@@ -115,17 +115,17 @@ def alert_estado(id_usuario, activo, email) -> rx.Component:
                 rx.alert_dialog.description(
                     rx.vstack(
                         rx.text("Desea realizar la acción para cambiar el estado de la cuenta.", size="1"), 
-                        rx.center(rx.text(f"{email}", weight="medium", size="1" ,color_scheme=rx.cond(activo, "ruby", "jade")), width="100%"),
+                        rx.center(rx.text(f"{email}", weight="medium", size="1"), width="100%"),
                         spacing="3",
                         width="100%",
-                    ),               
+                    ),                
                 ),
                 rx.flex(
                     rx.alert_dialog.cancel(button("Cancelar", "gray", [], size="1")),
                     rx.alert_dialog.action(button(rx.cond(activo, "Desactivar cuenta", "Activar cuenta"), rx.cond(activo, "ruby", "jade"), [ListarUsuarioState.altenar_activo(id_usuario)], size="1")),
                     justify="end",
                     width="100%",
-                    spacing="2"
+                    spacing="3"
                 ),
                 width="100%",
                 spacing="3",

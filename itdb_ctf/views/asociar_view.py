@@ -68,7 +68,7 @@ def fila_candidato(reto:dict) -> rx.Component:
 
 def item_carrito(item:dict) -> rx.Component:
     return rx.grid(
-        rx.text(item['titulo'], size="1", weight="light", color_scheme="gray" , align="center"),
+        rx.text(item['titulo'], size="2", weight="light", color_scheme="gray" , align="center"),
         rx.cond(
             item['override'] != None,
             rx.text(f"{item['override']} pts. (Override)", size="2", weight="light", color_scheme="gray"),
@@ -85,21 +85,22 @@ def card_carrito() -> rx.Component:
     return rx.card(
         rx.vstack(
             rx.text("Asociar", size="3", weight="medium"),
-        rx.divider(),
-        rx.cond(
-            AsociarState.carrito != [],
-            rx.foreach(AsociarState.carrito, item_carrito),
-            rx.spacer(),   
+            rx.divider(),
+            rx.cond(
+                AsociarState.carrito != [],
+                rx.foreach(AsociarState.carrito, item_carrito),
+                rx.spacer(),   
+                ),
+            
+            select_catalog("Evento destino", "Seleccionar", AsociarState.eventos_dest, AsociarState.set_id_evento_dest),
+            rx.grid(
+                button("Asociar", "jade", AsociarState.guardar_carrito, size="2", disabled=AsociarState.activar_asociar),
+                button("Vaciar", "ruby", AsociarState.vaciar_carrito, size="2"),
+                columns="2",
+                width="100%",
+                spacing="2",
             ),
-        rx.divider(),
-        rx.grid(
-            button("Asociar", "jade", AsociarState.guardar_carrito, size="2", disabled=AsociarState.activar_asociar),
-            button("Vaciar", "ruby", AsociarState.vaciar_carrito, size="2"),
-            columns="2",
-            width="100%",
-            spacing="2",
-        ),
-        select_catalog("Evento destino", "Seleccionar", AsociarState.eventos_dest, AsociarState.set_id_evento_dest),
+            
         ),
         width="100%",
         spacing="3", 
@@ -240,7 +241,7 @@ def contenido() -> rx.Component:
                 rx.cond(
                     AsociarState.id_evento_gest != "",
                     rx.foreach(AsociarState.retos_gest, fila_gestion),
-                    rx.text("seleccione evento a gestionar", color_scheme="gray", size="2", text_aling="center")
+                    rx.text("seleccione evento a gestionar", color_scheme="gray", size="2")
                 ),
                 rx.foreach(AsociarState.candidatos, fila_candidato)
             ),

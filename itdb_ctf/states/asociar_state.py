@@ -67,11 +67,11 @@ class AsociarState(AuthState):
     
     @rx.var
     def activar_asociar(self) -> bool:
-        return True if self.carrito == [] else False
+        return self.carrito == [] 
     
     @rx.var 
     def modo(self) -> bool:
-        return False if self.tab == "asociar" else True
+        return self.tab == "gestionar"
     
     @rx.var
     def override(self) -> bool:
@@ -151,7 +151,7 @@ class AsociarState(AuthState):
         if not self.id_evento_dest:
             return rx.toast.warning("Seleccione un evento destino.")
         if not self.carrito:
-            return rx.toast.info("Sin retos para asociar a evento.")
+            return rx.toast.warning("Sin retos para asociar a evento.")
         dest = int(self.id_evento_dest)
         exitos = 0
         fallos = []
@@ -164,7 +164,7 @@ class AsociarState(AuthState):
         self.carrito = []
         self.cargar_destino()
         self.cargar_candidatos()
-        return rx.toast.info(f"{exitos} reto(s) asociado(s)" + (f" Fallaron: {' '.join(fallos)}" if fallos else ""))
+        return rx.toast.success(f"{exitos} reto(s) asociado(s)" + (f" Fallaron: {' '.join(fallos)}" if fallos else ""))
 
     def cargar_gestion(self):
         if self.id_evento_gest:
@@ -176,10 +176,9 @@ class AsociarState(AuthState):
         try:
             if asociar.quitar_reto(id_reto, int(self.id_evento_gest)):
                 self.cargar_gestion()
-                toast = rx.toast.success("Reto desvinculado de evento")
+                return rx.toast.success("Reto desvinculado de evento")
             else:
-                toast =  rx.toast.error("No se encontro asociación")  
+                return  rx.toast.error("No se encontro asociación")  
         except ValueError as e:
             self.cargar_gestion()
-            toast = rx.toast.error(str(e))
-        return toast
+            return rx.toast.error(str(e))
