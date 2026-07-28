@@ -168,7 +168,6 @@ class ListarUsuarioState(AuthState):
         met = int(self.id_metodo_filtro) if self.id_metodo_filtro else None
         act = (self.activo_filtro == "1") if self.activo_filtro else None
         self.lista = user.listar_usuarios(self.busqueda or None, rol, met, act ,self.id_usuario, self.codigo_rol)
-        print(self.lista)
     
     def altenar_activo(self, id_usuario:int):
         guard = self.requiere_admin()

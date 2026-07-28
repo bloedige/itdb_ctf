@@ -1,8 +1,10 @@
+import csv, io
 from datetime import datetime, timezone
 from sqlmodel import select, Session
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento, Participa, Usuario, Rol, EstadoInscripcion, MetodoAuth
-
+from itdb_ctf.auth.auth_logic import DominiNoPermitido, validar_dominio, separar_apellidos
+from itdb_ctf.utils.validaciones import formato_email_valido
 def estado_evento(ev) -> str:
     if not ev.fec_inicio:
         return "abierto"
@@ -67,7 +69,8 @@ def participantes(id_evento:int, busqueda:str | None=None, id_estado_filtro:int 
         stmt = (select(Usuario, EstadoInscripcion.etiqueta, Participa.fec_ingreso, Participa.id_participa)
                 .join(Participa, Usuario.id_usuario == Participa.id_usuario)
                 .join(EstadoInscripcion, Participa.id_estado_inscripcion == EstadoInscripcion.id_estado_inscripcion)
-                .where(Participa.id_evento == id_evento))
+                .where(Participa.id_evento == id_evento)
+                .order_by(Usuario.email_inst).order_by(EstadoInscripcion.id_estado_inscripcion.desc()))
         if id_estado_filtro:
             stmt = stmt.where(Participa.id_estado_inscripcion == id_estado_filtro)
         if busqueda:
@@ -181,3 +184,75 @@ def alternar_estado(id_participa:int):
         s.commit()
         return est
       
+
+def parsear_cvs(contenido:bytes) -> list[str]:
+    texto = contenido.decode("utf-8-sig", errors="ignore")
+    correos = []
+    for fila in csv.reader(io.StringIO(texto)):
+        if not fila:
+            continue
+        valor = fila[0].strip().lower()
+        if valor and "@" in valor:
+            correos.append(valor)
+    return correos
+
+def analizar_correos(correos:list[str], id_evento:int) -> dict:
+    nuevos = []
+    existentes = []
+    omitidos= []
+    vistos = set()
+    with Session(engine) as s:
+        inscritos = set(s.exec(select(Participa.id_usuario).where(Participa.id_evento == id_evento)).all())
+        for correo in correos:
+            if correo in vistos:
+                omitidos.append({"email":correo, "motivo":"Correo duplicado en archivo."})
+                continue
+            vistos.add(correo)
+            if not formato_email_valido(correo):
+                omitidos.append({"email": correo, "motivo": "Formato de correo invalido"})
+                continue
+            try:
+                validar_dominio(correo)
+            except DominiNoPermitido:
+                omitidos.append({"email":correo, "motivo":"Correo no institucional."})
+                continue
+            user = s.exec(select(Usuario).where(Usuario.email_inst == correo)).first()
+            if user:
+                if user.id_usuario in inscritos:
+                    omitidos.append({"email":correo, "motivo":"Inscrito en evento."})
+                elif not user.activo:
+                    omitidos.append({"email":correo, "motivo":"Cuenta desactivada."})
+                else:
+                    existentes.append({"email":correo, "id_usuario":user.id_usuario})
+            else:
+                nuevos.append({"email":correo})
+    omitidos.sort(key=lambda o: o['motivo'])
+    return {"nuevos":nuevos, "existentes":existentes, "omitidos":omitidos}
+
+
+def crear_placeholder(correo:str) -> int:
+    with Session(engine) as s:
+        rol = s.exec(select(Rol).where(Rol.codigo == "user")).one()
+        met = s.exec(select(MetodoAuth).where(MetodoAuth.etiqueta == "google")).one()
+        local = correo.split("@")[0]
+        user = Usuario(
+            id_rol=rol.id_rol,
+            id_metodo_auth=met.id_metodo_auth,
+            nombre=local,
+            paterno="pendiente",
+            email_inst=correo,
+            alias=local[:30],
+        )
+        s.add(user)
+        s.commit()
+        s.refresh(user)
+        return user.id_usuario
+    
+def confirmar_csv(nuevos:list[dict], existentes:list[dict], id_evento:int) -> tuple[int, list[str]]:
+    ids = [e["id_usuario"] for e in existentes]
+    for n in nuevos:
+        try: 
+            ids.append(crear_placeholder(n["email"]))
+        except Exception as ex:
+            pass
+    return inscribir_lote(ids, id_evento)

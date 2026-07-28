@@ -1,5 +1,5 @@
 import reflex as rx
-from itdb_ctf.components.form import button, select_catalog, input_box, badge_msg
+from itdb_ctf.components.form import button, select_catalog, input_box, badge_msg, close_dialog_button
 from itdb_ctf.states.inscripcion_state import InscripcionState
 
 
@@ -256,7 +256,7 @@ def contendido() -> rx.Component:
                             width="100%",
                         ),
                         rx.foreach(InscripcionState.participantes, fila_participante),
-                        width="100%",spacing="5"
+                        width="100%",spacing="3"
                     ),
                     rx.text("seleccione evento para incribir", color_scheme="gray", size="2")
                 ),
@@ -274,7 +274,7 @@ def contendido() -> rx.Component:
                             width="100%",
                         ),
                         rx.foreach(InscripcionState.candidatos, fila_candidato),
-                        width="100%",spacing="5"
+                        width="100%",spacing="3"
                     ),
                     rx.text("seleccione evento a gestionar", color_scheme="gray", size="2")
                 ),
@@ -285,6 +285,145 @@ def contendido() -> rx.Component:
         ),
         width="100%",
         spacing="5",
+    )
+
+def prev_csv(titulo, items, color, motivo=False) -> rx.Component:
+    return rx.vstack(
+        rx.hstack(
+            rx.text(titulo, size="2", weight="regular"),
+            rx.spacer(),
+            rx.badge(items.length().to_string(), size="2", weight="regular", color_scheme=color),
+            width="95%",
+        ),
+        rx.cond(
+            items.length() > 0,
+            rx.vstack(
+                rx.foreach(
+                    items, lambda it: rx.grid(
+                        rx.text(it['email'], size="1", weight="light"),
+                        rx.cond(
+                            motivo,
+                            rx.text(it['motivo'], size="1", weight="light", color_scheme="gray"),
+                        ),
+                        columns="2",
+                        width="100%",
+                        spacing="2"   
+                    ),
+                ),
+            ),
+            rx.text("---", color_scheme="gray", size="1", weight="light")
+        ),
+        spacing="1",
+        width="100%",
+    )
+
+def archivo_csv() -> rx.Component:
+    return rx.card(
+        rx.vstack(
+            rx.heading("Gestion de inscripciones", size="3", weight="bold"),
+            select_catalog("Evento", "Seleccionar", InscripcionState.eventos, InscripcionState.set_id_evento_csv, InscripcionState.id_evento_csv),
+            rx.cond(
+                InscripcionState.csv_nombre != "",
+                rx.grid(
+                    rx.badge(
+                        rx.icon("file", size=20),
+                        rx.text(
+                            InscripcionState.csv_nombre,
+                            size="1", 
+                            text_overflow="ellipsis",
+                            white_space="nowrap",
+                            overflow="hidden",
+                            width="100%",
+                        ),  
+                    ), 
+                    button("Analizar csv", "jade", [InscripcionState.analizar_csv], size="1"),
+                    width="100%",
+                    grid_template_columns="65% 1fr",
+                    spacing="2",
+                ),
+            ),
+            rx.upload(
+                rx.text("Arrastrar o hacer click para Subir csv", size="1"),
+                id="csv_inscripcion",
+                max_files=1,
+                accept={"text/csv": [".csv"]},
+                on_drop=InscripcionState.on_drop_csv(rx.upload_files(upload_id="csv_inscripcion")),
+                border="1px dashed #888", padding="1em",
+                border_radius=".25em",
+                width="100%",
+            ),
+            rx.cond(
+                InscripcionState.csv_analize,
+                rx.grid(
+                    button("Cerrar","gray", [InscripcionState.cerrar_csv], size="2"),
+                    button("Confirmar", "jade", [InscripcionState.confirmar_csv], size="2"),
+                    width="100%",
+                    columns="2",
+                    spacing="2",
+                )
+            ),
+            width="100%",
+            spacing="2",
+        ),
+    )
+
+def reporte_csv() -> rx.components:
+    return rx.vstack(
+        rx.heading("Reporte de inscripción por csv", size="3", weight="bold"),
+        rx.text(
+            """Revisa antes de confirmar. Los nuevos se crearan como cuentas Google
+que se completan cuando el estudiante inicia sesion.""",
+            white_space="pre-wrap", size="1", weight="light", color_scheme="gray",
+        ),
+        rx.vstack(
+            rx.divider(),
+            prev_csv("Nuevos (se crean e inscriben)", InscripcionState.prev_nuevos, "jade"),
+            rx.divider(),
+            prev_csv("Existente (se inscriben)", InscripcionState.prev_existentes, "blue"),
+            rx.divider(),
+            prev_csv("Omitidos", InscripcionState.prev_omitidos, "ruby", True),
+            width="100%",
+            max_height="60vh",
+            overflow_y="auto",    
+        ), 
+    )
+
+def dialog_csv() -> rx.Component:
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            rx.button(
+                "CSV", 
+                color_scheme="jade", 
+                on_click=[InscripcionState.open_close_dialog_csv], 
+                width="100%",
+                variant="surface",
+            ),
+        ),
+        rx.dialog.content(
+            rx.grid(
+                reporte_csv(),
+                archivo_csv(),
+                grid_template_columns="65% 1fr",
+                spacing="4",
+                width="100%",   
+            ),
+            close_dialog_button(InscripcionState.open_close_dialog_csv),
+            max_width="900px",
+        ),
+        open=InscripcionState.csv_dialog,
+    )
+
+def card_csv() -> rx.Component:
+    return rx.card(
+        rx.grid(
+            rx.text("Incribir estudiantes por lote", size="2", weight="medium"),
+            dialog_csv(),
+            width="100%",
+            spacing="2",
+        ),
+        width="100%",
+        pointer_events=rx.cond(InscripcionState.modo, "none", "auto"),
+        opacity=rx.cond(InscripcionState.modo, ".5", "1"),
     )
 
 def inscripcion_view() -> rx.Component:
@@ -298,8 +437,11 @@ def inscripcion_view() -> rx.Component:
             ),
             rx.vstack(
                 card_carrito(),
+                card_csv(),
+                grid_template_rows="1fr 1fr",
                 spacing="5",
                 width="100%",
+                height="100%",
             ),
             grid_template_columns="80% 1fr",
             spacing="5",
