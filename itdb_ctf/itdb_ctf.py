@@ -3,8 +3,8 @@ from itdb_ctf.auth.auth_state import AuthState
 
 from itdb_ctf.states.evento_states import CreaEventoState, ListarEventoState
 from itdb_ctf.states.reto_states import CrearRetosState, ListarRetosState
-from itdb_ctf.states.catalogo_states import CatalogoState
-from itdb_ctf.states.asociar_state import AsociarState
+from itdb_ctf.catalogo.catalogo_states import CatalogoState
+from itdb_ctf.asociar.asociar_state import AsociarState
 from itdb_ctf.states.usuario_states import CrearUsuarioState, ListarUsuarioState
 from itdb_ctf.states.inscripcion_state import InscripcionState
 

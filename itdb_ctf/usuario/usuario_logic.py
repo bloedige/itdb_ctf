@@ -91,8 +91,9 @@ def crear_cuenta(nombre:str, paterno:str, materno:str, alias:str, email:str, id_
             password_hash=hasher.hashear(password)
         )
         s.add(user)
-        s.flush()
-        auto_incripcion_evento_abierto(s, user.id_usuario)
+        if id_rol_cod(id_rol) == "user":
+            s.flush()
+            auto_incripcion_evento_abierto(s, user.id_usuario)
         s.commit()
         return password
     

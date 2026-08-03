@@ -161,5 +161,7 @@ class Contiene(SQLModel, table=True):
     id_contiene: Optional[int] = Field(default=None, primary_key=True)
     id_reto: int = Field(foreign_key="reto.id_reto")
     id_evento: int = Field(foreign_key="evento.id_evento")
-    puntaje_override: Optional[int] = Field(default=None)
+    id_modo_puntaje: int = Field(foreign_key="modo_puntaje.id_modo_puntaje")
+    puntaje_inicial: int
+    puntaje_minimo: Optional[int] = Field(default=None)
 

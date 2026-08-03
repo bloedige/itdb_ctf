@@ -1,6 +1,6 @@
 import reflex as rx
 
-def select_catalog(legend, placeholder, opciones, on_change, value=None)->rx.Component:
+def select_catalog(legend, placeholder, opciones, on_change, value=None ,disabled=None)->rx.Component:
     return rx.box(
         rx.text(
             legend, 
@@ -19,6 +19,7 @@ def select_catalog(legend, placeholder, opciones, on_change, value=None)->rx.Com
             width="100%",
             on_change=on_change,
             value=value,
+            disabled=disabled
         ),
         width="100%",
     )
@@ -129,3 +130,37 @@ def button(legend, color, actions, disabled=None, size=None) -> rx.Component:
         size=size,                      
     )
 
+def toast_msg(msg:str) -> rx.Component:
+    return rx.toast(
+        msg,
+        duration=1000,
+        position="top-center",
+        style={
+            "background-color": "#ffbb0050",
+            "margin_top": "10vh",
+            "color": "#ffbb00",
+            "border": "1px solid #ffbb00ff",
+            "border-radius": "0.53rem",  # corregí '0.53m' a '0.53rem'
+            "z-index": 9999,  # por encima del diálogo
+            "padding": "1rem",
+            "box-shadow": "0 4px 12px rgba(0,0,0,0.3)",
+            "height": "auto",
+        },
+    )
+
+def success_msg(msg:str) -> rx.Component:
+    return rx.toast(
+        msg,
+        duration=2000,
+        position="top-center",
+        style={
+            "background-color": "#00FFC350",
+            "margin_top": "10vh",
+            "color": "#00FFC3FF",
+            "border": "1px solid #00FFC3FF",
+            "border-radius": "0.53rem",  # corregí '0.53m' a '0.53rem'
+            "z-index": 9999,  # por encima del diálogo
+            "padding": "1rem",
+            "box-shadow": "0 4px 12px rgba(0,0,0,0.3)",
+        },
+    )

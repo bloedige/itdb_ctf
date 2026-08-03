@@ -1,4 +1,4 @@
-import reflex as rx
+""""import reflex as rx
 from sqlmodel import select, Session
 from itdb_ctf.db import engine
 from itdb_ctf.models import Reto, Categoria, Dificultad, Usuario, Resuelve, EstadoInscripcion, Participa, Contiene
@@ -30,7 +30,7 @@ class CatalogoState(AuthState):
 
         with Session(engine) as s:
 
-            est_aceptado = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="aceptado")).first()
+            est_aceptado = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="inscrito")).first()
             aceptado = s.exec(select(Participa).where(
                 Participa.id_usuario==self.id_usuario,
                 Participa.id_evento==id_evento,
@@ -143,6 +143,6 @@ class EnvioFlagState(AuthState):
 
         
 
-    
+    """
 
 
