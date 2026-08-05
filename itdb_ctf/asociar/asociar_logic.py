@@ -110,6 +110,7 @@ def asociar_reto(id_reto:int, id_evento:int, id_modo_puntaje:int, puntaje_inicia
             id_modo_puntaje=id_modo_puntaje,
             puntaje_inicial=puntaje_inicial,
             puntaje_minimo=puntaje_minimo,
+            puntaje_actual=puntaje_inicial,
         ))
         s.commit()
         return True

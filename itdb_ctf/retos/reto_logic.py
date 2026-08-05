@@ -24,7 +24,14 @@ def crear_reto(id_usuario,id_categoria,id_modo_puntaje,id_dificultad,
         )
         s.add(reto)
         s.flush()
-        asoc=Contiene(id_reto=reto.id_reto,id_evento=id_evento)
+        asoc=Contiene(
+            id_reto=reto.id_reto,
+            id_evento=id_evento,
+            id_modo_puntaje=id_modo_puntaje,
+            puntaje_inicial=puntaje_inicial,
+            puntaje_minimo=puntaje_minimo,
+            puntaje_actual=puntaje_inicial,
+        )
         s.add(asoc)
         for p in (pistas or []):
             if p.get("descripcion"):

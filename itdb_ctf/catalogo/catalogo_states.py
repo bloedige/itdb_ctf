@@ -2,8 +2,8 @@ import reflex as rx
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.components.form import toast_msg, success_msg
 from itdb_ctf.evento.evento_logic import id_evento_abierto
-from itdb_ctf.catalogo.envio_logic import enviar_flag
-from itdb_ctf.catalogo.puntaje_logic import calcular_puntaje
+from itdb_ctf.core.envio_logic import enviar_flag
+from itdb_ctf.core.puntaje_logic import calcular_puntaje
 from itdb_ctf.catalogo.catalogo_logic import cargar_catalogos, listar_retos, inscrito
 
 class CatalogoState(AuthState):

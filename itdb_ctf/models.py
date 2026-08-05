@@ -134,7 +134,6 @@ class Resuelve(SQLModel, table=True):
     id_reto: int = Field(foreign_key="reto.id_reto")
     id_evento: int = Field(foreign_key="evento.id_evento")
     flag_correcta: bool = Field(default=False)
-    puntos: int = Field(default=0)
     dir_ip: Optional[str] = Field(default=None, sa_column=Column(INET))   
     fec_envio: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now()))
 
@@ -164,4 +163,5 @@ class Contiene(SQLModel, table=True):
     id_modo_puntaje: int = Field(foreign_key="modo_puntaje.id_modo_puntaje")
     puntaje_inicial: int
     puntaje_minimo: Optional[int] = Field(default=None)
+    puntaje_actual: int
 
