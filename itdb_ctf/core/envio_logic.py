@@ -1,7 +1,7 @@
 from sqlmodel import select,Session
 from itdb_ctf.db import engine
 from itdb_ctf.models import Resuelve,Contiene,Reto,EstadoInscripcion,Participa
-from itdb_ctf.catalogo.puntaje_logic import calcular_puntaje
+from itdb_ctf.core.puntaje_logic import refrescar_puntaje
 from itdb_ctf.utils.security import flag_hasher
 
 def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, dir_ip:str |None=None ) -> tuple[bool,str]:
@@ -31,16 +31,17 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, di
         if resuelto:
             return False, "El reto ah sido resuelto."
         correcta=flag_hasher.verificar(flag_enviada,reto.flag)
-        puntos = calcular_puntaje(s,id_reto,id_evento) if correcta else 0
         s.add(Resuelve(
             id_usuario=id_usuario,
             id_evento=id_evento,
             id_reto=id_reto,
             flag_correcta=correcta,
-            puntos=puntos,
             dir_ip=dir_ip,
         )) 
-        s.commit()
         if correcta:
+            s.flush()
+            refrescar_puntaje(s, id_reto, id_evento)
+            s.commit()
             return True, "¡Flag correcta!"
+        s.commit()
         return False, "Flag incorrecta."
