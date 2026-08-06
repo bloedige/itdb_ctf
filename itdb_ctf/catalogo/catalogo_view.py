@@ -1,6 +1,6 @@
 import reflex as rx 
-from itdb_ctf.catalogo.catalogo_states import CatalogoState, EnvioFlagState
-
+from itdb_ctf.catalogo.catalogo_states import CatalogoState, EnvioFlagState, listarPistaState
+from itdb_ctf.components.form import button
 def chip(texto:str,valor:str,filtro_actual,on_click)->rx.Component:
     return rx.button(
         texto,
@@ -46,18 +46,71 @@ def filtros_view()->rx.Component:
         spacing="5",
     )
 
+
+def pista_trigger(pista:dict) -> rx.Component:
+    return rx.button(
+        rx.grid(
+            rx.text(f"Pista {pista['costo']} pts.", weight="regular", size="2"),
+            place_items="center",
+            width="100%",
+        ),
+        width="100%",
+        bg=rx.cond(pista['adquirido'], "#00FFC350", ""),
+    )
+
+def pista_content(pista:dict) -> rx.Component:
+    return rx.cond(
+        pista['adquirido'],
+        rx.grid(
+            rx.text(f"Pista {pista['costo']} pts.", weight="bold", size="3"),
+            rx.text(pista['descripcion'], weight="regular", width="100%", size="2"),
+            spacing="3",
+            place_items="center",
+            width="100%",
+        ),
+        rx.grid(
+            rx.text(f"Pista {pista['costo']} pts.", weight="bold", size="3"),
+            rx.text("¿Desea adquirir la pista?", weight="regular", width="100%", size="2"),
+            spacing="3",
+            place_items="center",
+            width="100%",
+        )
+    )
+
+def dialog_pista(pista:dict) -> rx.Component:
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            pista_trigger(pista),
+        ),
+        rx.dialog.content(
+            pista_content(pista),
+            rx.cond(
+                ~pista['adquirido'],
+                rx.flex(
+                    rx.dialog.close(button("Cancelar", "gray", [], size="2")),
+                    button("confirmar", "jade", [lambda: listarPistaState.comprar_pista(pista['id_reto'],pista['id_pista'])], size="2"),
+                    spacing="3",
+                    justify="end",
+                ),
+            ),
+            max_width="45vh"
+        )
+    )
+
 def reto_trigger(reto:dict) -> rx.Component:
     return rx.card(
-        rx.grid(
+        rx.flex(
             rx.text(reto['titulo'],size="3", weight="medium",
             color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
             ),
             rx.text(f"{reto['puntaje']} pts.",size="2", weight="regular",
             color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
             ),
-            height="10vh",
+            align="center",
+            justify="center",
+            direction="column",
+            height="8vh",
             width="100%",
-            place_items="center",    
         ),
         rx.text(f"by. {reto['creador']}",size="1", weight="light",
             color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
@@ -87,21 +140,29 @@ def reto_content(reto:dict) -> rx.Component:
             width="100%",
         ),
         rx.divider(),
-        rx.dialog.description(reto['descripcion'], width="100%",),
+        rx.text(reto['descripcion'],weight="regular", width="100%",),
         rx.flex(
             rx.text(f"by: {reto['creador']}", size="1", color="gray"),
             justify="end",
             width="100%",
         ),
+        rx.foreach(listarPistaState.pistas, dialog_pista),
         rx.cond(
             reto['original'] != None,
             rx.link(
                     rx.grid(
                         rx.icon("file_down", stroke_width=1.5 , size=15),
-                        rx.text(reto['original'], size="1", weight="light"),
+                        rx.text(reto['original'], size="2", weight="light", 
+                            style={
+                                "whiteSpace": "nowrap",
+                                "overflow": "hidden",
+                                "textOverflow": "ellipsis",
+                            },
+                        ),
                         grid_template_columns="10% 1fr",
                         spacing="2", 
                     ),
+                max_width="30%",
                 border="1px solid",
                 border_radius=".3em",
                 padding=".3em",
@@ -131,6 +192,7 @@ def reto_card_view(reto:dict)->rx.Component:
     return rx.dialog.root(
         rx.dialog.trigger(
             reto_trigger(reto),
+            on_click=lambda:listarPistaState.cargar_pistas(reto['id_reto']),
         ),
         rx.dialog.content(
             reto_content(reto),

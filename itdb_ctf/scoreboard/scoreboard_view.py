@@ -34,7 +34,7 @@ def grafica_evolucion() -> rx.Component:
             ),
             rx.recharts.legend(icon_type="diamond"),
             data=ScoreboardState.grafica,
-            width="60%",
+            width="90%",
             height=300,
         ),
         place_items="center",
@@ -82,6 +82,6 @@ def scoreboard_view() -> rx.Component:
             width="100%",
         ),
         place_items="center",
-        width="80%",
+        width=["90%", "90%", "90%", "50%"],
         spacing="5",
     )

@@ -3,8 +3,8 @@ from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.components.form import toast_msg, success_msg
 from itdb_ctf.evento.evento_logic import id_evento_abierto
 from itdb_ctf.core.envio_logic import enviar_flag
-from itdb_ctf.core.puntaje_logic import calcular_puntaje
-from itdb_ctf.catalogo.catalogo_logic import cargar_catalogos, listar_retos, inscrito
+from itdb_ctf.core.compra_logic import adquirir_pista
+from itdb_ctf.catalogo.catalogo_logic import cargar_catalogos, listar_retos, inscrito, listar_pistas
 
 class CatalogoState(AuthState):
     retos:list[dict] = []
@@ -65,3 +65,27 @@ class EnvioFlagState(AuthState):
         catalogo = await self.get_state(CatalogoState)
         catalogo.cargar_retos()
         return success_msg(msg)  
+
+class listarPistaState(AuthState):
+    pistas:list[dict] = []
+
+    @rx.event   
+    def cargar_pistas(self, id_reto:int):
+        id_evento:int = id_evento_abierto()
+        if not id_evento:
+            self.pistas = []
+            return
+        self.pistas = listar_pistas(self.id_usuario, id_evento, id_reto)
+
+    @rx.event
+    def comprar_pista(self, id_reto:int, id_pista:int):
+        guard = self.requiere_login()
+        if guard: return guard
+        id_evento = id_evento_abierto()
+        if not id_evento:
+            return toast_msg("Evento inexistenete.")
+        ok, msg = adquirir_pista(self.id_usuario, id_evento, id_reto, id_pista)
+        if not ok:
+            return toast_msg(msg)
+        self.cargar_pistas(id_reto)
+        return success_msg("Pista adquirida")

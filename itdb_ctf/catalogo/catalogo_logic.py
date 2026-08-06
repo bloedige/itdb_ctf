@@ -1,6 +1,6 @@
 from sqlmodel import select, Session
 from itdb_ctf.db import engine
-from itdb_ctf.models import Reto, Categoria, Dificultad, Usuario, Resuelve, EstadoInscripcion, Participa, Contiene
+from itdb_ctf.models import Reto, Categoria, Dificultad, Usuario, Resuelve, EstadoInscripcion, Participa, Contiene, Pista, Compra
 
 def inscrito(id_usuario:int, id_evento:int) -> bool:
     with Session(engine) as s:
@@ -58,3 +58,21 @@ def listar_retos(id_usuario:int, id_evento:int, id_categoria:int | None = None, 
             for r ,c, cat, dif, ali, nom in s.exec(stmt).all()
         ]
     
+def listar_pistas(id_usuario:int, id_evento:int, id_reto:int) -> list[dict]:
+    with Session(engine) as s:
+        adquiridos = set(s.exec(select(Compra.id_pista).where(
+            Compra.id_usuario == id_usuario,
+            Compra.id_evento == id_evento,
+            Compra.id_reto == id_reto)).all())
+        pistas = s.exec(select(Pista).where(
+            Pista.id_reto == id_reto, Pista.activo == True).order_by(Pista.costo)).all()
+        return [
+            {
+                "id_reto": p.id_reto,
+                "id_pista": p.id_pista,
+                "costo": p.costo,
+                "adquirido": p.id_pista in adquiridos,
+                "descripcion": p.descripcion if p.id_pista in adquiridos else "",
+            }
+            for p in pistas
+        ]
