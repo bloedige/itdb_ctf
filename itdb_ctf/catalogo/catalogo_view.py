@@ -176,6 +176,7 @@ def reto_content(reto:dict) -> rx.Component:
                 placeholder="flag{...}",
                 on_change=EnvioFlagState.set_flag,
                 width="100%",
+                auto_focus=True,
             ),
             rx.button(
                 "Enviar",

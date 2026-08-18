@@ -1,5 +1,6 @@
 import reflex as rx
 from itdb_ctf.scoreboard.scoreboard_view import scoreboard_view
+from itdb_ctf.scoreboard.scoreboard_state import ScoreboardState
 
 def scoreboard_page() -> rx.Component:
     return rx.vstack(
@@ -9,4 +10,6 @@ def scoreboard_page() -> rx.Component:
             place_items="center",
         ),
         width="100%",
+        on_mount=ScoreboardState.auto_refresh,
+        on_unmount=ScoreboardState.stop_refresh,
     )
