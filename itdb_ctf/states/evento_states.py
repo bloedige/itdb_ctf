@@ -191,6 +191,7 @@ class EditarEventoState(AuthState):
         if not ev: 
             self.mensaje = "Evento 404" 
             return
+        self.id_evento = id_evento
         self.titulo = ev.titulo
         self.descripcion = ev.descripcion or ""
         self.id_modalidad = str(ev.id_modalidad)
