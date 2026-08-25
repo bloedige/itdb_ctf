@@ -1,6 +1,6 @@
 import reflex as rx
 from itdb_ctf.components.form import button, select_catalog, input_box, badge_msg, close_dialog_button
-from itdb_ctf.states.inscripcion_state import InscripcionState
+from itdb_ctf.inscripcion.inscripcion_state import InscripcionState
 
 
 

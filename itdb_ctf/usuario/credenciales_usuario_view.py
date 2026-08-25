@@ -1,6 +1,6 @@
 import reflex as rx
 from itdb_ctf.components.form import button, card_text
-from itdb_ctf.states.usuario_states import CredencialesUsuarioState, EditarUsuarioState, ListarUsuarioState
+from itdb_ctf.usuario.usuario_states import CredencialesUsuarioState, EditarUsuarioState, ListarUsuarioState
 
 def credenciales_dialog() -> rx.Component:
     return rx.dialog.root(

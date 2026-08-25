@@ -1,6 +1,6 @@
 import reflex as rx 
 from itdb_ctf.components.form import button
-from itdb_ctf.auto_inscripcion.auto_incripcion_state import AutoInscripcionState
+from itdb_ctf.auto_inscripcion.auto_inscripcion_evento_state import AutoInscripcionState
 
 def alert_incripcion(id_evento:int, titulo:str) -> rx.Component:
     return rx.alert_dialog.root(
@@ -116,11 +116,12 @@ def card_evento(ev:dict) -> rx.Component:
                     ev['inscrito'],
                     rx.cond(
                         ev['estado_evento'] == "activo",
-                        button("Ingresar", "jade", []),
+                        rx.link(button("Ingresar", "jade", []), href=f"/evento/{ev['id_evento_cerrado']}/informacion"),
+                        
                     ),
                     rx.cond(
                         ev['estado_evento'] != "futuro",
-                        button("Scoreboard", "blue", []),
+                        rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),
                     ),
                 ),
                 width="100%",
@@ -131,11 +132,12 @@ def card_evento(ev:dict) -> rx.Component:
         width="50%",
     ),
 
-def eventos_view() -> rx.Component:
+def auto_inscripcion_eventos_view() -> rx.Component:
     return rx.vstack(
         rx.moment(
             interval=1000,
             on_change=AutoInscripcionState.actualizar_tiempo,
+            style={"display":"none"}
         ),
         rx.grid(
             rx.foreach(AutoInscripcionState.eventos_procesados, card_evento),

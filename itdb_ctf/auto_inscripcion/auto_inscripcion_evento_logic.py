@@ -4,12 +4,6 @@ from itdb_ctf.db import engine
 from itdb_ctf.models import Evento, Participa, EstadoInscripcion, ModoPuntaje
 from itdb_ctf.asociar.asociar_logic import estado_evento
 
-
-def etiqute(id:int)->str:
-    with Session(engine) as s:
-        et = s.get(EstadoInscripcion, id)
-    return et if et else None
-
 def et_inscrito(s:Session) -> int:
     et = s.exec(select(EstadoInscripcion).where(EstadoInscripcion.etiqueta == "inscrito")).first()
     return et.id_estado_inscripcion if et else None
@@ -50,10 +44,10 @@ def eventos(id_usuario:int) -> list[dict]:
         
         stmt = (select(Evento, ModoPuntaje.etiqueta)
             .join(ModoPuntaje, Evento.id_modo_puntaje == ModoPuntaje.id_modo_puntaje)
-            .where(Evento.activo == True).order_by(Evento.fec_creacion.desc()))
+            .where(Evento.activo == True).order_by(Evento.fec_fin.desc()))
     return [
         {
-            "id_evento":ev.id_evento,
+            "id_evento_cerrado":ev.id_evento,
             "titulo":ev.titulo,
             "descripcion":ev.descripcion or "",
             "modo":md,

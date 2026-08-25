@@ -1,7 +1,7 @@
 import reflex as rx
 from datetime import datetime, timezone
 from itdb_ctf.auth.auth_state import AuthState
-from itdb_ctf.auto_inscripcion.auto_inscripcion_logic import auto_inscripcion, eventos
+from itdb_ctf.auto_inscripcion.auto_inscripcion_evento_logic import auto_inscripcion, eventos
 
 class AutoInscripcionState(AuthState):
     eventos:list[dict] = []

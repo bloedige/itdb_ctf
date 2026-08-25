@@ -1,5 +1,5 @@
 import reflex as rx
-from sqlmodel import Session,  select
+from sqlmodel import Session
 from itdb_ctf.models import Usuario, Rol
 from itdb_ctf.db import engine
 from itdb_ctf.auth.jwt_utils import validar_jwt
@@ -58,13 +58,13 @@ class AuthState(rx.State):
         if not self.autenticado:
             return rx.redirect("/login")
         if not self.es_staff:
-            return rx.redirect("/retos")
+            return rx.redirect("/informacion")
         
     def requiere_admin(self):
         if not self.autenticado:
             return rx.redirect("/login")
         if not self.es_admin:
-            return rx.redirect("/retos")
+            return rx.redirect("/informacion")
         
     def logout(self):
         self.token = ""

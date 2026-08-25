@@ -1,5 +1,5 @@
 import reflex as rx
-from itdb_ctf.states.evento_states import EditarEventoState
+from itdb_ctf.evento.evento_states import EditarEventoState
 from itdb_ctf.components.form import input_box, input_datetime, select_catalog, checked, text_area, button, badge_msg, close_dialog_button
 
 def form_evento_edit() -> rx.Component:

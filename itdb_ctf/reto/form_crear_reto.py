@@ -1,7 +1,7 @@
 import reflex as rx
 
 from itdb_ctf.components.form import select_catalog,input_box,text_area,card_text, button, badge_msg, close_dialog_button
-from itdb_ctf.states.reto_states import CrearRetosState
+from itdb_ctf.reto.reto_states import CrearRetosState
 
 def archivo_up()->rx.Component:
     return rx.vstack(

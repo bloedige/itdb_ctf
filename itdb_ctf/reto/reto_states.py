@@ -3,8 +3,8 @@ from sqlmodel import Session,select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Categoria,Dificultad,ModoPuntaje,Evento,Reto
 from itdb_ctf.auth.auth_state import AuthState
-from itdb_ctf.retos.reto_logic import crear_reto, activar_desactivar_reto, editar_reto, puede_editar, activar_desactivar_pista, crear_pista, editar_pista, listar_pista
-from itdb_ctf.retos.archivo_logic import guardar_archivo, borrar_archivo
+from itdb_ctf.reto.reto_logic import crear_reto, activar_desactivar_reto, editar_reto, puede_editar, activar_desactivar_pista, crear_pista, editar_pista, listar_pista
+from itdb_ctf.reto.archivo_logic import guardar_archivo, borrar_archivo
 from itdb_ctf.asociar.asociar_logic import aislado, listar_eventos_validos
 
 class CrearRetosState(AuthState):

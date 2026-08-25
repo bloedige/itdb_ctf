@@ -1,5 +1,5 @@
 import reflex as rx 
-from itdb_ctf.states.reto_states import EditarRetosState
+from itdb_ctf.reto.reto_states import EditarRetosState
 from itdb_ctf.components.form import select_catalog, input_box, text_area, close_dialog_button, button, badge_msg
 
 def archivo_edit() -> rx.Component:

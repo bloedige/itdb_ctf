@@ -1,25 +1,34 @@
 from sqlmodel import select,Session
 from itdb_ctf.db import engine
-from itdb_ctf.models import Resuelve,Contiene,Reto,EstadoInscripcion,Participa
+from itdb_ctf.models import Evento, Resuelve, Contiene, Reto, EstadoInscripcion, Participa
 from itdb_ctf.core.puntaje_logic import refrescar_puntaje
 from itdb_ctf.utils.security import flag_hasher
+from itdb_ctf.asociar.asociar_logic import estado_evento
 
 def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, dir_ip:str |None=None ) -> tuple[bool,str]:
     with Session(engine) as s :
         reto = s.get(Reto,id_reto)
         if not reto or not reto.activo:
-            return False, "Reto no disponible"
+            return False, "Reto no disponible."
         cont = s.exec(select(Contiene).where(Contiene.id_reto==id_reto,Contiene.id_evento==id_evento)).first()
         if not cont:
-            return False, "El reto no pertenece a este evento"
-        # --- El usuario debe estar ACEPTADO en el evento
-        est_aceptado = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="inscrito")).first()
-        aceptado = s.exec(select(Participa).where(
+            return False, "El reto no pertenece a este evento."
+        ev = s.get(Evento, id_evento)
+        if not ev:
+            return False, "Evento no disponible."
+        est_evento = estado_evento(ev)
+        if estado_evento == "futuro":
+            return False, "El evento aún no ha iniciado."
+        if estado_evento == "concluido":
+            return False, "El evento ha finalizado."
+        # --- El usuario debe estar INSCRITO en el evento
+        est_inscrito = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="inscrito")).first()
+        inscrito = s.exec(select(Participa).where(
             Participa.id_usuario==id_usuario,
             Participa.id_evento==id_evento,
-            Participa.id_estado_inscripcion==est_aceptado,
+            Participa.id_estado_inscripcion==est_inscrito,
         )).first()
-        if not aceptado:
+        if not inscrito:
             return False, "No estás inscrito en este evento."
         # --- Anti-resubmit
         resuelto = s.exec(select(Resuelve).where(

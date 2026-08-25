@@ -26,5 +26,5 @@ def adquirir_pista(id_usuario:int, id_evento:int, id_reto:int, id_pista:int) -> 
             puntos_usados = pista.costo,
         ))
         s.commit()
-        return True, ""
+        return True, "Pista adquirida."
         

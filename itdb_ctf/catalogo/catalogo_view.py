@@ -1,6 +1,7 @@
 import reflex as rx 
 from itdb_ctf.catalogo.catalogo_states import CatalogoState, EnvioFlagState, listarPistaState
 from itdb_ctf.components.form import button
+
 def chip(texto:str,valor:str,filtro_actual,on_click)->rx.Component:
     return rx.button(
         texto,
@@ -42,7 +43,7 @@ def filtros_view()->rx.Component:
     return rx.vstack(
         filtro_categoria_view(),
         filtro_dificultad_view(),
-        width="100%",
+        width="70%",
         spacing="5",
     )
 
@@ -109,7 +110,7 @@ def reto_trigger(reto:dict) -> rx.Component:
             align="center",
             justify="center",
             direction="column",
-            height="8vh",
+            height="12vh",
             width="100%",
         ),
         rx.text(f"by. {reto['creador']}",size="1", weight="light",
@@ -204,18 +205,18 @@ def reto_card_view(reto:dict)->rx.Component:
 
 def catalogo_view()->rx.Component:
      return rx.vstack(
-        filtros_view(),
         rx.vstack(
+            filtros_view(),
             rx.grid(
                 rx.foreach(CatalogoState.retos,reto_card_view),
-                columns={"base":"1", "md":"5"},
+                columns={"base":"1", "md":"4"},
                 spacing="4",
                 width="70%",
                 place_items="center"
             ),
+        width="100%",
         align="center",
-        width="100%"
-        ),
         spacing="5",
+        ),
         width="100%",
     )

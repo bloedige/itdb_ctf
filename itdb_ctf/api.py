@@ -5,7 +5,7 @@ from pathlib import Path
 from sqlmodel import Session
 from itdb_ctf.db import engine
 from itdb_ctf.models import Reto
-from itdb_ctf.retos.archivo_logic import RUTA_ARCHIVOS
+from itdb_ctf.reto.archivo_logic import RUTA_ARCHIVOS
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import RedirectResponse, FileResponse
 

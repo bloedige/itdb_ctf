@@ -24,7 +24,11 @@ class ScoreboardState(AuthState):
     def refresh_ranking(self):
         guard = self.requiere_login()
         if guard: return guard
-        id_evento = id_evento_abierto()
+        id_route = self.router.page.params.get("id_evento_cerrado")
+        if id_route:
+            id_evento = int(id_route)
+        else:
+            id_evento =  id_evento_abierto()
         if not id_evento:
             self.ranking = []
             self.grafica = []

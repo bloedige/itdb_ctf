@@ -1,6 +1,6 @@
 import reflex as rx
 from itdb_ctf.components.form import input_box, select_catalog, badge_msg, button, close_dialog_button
-from itdb_ctf.states.usuario_states import EditarUsuarioState
+from itdb_ctf.usuario.usuario_states import EditarUsuarioState
 
 
 def form_edit_content() -> rx.Componen:

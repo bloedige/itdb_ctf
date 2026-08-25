@@ -1,6 +1,6 @@
 import reflex as rx
-from itdb_ctf.states.reto_states import ListarRetosState
-from itdb_ctf.views.form_editar_reto_view import form_editar_reto_view
+from itdb_ctf.reto.reto_states import ListarRetosState
+from itdb_ctf.reto.form_editar_reto_view import form_editar_reto_view
 
 def fila_reto(reto:dict) -> rx.Component:
     return rx.table.row(

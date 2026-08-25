@@ -1,7 +1,7 @@
 import reflex as rx
-from itdb_ctf.states.usuario_states import ListarUsuarioState
-from itdb_ctf.views.form_editar_usuario_view import form_editar_usuario_view
-from itdb_ctf.views.credenciales_usuario_view import alert_reset_password, alert_estado
+from itdb_ctf.usuario.usuario_states import ListarUsuarioState
+from itdb_ctf.usuario.form_editar_usuario_view import form_editar_usuario_view
+from itdb_ctf.usuario.credenciales_usuario_view import alert_reset_password, alert_estado
 from itdb_ctf.components.form import select_catalog, input_box
 
 def fila_usuario(u:dict) -> rx.Component:

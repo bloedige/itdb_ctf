@@ -1,6 +1,6 @@
 import reflex as rx
-from itdb_ctf.states.evento_states import ListarEventoState
-from itdb_ctf.views.form_editar_evento_view import form_editar_evento_view
+from itdb_ctf.evento.evento_states import ListarEventoState
+from itdb_ctf.evento.form_editar_evento_view import form_editar_evento_view
 
 
 def fila_evento(evento:dict) -> rx.Component:

@@ -21,7 +21,9 @@ class LoginLocalState(AuthState):
             return
         self.token = emitir_jwt(usuario)
         self.error = ""
-        return rx.redirect("/retos")
+        if self.codigo_rol != "user":
+            return rx.redirect("/admin/retos")
+        return rx.redirect("/informacion")
         
 def login_page() -> rx.Component:
     return rx.center(

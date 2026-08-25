@@ -1,7 +1,7 @@
 import reflex as rx
 from itdb_ctf.components.form import input_box,select_catalog, button, close_dialog_button,badge_msg
-from itdb_ctf.states.usuario_states import CrearUsuarioState
-from itdb_ctf.views.credenciales_usuario_view import credenciales_dialog
+from itdb_ctf.usuario.usuario_states import CrearUsuarioState
+from itdb_ctf.usuario.credenciales_usuario_view import credenciales_dialog
 
 
 
