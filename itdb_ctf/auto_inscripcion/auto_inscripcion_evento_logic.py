@@ -34,8 +34,6 @@ def auto_inscripcion( id_evento:int, id_usuario:int) -> tuple[bool,str]:
 
 def eventos(id_usuario:int) -> list[dict]:
     with Session(engine) as s:
-
-        
         participaciones = s.exec(select(Participa.id_evento, EstadoInscripcion.etiqueta)
             .join(EstadoInscripcion, Participa.id_estado_inscripcion == EstadoInscripcion.id_estado_inscripcion)
             .where(Participa.id_usuario == id_usuario)).all()

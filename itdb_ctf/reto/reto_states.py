@@ -1,14 +1,10 @@
 import reflex as rx 
-from sqlmodel import Session,select
-from itdb_ctf.db import engine
-from itdb_ctf.models import Categoria,Dificultad,ModoPuntaje,Evento,Reto
 from itdb_ctf.auth.auth_state import AuthState
-from itdb_ctf.reto.reto_logic import crear_reto, activar_desactivar_reto, editar_reto, puede_editar, activar_desactivar_pista, crear_pista, editar_pista, listar_pista
+from itdb_ctf.reto.reto_logic import crear_reto, activar_desactivar_reto, editar_reto, activar_desactivar_pista, crear_pista, editar_pista, listar_pista, listar_retos, puede_editar, obtener_reto
 from itdb_ctf.reto.archivo_logic import guardar_archivo, borrar_archivo
-from itdb_ctf.asociar.asociar_logic import aislado, listar_eventos_validos
+from itdb_ctf.asociar.asociar_logic import aislado, listar_eventos_validos, cargar_catalogos
 
 class CrearRetosState(AuthState):
-    
     # ---Campos de formulario
     id_evento:str = ""
     titulo:str = ""
@@ -38,7 +34,6 @@ class CrearRetosState(AuthState):
     contenido_temp:bytes = b""
     # --- dialog
     dialog_bool:bool = False
-    
     # ---setters
     def set_id_evento(self, v:str):
         self.id_evento=v
@@ -82,13 +77,12 @@ class CrearRetosState(AuthState):
 
     def cargar_catalogos(self):
         guard=self.requiere_staff()
-        if guard:
-            return guard
-        with Session(engine) as s:
-            self.categorias=[(str(c.id_categoria),c.etiqueta) for c in s.exec(select(Categoria)).all()]
-            self.dificultades=[(str(d.id_dificultad),d.etiqueta) for d in s.exec(select(Dificultad)).all()]
-            self.modos=[(str(m.id_modo_puntaje),m.etiqueta) for m in s.exec(select(ModoPuntaje)).all()]
-            self.eventos=[(str(e.id_evento),e.titulo) for e in s.exec(select(Evento).where(Evento.activo==True)).all()]
+        if guard: return guard
+        catalogos = cargar_catalogos()
+        self.categorias = catalogos["categorias"]
+        self.dificultades = catalogos["dificultades"]
+        self.modos = catalogos["modos"]
+        self.eventos=listar_eventos_validos()
 
     async def subir_archivo(self):
         original, nombre_fisico = guardar_archivo(self.contenido_temp,self.archivo_temp)
@@ -98,12 +92,6 @@ class CrearRetosState(AuthState):
         self.mensaje=f"Archivo '{original}' listo."
 
     async def guardar_reto(self):
-        #if not (self.titulo and self.flag and self.puntaje_inicial):
-        #    self.mensaje="Titulo, flag y puntaje inicial son obligatorios."
-        #    return
-        #if not (self.id_categoria and self.id_dificultad and self.id_modo_puntaje and self.id_evento):
-        #    self.mensaje="Seleccione dificultad, categoria, modo y evento."
-        #    return
         try:
             crear_reto(
                 id_evento=int(self.id_evento),
@@ -180,7 +168,6 @@ class CrearRetosState(AuthState):
         self.contenido_temp = b""
         self.archivo_temp = ""
 
-
 class ListarRetosState(AuthState):
     
     lista: list[dict] = []
@@ -192,35 +179,13 @@ class ListarRetosState(AuthState):
 
     def cargar_lista(self):
         guard = self.requiere_staff()
-        if guard:
-            return guard
+        if guard: return guard
+        retos = listar_retos(self.id_usuario, self.codigo_rol)
+        if self.busqueda:
+            b = self.busqueda.lower()
+            retos = [r for r in retos if b in r["titulo"].lower() or b in r["categoria"].lower() or b in r["dificultad"].lower() or b in r["modo_puntaje"].lower()]
+        self.lista = retos       
         
-        with Session(engine) as s:
-            stmt = (select(Reto,Categoria.etiqueta,Dificultad.etiqueta,ModoPuntaje.etiqueta)
-                          .join(Categoria, Reto.id_categoria==Categoria.id_categoria)
-                          .join(Dificultad, Reto.id_dificultad==Dificultad.id_dificultad)
-                          .join(ModoPuntaje, Reto.id_modo_puntaje==ModoPuntaje.id_modo_puntaje)
-                          )
-            
-            if self.busqueda:
-                stmt = stmt.where(Reto.titulo.ilike(f"%{self.busqueda}%"))
-                
-
-            self.lista = [
-                {
-                    "id":r.id_reto,
-                    "titulo":r.titulo,
-                    "categoria":cat,
-                    "dificultad":dif,
-                    "modalidad":mod,
-                    "puntaje":r.puntaje_inicial,
-                    "minimo":r.puntaje_minimo if r.puntaje_minimo else "---",
-                    "activo":r.activo, 
-                    "edit":puede_editar(r,self.id_usuario,self.codigo_rol) 
-                }
-                for r,cat,dif,mod in s.exec(stmt).all()
-            ]
-
     def alternar_activo(self, id_reto:int):
         guard = self.requiere_staff()
         if guard:
@@ -243,7 +208,6 @@ class EditarRetosState(AuthState):
     categorias:list[tuple[str,str]]=[]
     dificultades:list[tuple[str,str]]=[]
     modos:list[tuple[str,str]]=[]
-    
 
     mensaje: str=""
 
@@ -356,50 +320,48 @@ class EditarRetosState(AuthState):
         self.archivo_ruta = fisico
 
     def cargar_reto(self, id_reto:int):
+        print(id_reto)
         guard = self.requiere_staff()
-        if guard:
-            return guard
-
-        with Session(engine) as s:
-            reto = s.get(Reto,id_reto)
-            if not reto:
-                return
-            if not puede_editar(reto, self.id_usuario,self.codigo_rol):
-                self.mensaje="no puedes editar este reto."
-                return
-            self.categorias=[(str(c.id_categoria),c.etiqueta) for c in s.exec(select(Categoria)).all()]
-            self.dificultades=[(str(d.id_dificultad),d.etiqueta) for d in s.exec(select(Dificultad)).all()]
-            self.modos=[(str(m.id_modo_puntaje),m.etiqueta) for m in s.exec(select(ModoPuntaje)).all()]
-            self.id_reto = reto.id_reto            
-            self.titulo = reto.titulo            
-            self.descripcion = reto.descripcion or ""
-            self.puntaje_inicial = str(reto.puntaje_inicial)
-            self.puntaje_minimo = str(reto.puntaje_minimo) if reto.puntaje_minimo else ""
-            self.id_modo_puntaje = str(reto.id_modo_puntaje)
-            self.id_dificultad = str(reto.id_dificultad)
-            self.id_categoria = str(reto.id_categoria)
-            self.flag = ""
-            self.mensaje = ""
-            self.pistas_existentes = listar_pista(id_reto)
-            self.pistas_nuevas = []
-            self.pista_costo = self.pista_desc = ""
-            self.archivo_original = reto.archivo_original or ""
-            self.archivo_ruta = reto.archivo_ruta or ""
-            self.aislado_bool = aislado(id_reto)
-            self.set_conservar()
+        if guard: return guard
+        reto = obtener_reto(id_reto)
+        print(reto)
+        if not reto:
+            return rx.toast.error("Reto inexistente")
+        if not puede_editar(reto, self.id_usuario,self.codigo_rol):
+            return rx.toast.error("No puedes editar este reto.")
+        catalogos = cargar_catalogos()
+        self.categorias = catalogos["categorias"]
+        self.dificultades = catalogos["dificultades"]
+        self.modos = catalogos["modos"]
+        self.id_reto = reto.id_reto            
+        self.titulo = reto.titulo            
+        self.descripcion = reto.descripcion or ""
+        self.puntaje_inicial = str(reto.puntaje_inicial)
+        self.puntaje_minimo = str(reto.puntaje_minimo) if reto.puntaje_minimo else ""
+        self.id_modo_puntaje = str(reto.id_modo_puntaje)
+        self.id_dificultad = str(reto.id_dificultad)
+        self.id_categoria = str(reto.id_categoria)
+        self.flag = ""
+        self.mensaje = ""
+        self.pistas_existentes = listar_pista(id_reto)
+        self.pistas_nuevas = []
+        self.pista_costo = self.pista_desc = ""
+        self.archivo_original = reto.archivo_original or ""
+        self.archivo_ruta = reto.archivo_ruta or ""
+        self.aislado_bool = aislado(id_reto)
+        self.set_conservar()
+        self.open_close_dialog()
 
     async def guardar(self):
         guard = self.requiere_staff()
-        if guard:
-            return guard
-        with Session(engine) as s:
-            reto = s.get(Reto,self.id_reto)
-            if not reto:
-                self.mensaje="El reto no existe"
-                return
-            if not puede_editar(reto, self.id_usuario, self.codigo_rol):
-                self.mensaje="No cuentas con permiso de edicion de retos"
-                return
+        if guard: return guard
+        reto = obtener_reto(self.id_reto)
+        if not reto:
+            self.mensaje="El reto no existe"
+            return
+        if not puede_editar(reto, self.id_usuario, self.codigo_rol):
+            self.mensaje="No cuentas con permiso de edicion de retos"
+            return
         values = {
             "titulo": self.titulo,            
             "descripcion": self.descripcion,

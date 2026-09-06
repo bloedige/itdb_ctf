@@ -63,7 +63,7 @@ class Usuario(SQLModel, table=True):
     nombre: str = Field(max_length=50)
     paterno: str = Field(max_length=50)
     materno: Optional[str] = Field(default=None, max_length=50)
-    alias: Optional[str] = Field(default=None, max_length=30)
+    alias: Optional[str] = Field(default=None, max_length=30) # pasar a unique
     password_hash: Optional[str] = Field(default=None, sa_column=Column(CHAR(60)))
     email_inst: str = Field(max_length=150, unique=True, index=True)
     avatar: Optional[str] =  Field(default=None, max_length=255)
@@ -124,8 +124,7 @@ class Writeup(SQLModel, table=True):
     fec_creacion: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now())) 
     activo: bool = Field(default=True)
 
-
-    ###     TABLAS ASOCIATIVAS
+###     TABLAS ASOCIATIVAS
 
 class Resuelve(SQLModel, table=True):
     __tablename__="resuelve"

@@ -100,7 +100,7 @@ def card_evento(ev:dict) -> rx.Component:
                     ),
                     rx.cond(
                         ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido") & (ev['estado_evento'] != "activo"),  
-                        alert_incripcion(ev['id_evento'], ev['titulo']),
+                        alert_incripcion(ev['id_evento_cerrado'], ev['titulo']),
                         rx.cond(
                             ~ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido"),
                             rx.badge(
@@ -112,16 +112,19 @@ def card_evento(ev:dict) -> rx.Component:
                         ),
                     ),
                 ),
-                rx.cond(
-                    ev['inscrito'],
-                    rx.cond(
-                        ev['estado_evento'] == "activo",
-                        rx.link(button("Ingresar", "jade", []), href=f"/evento/{ev['id_evento_cerrado']}/informacion"),
-                        
+                rx.match(
+                    ev['estado_evento'],
+                    (
+                        "activo",
+                        rx.cond(
+                            ev['inscrito'],
+                            rx.link(button("Ingresar", "jade", []), href=f"/evento/{ev['id_evento_cerrado']}/informacion"),
+                            rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),
+                        ),
                     ),
-                    rx.cond(
-                        ev['estado_evento'] != "futuro",
-                        rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),
+                    (
+                        "concluido",
+                        rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),  
                     ),
                 ),
                 width="100%",

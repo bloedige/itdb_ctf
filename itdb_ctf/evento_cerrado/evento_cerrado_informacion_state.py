@@ -41,21 +41,7 @@ class EventoCerradoContadorRegresivoFinalState(AuthState):
     @rx.event
     def actualizar_tiempo(self):
         self.ahora = datetime.now(timezone.utc)
-        #info = self.get_state(EventoCerradoInfromacionState)
-        #final = info.final
-        #if not final:
-        #    return "00:00:00"
-        #if isinstance(final, str):
-        #    final = datetime.fromisoformat(final)
-        #if final.tzinfo is None:
-        #    final = final.replace(tzinfo=timezone.utc)
-        #if self.ahora >= final:
-        #    return "00:00:00"
-        #else:
-        #    rest = int((final - self.ahora).total_seconds())
-        #    hrs, rest = divmod(rest, 3600)
-        #    mins, seg = divmod(rest, 60)      
-        #    self.contador_regresivo = f"{hrs:02d}:{mins:02d}:{seg:02d}"
+        
     @rx.var
     async def contador_regresivo(self) -> str:
         info = await self.get_state(EventoCerradoInfromacionState)

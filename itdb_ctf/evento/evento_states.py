@@ -1,10 +1,8 @@
 import reflex as rx
 from datetime import datetime
-from sqlmodel import Session, select
-from itdb_ctf.db import engine
-from itdb_ctf.models import ModoPuntaje, Modalidad
 from itdb_ctf.auth.auth_state import AuthState
-from itdb_ctf.evento.evento_logic import crear_evento, editar_evento, obtener_evento, activar_desactivar_evento, listar_evento, freeze_scoreboard
+from itdb_ctf.evento.evento_logic import crear_evento, editar_evento, obtener_evento, activar_desactivar_evento, listar_evento, catalogos
+from itdb_ctf.asociar.asociar_logic import estado_evento
 
 class CreaEventoState(AuthState):
     titulo: str = ""
@@ -51,11 +49,13 @@ class CreaEventoState(AuthState):
         return True
 
     def cargar_catalogos(self):
-        guard = self.requiere_staff()
+        guard = self.requiere_admin()
         if guard: return guard
-        with Session(engine) as s:
-            self.modalidades = [(str(m.id_modalidad),m.etiqueta) for m in s.exec(select(Modalidad)).all()]
-            self.modos = [(str(mp.id_modo_puntaje), mp.etiqueta) for mp in s.exec(select(ModoPuntaje)).all()]
+        cats = catalogos()
+        if not cats:
+            self.modalidades = self.modos = []
+        self.modalidades = cats["modalidades"]
+        self.modos = cats["modos"]
 
     async def guardar_evento(self) -> bool:
         fi = datetime.fromisoformat(self.fec_inicio) if self.fec_inicio else None
@@ -126,7 +126,8 @@ class ListarEventoState(AuthState):
         eventos = listar_evento()
         if self.busqueda:
             b = self.busqueda.lower()
-            eventos = [e for e in eventos if b in e['titulo'].lower()]
+            eventos = [e for e in eventos if b in e["titulo"].lower() or b in e["modalidad"].lower() or b in e["modo_puntaje"].lower()]
+
         self.lista = eventos
     
     def arternar_activo(self, id_evento:int):
@@ -145,6 +146,7 @@ class EditarEventoState(AuthState):
     fec_fin:str = ""
     auto_inscripcion:bool = False
     mensaje:str = ""
+    estado:str = ""
     
     modalidades: list[tuple[str,str]] = []
     modos: list[tuple[str,str]] = []
@@ -184,12 +186,14 @@ class EditarEventoState(AuthState):
     def cargar_evento(self, id_evento:int):
         guard = self.requiere_staff()
         if guard: return guard
-        with Session(engine) as s:
-            self.modalidades = [(str(m.id_modalidad), m.etiqueta) for m in s.exec(select(Modalidad)).all()]
-            self.modos = [(str(mp.id_modo_puntaje),mp.etiqueta)for mp in s.exec(select(ModoPuntaje)).all()]
+        cats = catalogos(id_evento)
+        if not cats:
+            self.modalidades = self.modos = []
+        self.modalidades = cats["modalidades"]
+        self.modos = cats["modos"] 
         ev = obtener_evento(id_evento)
         if not ev: 
-            self.mensaje = "Evento 404" 
+            self.mensaje = "Evento inexistente" 
             return
         self.id_evento = id_evento
         self.titulo = ev.titulo
@@ -199,7 +203,9 @@ class EditarEventoState(AuthState):
         self.fec_inicio = ev.fec_inicio.strftime("%Y-%m-%dT%H:%M") if ev.fec_inicio else ""
         self.fec_fin = ev.fec_fin.strftime("%Y-%m-%dT%H:%M") if ev.fec_fin else ""
         self.auto_inscripcion = bool(ev.auto_inscripcion)
+        self.estado = estado_evento(ev)
         self.mensaje = ""
+        self.open_close_dialog()
 
     async def guardar(self):
         fi = datetime.fromisoformat(self.fec_inicio) if self.fec_inicio else None

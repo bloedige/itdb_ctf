@@ -57,7 +57,7 @@ def estado_evento(ev) -> str:
 
 def listar_eventos_validos() -> list[tuple[str,str]]:
     with Session(engine) as s:
-        eventos = s.exec(select(Evento).where(Evento.activo == True)).all()
+        eventos = s.exec(select(Evento).where(Evento.activo == True).order_by(Evento.id_evento).order_by(Evento.fec_fin.desc())).all()
         return [(str(ev.id_evento),ev.titulo) for ev in eventos if estado_evento(ev) in ("abierto","futuro")]
 
 

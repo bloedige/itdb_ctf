@@ -20,7 +20,6 @@ class AutoInscripcionState(AuthState):
 
     @rx.event
     def cofirmar_inscrito(self, id_evento:int):
-
         guard = self.requiere_login()
         if guard: return guard
         if self.codigo_rol != "user":
@@ -64,4 +63,12 @@ class AutoInscripcionState(AuthState):
                     item["contador_fin"] = f"{hrs:02d}:{mins:02d}:{seg:02d}"
 
             resultado.append(item)
-        return resultado
+
+        activos = [e for e in resultado if e["estado_evento"] == "activo"]
+        futuros = [e for e in resultado if e["estado_evento"] == "futuro"]
+        pasados = [e for e in resultado if e["estado_evento"] == "concluido"]
+        
+        futuros.sort(key=lambda e: e["fec_inicio"])
+        pasados.sort(key=lambda e: e["fec_fin"], reverse=True)
+
+        return activos + futuros + pasados

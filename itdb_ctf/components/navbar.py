@@ -57,6 +57,7 @@ def log_out() -> rx.Component:
         rx.hstack(
             rx.icon("log_out", size=20),
             rx.text("Cerrar Sesion"),
+            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", None)
         ),
         on_click=AuthState.logout,
         variant="ghost",
@@ -68,19 +69,20 @@ def perfil() -> rx.Component:
         rx.flex(
             rx.icon(
                 "user",
-                size=30,
+                size=25,
             ),
             rx.flex(
                 rx.text("alias", weight="medium"),
                 rx.text("correo@correo", weight="light"),
-                align="start",
-                direction=rx.cond(
+                align=rx.cond(
                     AuthState.codigo_rol == "user",
-                    "column",
-                    "column-reverse",
+                    "end",
+                    "start",
                 ),
+                direction="column",
             ),
             width="100%",
+            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", None),
             align="center",
             justify_content="space-evenly",
         ),
@@ -91,6 +93,7 @@ def perfil() -> rx.Component:
         ),
         color_scheme="amber",
         variant="ghost",
+        width="100%",
     )
 
 def navbar() -> rx.Component: 
@@ -118,13 +121,16 @@ def navbar() -> rx.Component:
                         
                     ),
                 ),
-                grid_template_columns="10% 1fr 18%",
+                grid_template_columns="10% 1fr 20%",
                 place_items="center",
                 width="100%",
             ),
+            top="0",
             width="100%",
             padding=".5em",
-            bg="#011541"
+            bg="#011541",
+            position="sticky",
+            z_index="100"
     )
 
 def navbar_cerrado(id_evento) -> rx.Component:
@@ -145,7 +151,7 @@ def navbar_cerrado(id_evento) -> rx.Component:
             rx.button(
                 "Regresar",
                 color_scheme="amber",
-                on_click=rx.redirect("/retos")
+                on_click=rx.redirect("/eventos")
             ), 
             grid_template_columns="10% 1fr 10%",
             place_items="center",
@@ -155,6 +161,10 @@ def navbar_cerrado(id_evento) -> rx.Component:
         padding=".5em",
         spacing="4",
         bg="#011541",
+        position="sticky",
+        z_index="100",
+        top="0",
+        left="0",
     )
 
 def navbar_staff() -> rx.Component:
@@ -172,9 +182,8 @@ def navbar_staff() -> rx.Component:
                     "admin",
                     rx.grid(   
                         link("Gestion de evento", "/admin/eventos"),
-                        link("Retos en eventos", "/admin/asociar"),                       
                         link("Gestion de retos", "/admin/retos"),
-                        link("Retos en eventos", "/admin/asociar"),
+                        link("Retos en eventos", "/admin/asociar"),                       
                         link("Gestion de usuario", "/admin/usuarios"),
                         link("Inscribir usuarios", "/admin/inscribir"),
                         width="100%", spacing="1", justify="start",
@@ -184,9 +193,8 @@ def navbar_staff() -> rx.Component:
                     "superadmin",
                     rx.grid(   
                         link("Gestion de evento", "/admin/eventos"),
-                        link("Retos en eventos", "/admin/asociar"),                       
                         link("Gestion de retos", "/admin/retos"),
-                        link("Retos en eventos", "/admin/asociar"),
+                        link("Retos en eventos", "/admin/asociar"),                       
                         link("Gestion de usuario", "/admin/usuarios"),
                         link("Inscribir usuarios", "/admin/inscribir"),
                         width="100%", spacing="1", align="start",                   
@@ -208,4 +216,7 @@ def navbar_staff() -> rx.Component:
         padding="1em",
         spacing="1",
         bg="#011541",
+        position="sticky",
+        z_index="100",
+        top="0",
     )

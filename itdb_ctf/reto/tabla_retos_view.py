@@ -1,6 +1,6 @@
 import reflex as rx
 from itdb_ctf.reto.reto_states import ListarRetosState
-from itdb_ctf.reto.form_editar_reto_view import form_editar_reto_view
+from itdb_ctf.reto.form_editar_reto_view import button_edit
 
 def fila_reto(reto:dict) -> rx.Component:
     return rx.table.row(
@@ -8,7 +8,7 @@ def fila_reto(reto:dict) -> rx.Component:
         rx.table.cell(reto['titulo']),
         rx.table.cell(reto['categoria']),
         rx.table.cell(reto['dificultad']),
-        rx.table.cell(reto['modalidad']),
+        rx.table.cell(reto['modo_puntaje']),
         rx.table.cell(reto['puntaje']),
         rx.table.cell(reto['minimo']),        
         rx.table.cell(
@@ -22,14 +22,17 @@ def fila_reto(reto:dict) -> rx.Component:
             rx.hstack(
                 rx.cond(
                     reto['edit'],
-                    form_editar_reto_view(reto)
-                ),
-                rx.button(
-                rx.cond(reto['activo'],"Desactivar","Activar"),
-                on_click=lambda:ListarRetosState.alternar_activo(reto['id']),
-                color_scheme=rx.cond(reto['activo'],"red","green"),
-                size="1",
-                variant="soft",
+                    rx.flex(
+                        button_edit(reto['id']),
+                        rx.button(
+                        rx.cond(reto['activo'],"Desactivar","Activar"),
+                        on_click=lambda:ListarRetosState.alternar_activo(reto['id']),
+                        color_scheme=rx.cond(reto['activo'],"red","green"),
+                        size="1",
+                        variant="soft",
+                        ),
+                    ),
+                    None,
                 ),
                 spacing="2",
             ),

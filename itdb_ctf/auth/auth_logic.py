@@ -8,6 +8,7 @@ DOMINIO=os.environ["ALLOWED_EMAIL_DOMAIN"]
 
 class DominiNoPermitido(Exception):
     """El correo no pertenece al dominio institucional."""
+
 def validar_dominio (email: str) -> None:
     if not email.lower().endswith("@"+DOMINIO.lower()):
         raise DominiNoPermitido(email)
@@ -45,12 +46,26 @@ def auto_incripcion_evento_abierto(session,id_usuario:int):
             fec_ingreso=datetime.now(timezone.utc),
         ))
 
+def es_placeholder(u:Usuario) -> bool:
+    return u.paterno == "placeholder" and u.materno == "placeholder"
+
 def obtener_crear_usuario(info: dict) -> Usuario:
     email = info["email"] #porque  es una lista 
     validar_dominio(email)
     with Session(engine) as s:
         usuario = s.exec(select(Usuario).where(Usuario.email_inst==email)).first()
         if usuario:
+            if es_placeholder(usuario):
+                paterno, materno = separar_apellidos(info.get("family_name"))
+                usuario.nombre=info.get("given_name", "")
+                usuario.paterno=paterno
+                usuario.materno=materno
+                usuario.alias=info.get("name",email.split("@")[0])[:30]
+                s.add(usuario)
+                s.flush()
+                auto_incripcion_evento_abierto(s, usuario.id_usuario)
+                s.commit()
+                s.refresh(usuario)
             return usuario
         rol = s.exec(select(Rol).where(Rol.codigo=="user")).one()
         metodo = s.exec(select(MetodoAuth).where(MetodoAuth.etiqueta=="google")).one()

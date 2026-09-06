@@ -239,7 +239,8 @@ def crear_placeholder(correo:str) -> int:
             id_rol=rol.id_rol,
             id_metodo_auth=met.id_metodo_auth,
             nombre=local,
-            paterno="pendiente",
+            paterno="placeholder",
+            materno="placeholder",
             email_inst=correo,
             alias=local[:30],
         )

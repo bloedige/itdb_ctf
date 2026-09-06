@@ -33,7 +33,7 @@ async def callback(request: Request, code: str, state: str):
     except DominiNoPermitido:
         return RedirectResponse("/login?error=dominio")
     token = emitir_jwt(usuario)
-    resp = RedirectResponse("http://localhost:3000/retos")
+    resp = RedirectResponse("http://localhost:3000/informacion")
 
     resp.set_cookie("token", token, max_age= 3600)
     resp.delete_cookie("oauth_state")

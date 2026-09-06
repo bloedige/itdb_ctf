@@ -1,6 +1,6 @@
 from sqlmodel import Session,select
 from itdb_ctf.db import engine
-from itdb_ctf.models import Reto, Contiene, Pista
+from itdb_ctf.models import Reto, Contiene, Pista, ModoPuntaje, Dificultad, Categoria
 from itdb_ctf.utils.security import flag_hasher
 
 ROLES_STAFF ={"superadmin","admin","autor"}
@@ -53,6 +53,11 @@ def asociar_reto(id_reto:int, id_evento:int, puntaje_override:int|None=None):
         s.add(Contiene(id_reto=id_reto,id_evento=id_evento,puntaje_override=puntaje_override))
         s.commit()
         return True
+
+def obtener_reto(id_reto):
+    with Session(engine) as s:
+        reto = s.get(Reto,id_reto)
+        return reto if reto else None
 
 def editar_reto(id_reto, values:dict):
     with Session(engine) as s:
@@ -125,3 +130,30 @@ def listar_pista(id_reto):
             }
             for p in s.exec(select(Pista).where(Pista.id_reto==id_reto)).all()
         ]
+
+def listar_retos(id_usuario, cod_rol) -> list[dict]:
+    with Session(engine) as s:
+            stmt = (select(Reto,Categoria.etiqueta, Dificultad.etiqueta, ModoPuntaje.etiqueta)
+                .join(Categoria, Reto.id_categoria==Categoria.id_categoria)
+                .join(Dificultad, Reto.id_dificultad==Dificultad.id_dificultad)
+                .join(ModoPuntaje, Reto.id_modo_puntaje==ModoPuntaje.id_modo_puntaje)
+                .order_by(Reto.activo)
+                .order_by(Categoria.id_categoria))
+            if cod_rol == "autor":
+                stmt = stmt.where(Reto.id_usuario == id_usuario)    
+            return [
+                {
+                    "id":r.id_reto,
+                    "titulo":r.titulo,
+                    "categoria":cat,
+                    "dificultad":dif,
+                    "modo_puntaje":mod,
+                    "puntaje":r.puntaje_inicial,
+                    "minimo":r.puntaje_minimo if r.puntaje_minimo else "---",
+                    "activo":r.activo, 
+                    "edit":puede_editar(r, id_usuario, cod_rol) 
+                }
+                for r,cat,dif,mod in s.exec(stmt).all()
+            ]
+
+    

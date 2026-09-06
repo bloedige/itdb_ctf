@@ -1,11 +1,12 @@
 from sqlmodel import Session, select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento,Modalidad,ModoPuntaje
+from itdb_ctf.asociar.asociar_logic import estado_evento
     
 def validar_evento(id_modadlidad, fec_inicio, fec_fin, id_evento=None):
     etiqueta = etiqueta_modalidad(id_modadlidad) 
     if etiqueta == "abierto":
-        if existe_evento_avierto(id_evento):
+        if existe_evento_abierto(id_evento):
             return "El evento abierto ya existe."
         if fec_inicio or fec_fin:
             return "El evento abierto no requiere fechas inicio / fin."
@@ -21,7 +22,7 @@ def etiqueta_modalidad(id_modalidad: int) -> str:
         modalidad = s.get(Modalidad, id_modalidad)
         return modalidad.etiqueta if modalidad else "" 
 
-def existe_evento_avierto(excluir_id=None) -> bool:
+def existe_evento_abierto(excluir_id=None) -> bool:
     with Session(engine) as s:
         abierto = s.exec(select(Modalidad).where(Modalidad.etiqueta == "abierto")).first()
         if not abierto:
@@ -80,7 +81,9 @@ def listar_evento():
     with Session(engine) as s:
         stmt = (select(Evento, Modalidad.etiqueta, ModoPuntaje.etiqueta)
                       .join(Modalidad, Evento.id_modalidad == Modalidad.id_modalidad)
-                      .join(ModoPuntaje, Evento.id_modo_puntaje == ModoPuntaje.id_modo_puntaje))
+                      .join(ModoPuntaje, Evento.id_modo_puntaje == ModoPuntaje.id_modo_puntaje)
+                      .order_by(Evento.id_modalidad)
+                      .order_by(Evento.fec_fin.desc()))
         return[
             {
             "id":e.id_evento,
@@ -91,6 +94,7 @@ def listar_evento():
             "activo":e.activo,
             "auto_inscripcion":bool(e.auto_inscripcion),
             "freeze":bool(e.freeze),
+            "estado":estado_evento(e)
             } for e , m, mp in s.exec(stmt).all()
         ]
         
@@ -106,6 +110,8 @@ def freeze_scoreboard(id_evento) -> bool:
 def obtener_evento(id_evento):
     with Session(engine) as s:
         ev = s.get(Evento,id_evento)
+        if not ev:
+           return None 
         return ev
 
 def id_evento_abierto()->int:
@@ -113,3 +119,17 @@ def id_evento_abierto()->int:
         abierto = s.exec(select(Modalidad).where(Modalidad.etiqueta == "abierto")).first()
         ev = s.exec(select(Evento).where(Evento.id_modalidad == abierto.id_modalidad)).first()
         return ev.id_evento if ev else None
+
+def catalogos(id_evento:int | None=None) -> dict:
+    with Session(engine) as s:
+        abierto = existe_evento_abierto()
+        if not abierto or id_evento == id_evento_abierto():
+            modalidades = [(str(m.id_modalidad),m.etiqueta) for m in s.exec(select(Modalidad).where(Modalidad.etiqueta != "cerrado")).all()]
+            modos = [(str(mp.id_modo_puntaje), mp.etiqueta) for mp in s.exec(select(ModoPuntaje).where(ModoPuntaje.etiqueta != "dinamico")).all()]
+        else:
+            modalidades = [(str(m.id_modalidad),m.etiqueta) for m in s.exec(select(Modalidad).where(Modalidad.etiqueta != "abierto")).all()]
+            modos = [(str(mp.id_modo_puntaje), mp.etiqueta) for mp in s.exec(select(ModoPuntaje)).all()]
+        return {
+            "modalidades":modalidades,
+            "modos":modos,
+        }

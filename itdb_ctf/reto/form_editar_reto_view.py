@@ -159,16 +159,16 @@ def form_pistas_edit() -> rx.Component:
         width="100%",
     )
 
-def form_editar_reto_view(reto: dict) -> rx.Component:
+def button_edit(id_reto) -> rx.Component:
+    return rx.button(
+        "Editar",
+        on_click=EditarRetosState.cargar_reto(id_reto),
+        size="1",
+        variant="soft",
+    ),
+
+def form_editar_reto_view() -> rx.Component:
     return rx.dialog.root(
-        rx.dialog.trigger(
-            rx.button(
-                "Editar",
-                on_click=[lambda:EditarRetosState.cargar_reto(reto['id']), EditarRetosState.open_close_dialog],
-                size="1",
-                variant="soft",
-            ),
-        ),
         rx.dialog.content(
             rx.grid(
                 rx.grid(
