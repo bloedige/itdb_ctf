@@ -13,6 +13,7 @@ from itdb_ctf.auto_inscripcion.auto_inscripcion_evento_state import AutoInscripc
 from itdb_ctf.evento_cerrado.evento_cerrado_informacion_state import EventoCerradoInfromacionState
 from itdb_ctf.evento_cerrado.evento_cerrado_reto_state import EventoCerradoRetoState
 from itdb_ctf.perfil.perfil_state import PerfilGeneralState, PerfilEventoCerradoState
+from itdb_ctf.perfil.gestion_state import PerfilGestionState
 
 #states staff
 

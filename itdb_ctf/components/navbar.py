@@ -1,5 +1,7 @@
-import reflex as rx 
+import reflex as rx
 from itdb_ctf.auth.auth_state import AuthState
+from itdb_ctf.perfil.gestion_state import PerfilGestionState
+from itdb_ctf.perfil.gestion_view import dialogo_perfil
 
 def link(legend:str, url:str) -> rx.Component:
     return rx.link(
@@ -52,19 +54,29 @@ def logo() -> rx.Component:
         align="center",
     ),
 
-def log_out() -> rx.Component:
+def _item_menu(icono: str, texto: str, accion, color: str) -> rx.Component:
+    """Botón con el mismo formato que 'Cerrar sesión' (ghost, icono + texto)."""
     return rx.button(
         rx.hstack(
-            rx.icon("log_out", size=20),
-            rx.text("Cerrar Sesion"),
-            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", "row")
+            rx.icon(icono, size=20),
+            rx.text(texto),
+            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", "row"),
         ),
-        on_click=AuthState.logout,
+        on_click=accion,
         variant="ghost",
-        color_scheme="red",
+        color_scheme=color,
+        width="100%",
     )
 
-def perfil() -> rx.Component:
+
+def log_out() -> rx.Component:
+    return _item_menu("log_out", "Cerrar Sesion", AuthState.logout, "red")
+
+
+def _boton_editar_perfil() -> rx.Component:
+    return _item_menu("pencil", "Editar perfil", PerfilGestionState.abrir, "gray")
+
+def _boton_perfil() -> rx.Component:
     return rx.button(
         rx.flex(
             rx.icon(
@@ -86,14 +98,24 @@ def perfil() -> rx.Component:
             align="center",
             justify_content="space-evenly",
         ),
-        on_click=rx.cond(
-            AuthState.codigo_rol == "user",
-            rx.redirect("/perfil"),
-            None,
-        ),
         color_scheme="amber",
         variant="ghost",
         width="100%",
+    )
+
+
+def perfil() -> rx.Component:
+    # Solo top bar (navbar): menú desplegable Perfil · (Editar perfil, solo autor) · Cerrar sesión.
+    return rx.fragment(
+        rx.menu.root(
+            rx.menu.trigger(_boton_perfil()),
+            rx.menu.content(
+                _item_menu("user", "Perfil", rx.redirect("/perfil"), "amber"),
+                _boton_editar_perfil(),
+                log_out(),
+            ),
+        ),
+        dialogo_perfil(),
     )
 
 def navbar() -> rx.Component: 
@@ -112,16 +134,9 @@ def navbar() -> rx.Component:
                 ),
                 rx.cond(
                     AuthState.autenticado,
-                    rx.grid(
-                        perfil(),
-                        log_out(),
-                        width="100%",
-                        columns="2",
-                        place_items="center",
-                        
-                    ),
+                    perfil(),
                 ),
-                grid_template_columns="10% 1fr 20%",
+                grid_template_columns="10% 1fr 10%",
                 place_items="center",
                 width="100%",
             ),
@@ -219,9 +234,11 @@ def navbar_staff() -> rx.Component:
             spacing="1",
         ),
         rx.spacer(),
+        rx.cond(AuthState.codigo_rol == "autor", _boton_editar_perfil(), rx.fragment()),
         log_out(),
         rx.divider(),
-        perfil(),         
+        _boton_perfil(),
+        dialogo_perfil(),
         width="100%",
         height="100vh",
         direction="column",

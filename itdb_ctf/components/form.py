@@ -155,7 +155,7 @@ def success_msg(msg:str) -> rx.Component:
         position="top-center",
         style={
             "background-color": "#00FFC350",
-            "margin_top": "10vh",
+            "margin_top": "12vh",
             "color": "#00FFC3FF",
             "border": "1px solid #00FFC3FF",
             "border-radius": "0.53rem",  # corregí '0.53m' a '0.53rem'

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, CHAR, Text, DateTime, func
+from sqlalchemy import Column, CHAR, Text, DateTime, func, Index, text
 from sqlalchemy.dialects.postgresql import INET
 
 ###          CATALOGOS
@@ -56,6 +56,15 @@ class MetodoAuth(SQLModel, table=True):
 
 class Usuario(SQLModel, table=True):
     __tablename__ = "usuario"
+    # alias único case-insensitive (ignora NULL). Ver migración alias_unico.
+    __table_args__ = (
+        Index(
+            "uq_usuario_alias_lower",
+            text("lower(alias)"),
+            unique=True,
+            postgresql_where=text("alias IS NOT NULL"),
+        ),
+    )
     id_usuario: Optional[int]= Field(default=None, primary_key=True)
     id_rol: int = Field(foreign_key="rol.id_rol")
     id_metodo_auth: int = Field(foreign_key="metodo_auth.id_metodo_auth")
@@ -63,7 +72,7 @@ class Usuario(SQLModel, table=True):
     nombre: str = Field(max_length=50)
     paterno: str = Field(max_length=50)
     materno: Optional[str] = Field(default=None, max_length=50)
-    alias: Optional[str] = Field(default=None, max_length=30) # pasar a unique
+    alias: Optional[str] = Field(default=None, max_length=30)  # único case-insensitive vía uq_usuario_alias_lower
     password_hash: Optional[str] = Field(default=None, sa_column=Column(CHAR(60)))
     email_inst: str = Field(max_length=150, unique=True, index=True)
     avatar: Optional[str] =  Field(default=None, max_length=255)

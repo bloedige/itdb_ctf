@@ -48,12 +48,22 @@ def puntaje_total_usuario(session:Session, id_usuario:int, id_evento:int) -> int
     gastados = session.exec(select(func.coalesce(func.sum(Compra.puntos_usados),0)).where(
         Compra.id_usuario == id_usuario,
         Compra.id_evento == id_evento)).one()
-    total = session.exec(select(func.coalesce(func.sum(Contiene.puntaje_actual),0))
-        .join(Resuelve, (Contiene.id_reto == Resuelve.id_reto) & (Contiene.id_evento == Resuelve.id_evento))
-        .where(
-            Resuelve.id_usuario == id_usuario,
-            Resuelve.id_evento == id_evento,
-            Resuelve.flag_correcta == True)).one()
+    ev = session.get(Evento, id_evento)
+    mod_ev = session.get(ModoPuntaje, ev.id_modo_puntaje)
+    if mod_ev == "estatico":
+        total = session.exec(select(func.coalesce(func.sum(Contiene.puntaje_inicial),0))
+            .join(Resuelve, (Contiene.id_reto == Resuelve.id_reto) & (Contiene.id_evento == Resuelve.id_evento))
+            .where(
+                Resuelve.id_usuario == id_usuario,
+                Resuelve.id_evento == id_evento,
+                Resuelve.flag_correcta == True)).one()
+    else:
+        total = session.exec(select(func.coalesce(func.sum(Contiene.puntaje_actual),0))
+            .join(Resuelve, (Contiene.id_reto == Resuelve.id_reto) & (Contiene.id_evento == Resuelve.id_evento))
+            .where(
+                Resuelve.id_usuario == id_usuario,
+                Resuelve.id_evento == id_evento,
+                Resuelve.flag_correcta == True)).one()
     score = total - gastados
     if score < 0:
         return 0
