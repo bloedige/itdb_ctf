@@ -46,7 +46,7 @@ def fila_ranking(fila:dict) -> rx.Component:
             grid_template_columns="1fr 50% 1fr",
             width="100%",
         ),
-        rx.icon(tag="1st",
+        rx.icon(tag="medal",
             color=rx.match(
                     fila['posicion'],
                     (1, COLORES_VAR[0]),

@@ -1,4 +1,4 @@
-import os 
+import os
 from dotenv import load_dotenv
 
 import reflex as rx
@@ -12,5 +12,6 @@ config = rx.Config(
     plugins=[
         rx.plugins.SitemapPlugin(),
         rx.plugins.TailwindV4Plugin(),
+        rx.plugins.RadixThemesPlugin(),
     ]
 )

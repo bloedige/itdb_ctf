@@ -57,7 +57,7 @@ def log_out() -> rx.Component:
         rx.hstack(
             rx.icon("log_out", size=20),
             rx.text("Cerrar Sesion"),
-            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", None)
+            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", "row")
         ),
         on_click=AuthState.logout,
         variant="ghost",
@@ -82,7 +82,7 @@ def perfil() -> rx.Component:
                 direction="column",
             ),
             width="100%",
-            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", None),
+            direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", "row"),
             align="center",
             justify_content="space-evenly",
         ),
@@ -180,10 +180,12 @@ def navbar_staff() -> rx.Component:
                 ),
                 (
                     "admin",
-                    rx.grid(   
+                    rx.grid(
+                        link("Dashboard", "/admin/dashboard"),
+                        link("Dashboard eventos", "/admin/dashboard/eventos-cerrados"),
                         link("Gestion de evento", "/admin/eventos"),
                         link("Gestion de retos", "/admin/retos"),
-                        link("Retos en eventos", "/admin/asociar"),                       
+                        link("Retos en eventos", "/admin/asociar"),
                         link("Gestion de usuario", "/admin/usuarios"),
                         link("Inscribir usuarios", "/admin/inscribir"),
                         width="100%", spacing="1", justify="start",
@@ -191,14 +193,16 @@ def navbar_staff() -> rx.Component:
                 ),
                 (
                     "superadmin",
-                    rx.grid(   
+                    rx.grid(
+                        link("Dashboard", "/admin/dashboard"),
+                        link("Dashboard eventos", "/admin/dashboard/eventos-cerrados"),
                         link("Gestion de evento", "/admin/eventos"),
                         link("Gestion de retos", "/admin/retos"),
-                        link("Retos en eventos", "/admin/asociar"),                       
+                        link("Retos en eventos", "/admin/asociar"),
                         link("Gestion de usuario", "/admin/usuarios"),
                         link("Inscribir usuarios", "/admin/inscribir"),
-                        width="100%", spacing="1", align="start",                   
-                    ),    
+                        width="100%", spacing="1", align="start",
+                    ),
                 ),
             ),
             width="100%",

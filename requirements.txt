@@ -1,5 +1,5 @@
 
-reflex==0.9.4
+reflex==0.9.10.post2
 
 
 #pip install sqlmodel

@@ -1,0 +1,89 @@
+import reflex as rx
+
+from itdb_ctf.auth.auth_state import AuthState
+from itdb_ctf.evento.evento_logic import id_evento_abierto
+from itdb_ctf.catalogo.catalogo_logic import inscrito
+from itdb_ctf.perfil.perfil_logic import (
+    participa,
+    perfil_datos,
+    retos_resueltos,
+    distribucion_categorias,
+    reparto_puntos,
+    evolucion_puntaje,
+    aciertos_errores,
+)
+
+
+class PerfilBaseState(AuthState):
+    datos: dict = {}
+    resueltos: list[dict] = []
+    distribucion: list[dict] = []
+    reparto: list[dict] = []
+    evolucion: list[dict] = []
+    envios: list[dict] = []
+
+    @rx.var
+    def hay_datos(self) -> bool:
+        return bool(self.datos.get("inscrito"))
+
+    @rx.var
+    def sin_resueltos(self) -> bool:
+        return len(self.resueltos) == 0
+
+    @rx.var
+    def sin_distribucion(self) -> bool:
+        return len(self.distribucion) == 0
+
+    @rx.var
+    def sin_reparto(self) -> bool:
+        return len(self.reparto) == 0
+
+    @rx.var
+    def sin_evolucion(self) -> bool:
+        return len(self.evolucion) == 0
+
+    @rx.var
+    def sin_envios(self) -> bool:
+        return len(self.envios) == 0
+
+    def _sin_datos(self):
+        self.datos = {"inscrito": False}
+        self.resueltos = []
+        self.distribucion = []
+        self.reparto = []
+        self.evolucion = []
+        self.envios = []
+
+    def _cargar(self, id_evento: int):
+        self.datos = perfil_datos(self.id_usuario, id_evento)
+        self.resueltos = retos_resueltos(self.id_usuario, id_evento)
+        self.distribucion = distribucion_categorias(self.id_usuario, id_evento)
+        self.reparto = reparto_puntos(self.id_usuario, id_evento)
+        self.evolucion = evolucion_puntaje(self.id_usuario, id_evento)
+        self.envios = aciertos_errores(self.id_usuario, id_evento)
+
+
+class PerfilGeneralState(PerfilBaseState):
+    @rx.event
+    def cargar_perfil(self):
+        guard = self.requiere_login()
+        if guard:
+            return guard
+        id_ev = id_evento_abierto()
+        if not id_ev or not inscrito(self.id_usuario, id_ev):
+            self._sin_datos()
+            return
+        self._cargar(id_ev)
+
+
+class PerfilEventoCerradoState(PerfilBaseState):
+    @rx.event
+    def cargar_perfil(self):
+        guard = self.requiere_login()
+        if guard:
+            return guard
+        id_ev = int(self.router.page.params.get("id_evento_cerrado", 0))
+        if not participa(self.id_usuario, id_ev):
+            self._sin_datos()
+            return
+        self._cargar(id_ev)
