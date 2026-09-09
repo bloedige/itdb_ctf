@@ -108,7 +108,7 @@ def perfil() -> rx.Component:
     # Solo top bar (navbar): menú desplegable Perfil · (Editar perfil, solo autor) · Cerrar sesión.
     return rx.fragment(
         rx.menu.root(
-            rx.menu.trigger(_boton_perfil()),
+            rx.menu.trigger(_boton_perfil(), as_child=True),
             rx.menu.content(
                 _item_menu("user", "Perfil", rx.redirect("/perfil"), "amber"),
                 _boton_editar_perfil(),

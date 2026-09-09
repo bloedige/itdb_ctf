@@ -2,14 +2,13 @@ import reflex as rx
 import asyncio
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.evento.evento_logic import id_evento_abierto
-from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, scoreboard_graph
+from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, opcion_evolucion
 
 REFRESH = 5
 
 class ScoreboardState(AuthState):
     ranking:list[dict] = []
-    grafica: list[dict] = []
-    series: list[dict] = []
+    evolucion_opcion: dict = {}
     streaming:bool = False
     tick_token:int = 0
 
@@ -19,6 +18,10 @@ class ScoreboardState(AuthState):
     @rx.var
     def solves(self) -> bool:
         return len(self.ranking) > 0
+
+    @rx.var
+    def evolucion_vacia(self) -> bool:
+        return not self.evolucion_opcion
 
     @rx.event
     def refresh_ranking(self):
@@ -31,11 +34,10 @@ class ScoreboardState(AuthState):
             id_evento =  id_evento_abierto()
         if not id_evento:
             self.ranking = []
-            self.grafica = []
-            self.series = []
+            self.evolucion_opcion = {}
             return
         self.ranking = scoreboard(id_evento)
-        self.grafica, self.series = scoreboard_graph(id_evento)
+        self.evolucion_opcion = opcion_evolucion(id_evento, top=10)
 
     @rx.event
     def cargar_ranking(self):

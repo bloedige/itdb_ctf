@@ -1,34 +1,22 @@
 import reflex as rx
 from itdb_ctf.scoreboard.scoreboard_state import ScoreboardState
-
-COLORES = ["#00ffd0","#ff7300","#9dff00","#8400ff","#ff006a"]
-COLORES_VAR = rx.Var.create(COLORES)
-BG_COLORES = ["#00ffd010","#ff730010","#9dff0010","#8400ff10","#ff006a10"]
-BG_COLORES_VAR = rx.Var.create(BG_COLORES)
+from itdb_ctf.components.evolucion_chart import evolucion_chart
 
 def grafica_evolucion() -> rx.Component:
-    return rx.grid(
+    return rx.box(
         rx.text("Evolucion de puntaje", size="2", weight="medium", color_scheme="gray"),
-        rx.recharts.line_chart(
-            rx.foreach(
-                ScoreboardState.series,
-                lambda serie, i: rx.recharts.line(
-                    data_key=serie["key"],     
-                    name=serie["nombre"],       
-                    type_="monotone",
-                    stroke=COLORES_VAR[i % 5],
-                    dot=True,                   
-                    connect_nulls=True,         
-                ),
+        rx.cond(
+            ScoreboardState.evolucion_vacia,
+            rx.center(
+                rx.text("Sin datos de evolucion todavia.", size="2",
+                        weight="light", color_scheme="gray"),
+                height="320px", width="100%",
             ),
-            rx.recharts.x_axis(data_key="fecha", hide=True),
-            rx.recharts.y_axis(),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            data=ScoreboardState.grafica,
-            width="90%",
-            height=300,
+            evolucion_chart(
+                option=ScoreboardState.evolucion_opcion,
+                width="100%",
+            ),
         ),
-        place_items="center",
         width="100%",
     )
 
@@ -46,31 +34,7 @@ def fila_ranking(fila:dict) -> rx.Component:
             grid_template_columns="1fr 50% 1fr",
             width="100%",
         ),
-        rx.icon(tag="medal",
-            color=rx.match(
-                    fila['posicion'],
-                    (1, COLORES_VAR[0]),
-                    (2, COLORES_VAR[1]),
-                    (3, COLORES_VAR[2]),
-                    (4, COLORES_VAR[3]),
-                    (5, COLORES_VAR[4]),
-                    "",
-            ),
-            style={},
-            position="absolute",
-            top=".9em",
-            right=".9em",
-        ),
         width="100%",
-        #bg=rx.match(
-        #    fila['posicion'],
-        #    (1, BG_COLORES_VAR[0]),
-        #    (2, BG_COLORES_VAR[1]),
-        #    (3, BG_COLORES_VAR[2]),
-        #    (4, BG_COLORES_VAR[3]),
-        #    (5, BG_COLORES_VAR[4]),
-        #    "",
-        #),
     ) 
 
 def scoreboard_view() -> rx.Component:

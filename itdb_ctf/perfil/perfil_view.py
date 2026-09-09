@@ -1,6 +1,7 @@
 import reflex as rx
 
 from itdb_ctf.dashboards.dashboard_componentes import CAT_COLORES_VAR, VERDE, NARANJA
+from itdb_ctf.components.evolucion_chart import evolucion_chart
 
 PIE_COLORES_VAR = rx.Var.create(["#00ffc3", "#ff6b6b"])  # aciertos, errores
 REPARTO_COLORES_VAR = rx.Var.create([VERDE, NARANJA])  # puntaje conservado, en pistas
@@ -174,26 +175,7 @@ def aciertos_view(E) -> rx.Component:
 def evolucion_view(E) -> rx.Component:
     return _card(
         "Evolución de tu puntaje",
-        rx.cond(
-            E.sin_evolucion,
-            rx.center(
-                rx.text("Sin actividad todavía.", size="2", weight="light", color_scheme="gray"),
-                height="260px",
-            ),
-            rx.recharts.line_chart(
-                rx.recharts.line(
-                    data_key="puntaje", name="Puntaje", type_="monotone",
-                    stroke=VERDE, dot=False,
-                ),
-                rx.recharts.x_axis(data_key="t", hide=True),
-                rx.recharts.y_axis(),
-                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-                rx.recharts.graphing_tooltip(),
-                data=E.evolucion,
-                width="100%",
-                height=260,
-            ),
-        ),
+        evolucion_chart(option=E.evolucion_opcion, altura="260px", width="100%"),
     )
 
 

@@ -195,7 +195,7 @@ def eventos_cerrados_dashboard_view() -> rx.Component:
                     barra_estado(),
                     fila_kpis(),
                     rx.grid(
-                        _grafica_evolucion(S.evol_series, S.evol_data),
+                        _grafica_evolucion(S.evol_opcion),
                         panel_ranking(S.hay_ranking, S.ranking),
                         columns={"base": "1", "lg": "60% 1fr"},
                         spacing="3",

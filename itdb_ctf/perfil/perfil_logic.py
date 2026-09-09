@@ -205,47 +205,6 @@ def reparto_puntos(id_usuario: int | None, id_evento: int | None) -> list[dict]:
     ]
 
 
-def evolucion_puntaje(id_usuario: int | None, id_evento: int | None) -> list[dict]:
-    """Puntaje acumulado del jugador a lo largo de su línea de tiempo en el evento.
-
-    Suma `Contiene.puntaje_actual` por cada resolución correcta y resta
-    `Compra.puntos_usados` por cada pista, ordenado por fecha.
-    """
-    if not id_usuario or not id_evento:
-        return []
-    with Session(engine) as s:
-        solves = s.exec(
-            select(Resuelve.fec_envio, Contiene.puntaje_actual)
-            .join(
-                Contiene,
-                (Contiene.id_reto == Resuelve.id_reto)
-                & (Contiene.id_evento == Resuelve.id_evento),
-            )
-            .where(
-                Resuelve.id_usuario == id_usuario,
-                Resuelve.id_evento == id_evento,
-                Resuelve.flag_correcta == True,  # noqa: E712
-            )
-        ).all()
-        compras = s.exec(
-            select(Compra.fec_compra, Compra.puntos_usados).where(
-                Compra.id_usuario == id_usuario,
-                Compra.id_evento == id_evento,
-            )
-        ).all()
-
-    eventos = [(f, p) for f, p in solves if f is not None]
-    eventos += [(f, -p) for f, p in compras if f is not None]
-    eventos.sort(key=lambda e: e[0])
-
-    acum = 0
-    salida = []
-    for fec, delta in eventos:
-        acum += delta
-        salida.append({"t": fec.strftime("%d/%m %H:%M"), "puntaje": max(acum, 0)})
-    return salida
-
-
 def aciertos_errores(id_usuario: int | None, id_evento: int | None) -> list[dict]:
     """Reparto de los envíos del jugador: correctos vs. incorrectos."""
     if not id_usuario or not id_evento:

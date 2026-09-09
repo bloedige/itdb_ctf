@@ -1,7 +1,7 @@
 import reflex as rx
 
 from itdb_ctf.auth.auth_state import AuthState
-from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, scoreboard_graph
+from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, opcion_evolucion
 from itdb_ctf.dashboards import dashboard_metricas_logic as m
 from itdb_ctf.dashboards.eventos_cerrados_dashboard_logic import (
     listar_eventos_cerrados,
@@ -20,8 +20,7 @@ class EventosCerradosDashboardState(AuthState):
     dificultad: list[dict] = []
     actividad: list[dict] = []
     ranking: list[dict] = []
-    evol_data: list[dict] = []
-    evol_series: list[dict] = []
+    evol_opcion: dict = {}
     feed: list[dict] = []
 
     @rx.var
@@ -53,7 +52,8 @@ class EventosCerradosDashboardState(AuthState):
             self.info = {}
             self.resumen = {}
             self.categoria = self.dificultad = self.actividad = []
-            self.ranking = self.evol_data = self.evol_series = self.feed = []
+            self.ranking = self.feed = []
+            self.evol_opcion = {}
             return
         id_ev = int(self.id_sel)
         self.info = info_evento(id_ev)
@@ -63,7 +63,7 @@ class EventosCerradosDashboardState(AuthState):
         self.actividad = actividad_evento(id_ev)
         self.feed = feed_resoluciones(id_ev)
         self.ranking = scoreboard(id_ev)[:10]
-        self.evol_data, self.evol_series = scoreboard_graph(id_ev, top=10)
+        self.evol_opcion = opcion_evolucion(id_ev, top=10)
 
     @rx.event
     def cargar_todo(self):

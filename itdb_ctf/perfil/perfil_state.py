@@ -9,9 +9,9 @@ from itdb_ctf.perfil.perfil_logic import (
     retos_resueltos,
     distribucion_categorias,
     reparto_puntos,
-    evolucion_puntaje,
     aciertos_errores,
 )
+from itdb_ctf.scoreboard.scoreboard_logic import opcion_evolucion_usuario
 
 
 class PerfilBaseState(AuthState):
@@ -19,7 +19,7 @@ class PerfilBaseState(AuthState):
     resueltos: list[dict] = []
     distribucion: list[dict] = []
     reparto: list[dict] = []
-    evolucion: list[dict] = []
+    evolucion_opcion: dict = {}
     envios: list[dict] = []
 
     @rx.var
@@ -40,7 +40,7 @@ class PerfilBaseState(AuthState):
 
     @rx.var
     def sin_evolucion(self) -> bool:
-        return len(self.evolucion) == 0
+        return not self.evolucion_opcion
 
     @rx.var
     def sin_envios(self) -> bool:
@@ -51,7 +51,7 @@ class PerfilBaseState(AuthState):
         self.resueltos = []
         self.distribucion = []
         self.reparto = []
-        self.evolucion = []
+        self.evolucion_opcion = {}
         self.envios = []
 
     def _cargar(self, id_evento: int):
@@ -59,7 +59,7 @@ class PerfilBaseState(AuthState):
         self.resueltos = retos_resueltos(self.id_usuario, id_evento)
         self.distribucion = distribucion_categorias(self.id_usuario, id_evento)
         self.reparto = reparto_puntos(self.id_usuario, id_evento)
-        self.evolucion = evolucion_puntaje(self.id_usuario, id_evento)
+        self.evolucion_opcion = opcion_evolucion_usuario(id_evento, self.id_usuario)
         self.envios = aciertos_errores(self.id_usuario, id_evento)
 
 

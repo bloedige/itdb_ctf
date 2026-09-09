@@ -2,7 +2,7 @@ import reflex as rx
 
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.evento.evento_logic import id_evento_abierto
-from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, scoreboard_graph
+from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, opcion_evolucion
 from itdb_ctf.dashboards.evento_abierto_dashboard_logic import (
     resumen_abierto,
     desglose_categoria,
@@ -20,8 +20,7 @@ class EventoAbiertoDashboardState(AuthState):
     actividad: list[dict] = []
     inscripciones_mes: list[dict] = []
     ranking: list[dict] = []
-    evol_data: list[dict] = []
-    evol_series: list[dict] = []
+    evol_opcion: dict = {}
     ranking_retos: list[dict] = []
 
     @rx.var
@@ -62,10 +61,10 @@ class EventoAbiertoDashboardState(AuthState):
         id_ev = id_evento_abierto()
         if id_ev:
             self.ranking = scoreboard(id_ev)[:10]
-            self.evol_data, self.evol_series = scoreboard_graph(id_ev, top=10)
+            self.evol_opcion = opcion_evolucion(id_ev, top=10)
         else:
             self.ranking = []
-            self.evol_data, self.evol_series = [], []
+            self.evol_opcion = {}
 
     @rx.event
     def actualizar(self):

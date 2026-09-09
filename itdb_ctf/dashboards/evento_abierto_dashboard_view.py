@@ -60,10 +60,7 @@ def fila_kpis() -> rx.Component:
 
 
 def grafica_evolucion() -> rx.Component:
-    return _grafica_evolucion(
-        EventoAbiertoDashboardState.evol_series,
-        EventoAbiertoDashboardState.evol_data,
-    )
+    return _grafica_evolucion(EventoAbiertoDashboardState.evol_opcion)
 
 
 def grafica_actividad() -> rx.Component:

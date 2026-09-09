@@ -6,6 +6,8 @@ State en particular.
 
 import reflex as rx
 
+from itdb_ctf.components.evolucion_chart import evolucion_chart
+
 COLORES = ["#00ffd0", "#ff7300", "#9dff00", "#8400ff", "#ff006a"]
 COLORES_VAR = rx.Var.create(COLORES)
 
@@ -48,29 +50,10 @@ def panel(titulo: str, contenido: rx.Component) -> rx.Component:
     )
 
 
-def grafica_evolucion(series, data, titulo: str = "Evolución de puntaje · top 10") -> rx.Component:
+def grafica_evolucion(opcion, titulo: str = "Evolución de puntaje · top 10") -> rx.Component:
     return panel(
         titulo,
-        rx.recharts.line_chart(
-            rx.foreach(
-                series,
-                lambda serie, i: rx.recharts.line(
-                    data_key=serie["key"],
-                    name=serie["nombre"],
-                    type_="monotone",
-                    stroke=COLORES_VAR[i % 5],
-                    dot=False,
-                    connect_nulls=True,
-                ),
-            ),
-            rx.recharts.x_axis(data_key="fecha", hide=True),
-            rx.recharts.y_axis(),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            rx.recharts.graphing_tooltip(),
-            data=data,
-            width="100%",
-            height=280,
-        ),
+        evolucion_chart(option=opcion, altura="300px", width="100%"),
     )
 
 
