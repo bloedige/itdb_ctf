@@ -3,6 +3,8 @@ from datetime import datetime
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.evento.evento_logic import crear_evento, editar_evento, obtener_evento, activar_desactivar_evento, listar_evento, catalogos
 from itdb_ctf.asociar.asociar_logic import estado_evento
+from itdb_ctf.websockets import canales, suscriptor
+from itdb_ctf.websockets.suscriptor import SuscriptorMixin
 
 class CreaEventoState(AuthState):
     titulo: str = ""
@@ -112,13 +114,26 @@ class CreaEventoState(AuthState):
             return False
         return True
     
-class ListarEventoState(AuthState):
+class ListarEventoState(SuscriptorMixin, AuthState):
     lista: list[dict] = []
     busqueda: str = ""
 
     def set_busqueda(self, v:str):
         self.busqueda = v
         return ListarEventoState.cargar_lista
+
+    @rx.event(background=True)
+    async def escuchar_eventos_admin(self):
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: "eventos",
+            canales_getter=lambda s: [canales.CH_EVENTOS],
+            recargar=lambda s: s.cargar_lista(),
+        )
+
+    @rx.event
+    def parar_eventos_admin(self):
+        self.streaming = False
     
     def cargar_lista(self):
         guard = self.requiere_staff()

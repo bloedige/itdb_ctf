@@ -1,5 +1,6 @@
 
 reflex==0.9.10.post2
+redis==7.4.1
 
 
 #pip install sqlmodel

@@ -91,7 +91,7 @@ class Evento(SQLModel, table=True):
     fec_inicio: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True)))
     fec_fin: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True)))
     fec_creacion: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now()))
-    freeze: bool = Field(default=False)  #freeze de tabal de posisones
+    # freeze del scoreboard: vive en Redis (itdb:frz:*), ver itdb_ctf/websockets/freeze_logic.py
     auto_inscripcion: Optional[bool] = Field(default=None)
     activo: bool =Field(default = True)     #se desactiva una vez que su periodo finalice
     

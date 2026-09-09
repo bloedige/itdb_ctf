@@ -1,20 +1,22 @@
 import reflex as rx
-import asyncio
+
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.evento.evento_logic import id_evento_abierto
-from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, opcion_evolucion
+from itdb_ctf.scoreboard.scoreboard_logic import ranking_y_evolucion
+from itdb_ctf.websockets import canales, suscriptor
+from itdb_ctf.websockets.freeze_logic import corte_freeze
 
-REFRESH = 5
 
 class ScoreboardState(AuthState):
-    ranking:list[dict] = []
+    ranking: list[dict] = []
     evolucion_opcion: dict = {}
-    streaming:bool = False
-    tick_token:int = 0
+    streaming: bool = False
+    tick_token: int = 0
 
     @rx.var
     def no_solves(self) -> bool:
         return len(self.ranking) == 0
+
     @rx.var
     def solves(self) -> bool:
         return len(self.ranking) > 0
@@ -23,40 +25,49 @@ class ScoreboardState(AuthState):
     def evolucion_vacia(self) -> bool:
         return not self.evolucion_opcion
 
+    def _id_evento(self) -> int | None:
+        id_route = self.router.page.params.get("id_evento_cerrado")
+        return int(id_route) if id_route else id_evento_abierto()
+
+    def _aplica_freeze(self) -> bool:
+        """El corte de freeze aplica a estudiantes, o a staff con `?preview=1`
+        (para que un admin vea el scoreboard tal como lo ve el jugador)."""
+        if self.codigo_rol == "user":
+            return True
+        return self.router.page.params.get("preview") == "1"
+
     @rx.event
     def refresh_ranking(self):
         guard = self.requiere_login()
-        if guard: return guard
-        id_route = self.router.page.params.get("id_evento_cerrado")
-        if id_route:
-            id_evento = int(id_route)
-        else:
-            id_evento =  id_evento_abierto()
+        if guard:
+            return guard
+        id_evento = self._id_evento()
         if not id_evento:
             self.ranking = []
             self.evolucion_opcion = {}
             return
-        self.ranking = scoreboard(id_evento)
-        self.evolucion_opcion = opcion_evolucion(id_evento, top=10)
+        corte = corte_freeze(id_evento) if self._aplica_freeze() else None
+        self.ranking, self.evolucion_opcion = ranking_y_evolucion(id_evento, corte)
 
     @rx.event
     def cargar_ranking(self):
         guard = self.requiere_login()
-        if guard: return guard
+        if guard:
+            return guard
         self.refresh_ranking()
 
     @rx.event(background=True)
-    async def auto_refresh(self):
-        async with self:
-            self.tick_token += 1
-            token = self.tick_token
-            self.streaming = True
-        while True:
-            await asyncio.sleep(REFRESH)
-            async with self:
-                if not self.streaming or token != self.tick_token:
-                    return
-                self.refresh_ranking()
+    async def escuchar_scoreboard(self):
+        """Suscripción Redis pub/sub (push). Degrada a polling si no hay Redis."""
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: s._id_evento(),
+            canales_getter=lambda s: (
+                [canales.ch_scoreboard(s._id_evento()), canales.ch_freeze(s._id_evento())]
+                if s._id_evento() else []
+            ),
+            recargar=lambda s: s.refresh_ranking(),
+        )
 
     @rx.event
     def stop_refresh(self):

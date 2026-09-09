@@ -131,7 +131,7 @@ def sembrar_superadmin_evento(session):
             "id_modalidad": modalidad_abierto.id_modalidad,
             "id_modo_puntaje": modo_estatico.id_modo_puntaje,
             "descripcion": EVENTO_ABIERTO_DESC,
-            "fec_inicio": datetime.now(timezone.utc),
+            "fec_inicio": None,
             "fec_fin": None,                             # None = permanente, sin fin
         },
     )

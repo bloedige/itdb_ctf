@@ -2,8 +2,10 @@ import reflex as rx
 from datetime import datetime, timezone
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.evento_cerrado.evento_cerrado_logic import info_evento_cerrado
+from itdb_ctf.websockets import canales, suscriptor
+from itdb_ctf.websockets.suscriptor import SuscriptorMixin
 
-class EventoCerradoInfromacionState(AuthState):
+class EventoCerradoInfromacionState(SuscriptorMixin, AuthState):
     id_cerrado:int = 0
     encontrado:bool = False
     titulo:str = ""
@@ -32,6 +34,19 @@ class EventoCerradoInfromacionState(AuthState):
         fi, ff = info['fec_inicio'], info['fec_fin']
         self.fi_str = fi.astimezone(tz_local).strftime("%d-%m-%y %H:%M")if fi else ""
         self.ff_str = ff.astimezone(tz_local).strftime("%d-%m-%y %H:%M")if ff else ""
+
+    @rx.event(background=True)
+    async def escuchar_info_cerrado(self):
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: s.id_cerrado or None,
+            canales_getter=lambda s: [canales.ch_evento(s.id_cerrado)] if s.id_cerrado else [],
+            recargar=lambda s: s.cargar_info(),
+        )
+
+    @rx.event
+    def parar_info_cerrado(self):
+        self.streaming = False
 
 
 class EventoCerradoContadorRegresivoFinalState(AuthState):

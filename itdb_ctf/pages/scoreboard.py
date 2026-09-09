@@ -12,6 +12,6 @@ def scoreboard_page() -> rx.Component:
             place_items="center",
         ),
         width="100%",
-        on_mount=ScoreboardState.auto_refresh,
+        on_mount=ScoreboardState.escuchar_scoreboard,
         on_unmount=ScoreboardState.stop_refresh,
     )

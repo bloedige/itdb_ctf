@@ -2,6 +2,7 @@ from itdb_ctf.db import engine
 from sqlmodel import Session, select
 from itdb_ctf.models import Compra, Pista
 from itdb_ctf.core.puntaje_logic import puntaje_total_usuario
+from itdb_ctf.websockets import canales
 
 def adquirir_pista(id_usuario:int, id_evento:int, id_reto:int, id_pista:int) -> tuple[bool, str]:
     with Session(engine) as s:
@@ -26,5 +27,8 @@ def adquirir_pista(id_usuario:int, id_evento:int, id_reto:int, id_pista:int) -> 
             puntos_usados = pista.costo,
         ))
         s.commit()
+        # el saldo del comprador cambió -> refrescar scoreboard + su vista de retos
+        canales.publicar_scoreboard(id_evento)
+        canales.publicar_evento(id_evento)
         return True, "Pista adquirida."
-        
+

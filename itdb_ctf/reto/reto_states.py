@@ -1,8 +1,10 @@
-import reflex as rx 
+import reflex as rx
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.reto.reto_logic import crear_reto, activar_desactivar_reto, editar_reto, activar_desactivar_pista, crear_pista, editar_pista, listar_pista, listar_retos, puede_editar, obtener_reto
 from itdb_ctf.reto.archivo_logic import guardar_archivo, borrar_archivo
 from itdb_ctf.asociar.asociar_logic import aislado, listar_eventos_validos, cargar_catalogos
+from itdb_ctf.websockets import canales, suscriptor
+from itdb_ctf.websockets.suscriptor import SuscriptorMixin
 
 class CrearRetosState(AuthState):
     # ---Campos de formulario
@@ -168,14 +170,27 @@ class CrearRetosState(AuthState):
         self.contenido_temp = b""
         self.archivo_temp = ""
 
-class ListarRetosState(AuthState):
-    
+class ListarRetosState(SuscriptorMixin, AuthState):
+
     lista: list[dict] = []
     busqueda: str = ""
 
     def set_busqueda(self, v:str):
         self.busqueda=v
         return ListarRetosState.cargar_lista
+
+    @rx.event(background=True)
+    async def escuchar_retos_admin(self):
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: "retos",
+            canales_getter=lambda s: [canales.CH_RETOS],
+            recargar=lambda s: s.cargar_lista(),
+        )
+
+    @rx.event
+    def parar_retos_admin(self):
+        self.streaming = False
 
     def cargar_lista(self):
         guard = self.requiere_staff()

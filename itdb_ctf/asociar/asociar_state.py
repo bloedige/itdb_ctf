@@ -1,9 +1,11 @@
-import reflex as rx 
+import reflex as rx
 from itdb_ctf.components.form import toast_msg
 from itdb_ctf.asociar import asociar_logic as asociar
 from itdb_ctf.auth.auth_state import AuthState
+from itdb_ctf.websockets import canales, suscriptor
+from itdb_ctf.websockets.suscriptor import SuscriptorMixin
 
-class AsociarState(AuthState):
+class AsociarState(SuscriptorMixin, AuthState):
     tab:str = "asociar"   #gestionar / asciar"
     busqueda:str = ""
     id_categoria_filtro:str = ""
@@ -165,6 +167,23 @@ class AsociarState(AuthState):
         else:
             self.prev_retos = []
         self.cargar_candidatos()
+
+    def _refrescar_vivo(self):
+        self.cargar_destino()
+        self.cargar_gestion()
+
+    @rx.event(background=True)
+    async def escuchar_asociar(self):
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: "asociar",
+            canales_getter=lambda s: [canales.CH_RETOS, canales.CH_EVENTOS],
+            recargar=lambda s: s._refrescar_vivo(),
+        )
+
+    @rx.event
+    def parar_asociar(self):
+        self.streaming = False
         
     @rx.event
     def open_dialog(self, id_reto:int, titulo:str, m_def:str, pi_def:int, pm_def:int | None=None):

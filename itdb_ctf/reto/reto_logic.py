@@ -2,8 +2,14 @@ from sqlmodel import Session,select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Reto, Contiene, Pista, ModoPuntaje, Dificultad, Categoria
 from itdb_ctf.utils.security import flag_hasher
+from itdb_ctf.websockets import canales
 
 ROLES_STAFF ={"superadmin","admin","autor"}
+
+
+def eventos_de_reto(id_reto:int) -> list[int]:
+    with Session(engine) as s:
+        return list(s.exec(select(Contiene.id_evento).where(Contiene.id_reto == id_reto)).all())
 
 def crear_reto(id_usuario,id_categoria,id_modo_puntaje,id_dificultad,
                titulo,descripcion,flag, puntaje_inicial,id_evento,
@@ -43,6 +49,7 @@ def crear_reto(id_usuario,id_categoria,id_modo_puntaje,id_dificultad,
 
         s.commit()
         s.refresh(reto)
+        canales.publicar_reto_en_eventos([id_evento])
         return reto
 
 def asociar_reto(id_reto:int, id_evento:int, puntaje_override:int|None=None):
@@ -72,8 +79,9 @@ def editar_reto(id_reto, values:dict):
         s.add(reto)
         s.commit()
         s.refresh(reto)
-        return reto
-    
+    canales.publicar_reto_en_eventos(eventos_de_reto(id_reto))
+    return reto
+
 def activar_desactivar_reto(id_reto) -> bool:
     with Session(engine) as s:
         reto = s.get(Reto,id_reto)
@@ -81,7 +89,8 @@ def activar_desactivar_reto(id_reto) -> bool:
         reto.activo = not reto.activo
         s.add(reto)
         s.commit()
-        return True
+    canales.publicar_reto_en_eventos(eventos_de_reto(id_reto))
+    return True
     
 def puede_editar(reto:Reto, id_usuario:int, codigo_rol:str ) -> bool:
     if codigo_rol in ("superadmin","admin"):
@@ -96,8 +105,10 @@ def crear_pista(id_reto, costo, desc):
         s.add(p)
         s.commit()
         s.refresh(p)
-        return p.id_pista 
-    
+        id_p = p.id_pista
+    canales.publicar_reto_en_eventos(eventos_de_reto(id_reto))
+    return id_p
+
 def editar_pista(id_pista, costo, desc):
     with Session(engine) as s:
         p = s.get(Pista, id_pista)
@@ -107,8 +118,10 @@ def editar_pista(id_pista, costo, desc):
         p.descripcion = desc
         s.add(p)
         s.commit()
-        return True
-    
+        id_reto = p.id_reto
+    canales.publicar_reto_en_eventos(eventos_de_reto(id_reto))
+    return True
+
 def activar_desactivar_pista(id_pista):
     with Session(engine) as s:
         p = s.get(Pista, id_pista)
@@ -116,8 +129,10 @@ def activar_desactivar_pista(id_pista):
             return False
         p.activo = not p.activo
         s.add(p)
-        s.commit()       
-        return True
+        s.commit()
+        id_reto = p.id_reto
+    canales.publicar_reto_en_eventos(eventos_de_reto(id_reto))
+    return True
 
 def listar_pista(id_reto):
     with Session(engine) as s:

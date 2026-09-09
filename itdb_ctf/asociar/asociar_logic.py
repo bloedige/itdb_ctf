@@ -2,6 +2,7 @@ from sqlmodel import Session, select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento, Contiene, Reto, Categoria, ModoPuntaje, Dificultad
 from datetime import datetime, timezone
+from itdb_ctf.websockets import canales
 
 def cargar_catalogos():
     with Session(engine) as s:
@@ -113,7 +114,8 @@ def asociar_reto(id_reto:int, id_evento:int, id_modo_puntaje:int, puntaje_inicia
             puntaje_actual=puntaje_inicial,
         ))
         s.commit()
-        return True
+    canales.publicar_reto_en_eventos([id_evento])
+    return True
            
 def validar_quitar_reto(id_evento:int) -> tuple[bool,str]:
     with Session(engine) as s:
@@ -137,7 +139,8 @@ def quitar_reto(id_reto:int, id_evento:int):
             return False
         s.delete(asoc)
         s.commit()
-        return True
+    canales.publicar_reto_en_eventos([id_evento])
+    return True
                    
 def aislado(id_reto:int) -> bool:
     with Session(engine) as s:
@@ -316,4 +319,6 @@ def editar_contiene(id_contiene:int, id_modo_puntaje:int, inicial:int, minimo:in
         c.puntaje_minimo = minimo if dinamico else None
         s.add(c)
         s.commit()
-        return True
+        id_ev = c.id_evento
+    canales.publicar_reto_en_eventos([id_ev])
+    return True

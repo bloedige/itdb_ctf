@@ -5,13 +5,30 @@ from itdb_ctf.evento.evento_logic import id_evento_abierto
 from itdb_ctf.core.envio_logic import enviar_flag
 from itdb_ctf.core.compra_logic import adquirir_pista
 from itdb_ctf.catalogo.catalogo_logic import cargar_catalogos, listar_retos, inscrito, listar_pistas
+from itdb_ctf.websockets import canales, suscriptor
+from itdb_ctf.websockets.suscriptor import SuscriptorMixin
 
-class CatalogoState(AuthState):
+class CatalogoState(SuscriptorMixin, AuthState):
     retos:list[dict] = []
     id_categoria_filtro:str = ""
     id_dificultad_filtro:str = ""
     categorias:list[tuple[str,str]] = []
     dificultades:list[tuple[str,str]] = []
+
+    @rx.event(background=True)
+    async def escuchar_catalogo(self):
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: id_evento_abierto(),
+            canales_getter=lambda s: (
+                [canales.ch_evento(id_evento_abierto())] if id_evento_abierto() else []
+            ),
+            recargar=lambda s: s.cargar_retos(),
+        )
+
+    @rx.event
+    def parar_catalogo(self):
+        self.streaming = False
 
     @rx.event
     def set_id_categoria_filtro(self, v:str):
@@ -66,16 +83,37 @@ class EnvioFlagState(AuthState):
         catalogo.cargar_retos()
         return success_msg(msg)  
 
-class listarPistaState(AuthState):
+class listarPistaState(SuscriptorMixin, AuthState):
     pistas:list[dict] = []
+    id_reto_abierto:int = 0
 
-    @rx.event   
+    @rx.event
     def cargar_pistas(self, id_reto:int):
+        self.id_reto_abierto = id_reto
         id_evento:int = id_evento_abierto()
         if not id_evento:
             self.pistas = []
             return
         self.pistas = listar_pistas(self.id_usuario, id_evento, id_reto)
+
+    def _recargar_abierto(self):
+        if self.id_reto_abierto:
+            self.cargar_pistas(self.id_reto_abierto)
+
+    @rx.event(background=True)
+    async def escuchar_pistas(self):
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: id_evento_abierto(),
+            canales_getter=lambda s: (
+                [canales.ch_evento(id_evento_abierto())] if id_evento_abierto() else []
+            ),
+            recargar=lambda s: s._recargar_abierto(),
+        )
+
+    @rx.event
+    def parar_pistas(self):
+        self.streaming = False
 
     @rx.event
     def comprar_pista(self, id_reto:int, id_pista:int):

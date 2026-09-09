@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento, Participa, EstadoInscripcion, ModoPuntaje
 from itdb_ctf.asociar.asociar_logic import estado_evento
+from itdb_ctf.websockets import canales
 
 def et_inscrito(s:Session) -> int:
     et = s.exec(select(EstadoInscripcion).where(EstadoInscripcion.etiqueta == "inscrito")).first()
@@ -30,6 +31,7 @@ def auto_inscripcion( id_evento:int, id_usuario:int) -> tuple[bool,str]:
             id_estado_inscripcion=id_estado,
             ))
         s.commit()
+    canales.publicar_inscripcion(id_evento)
     return True, "Inscrito con exito."
 
 def eventos(id_usuario:int) -> list[dict]:

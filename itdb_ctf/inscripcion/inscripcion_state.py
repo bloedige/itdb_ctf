@@ -4,6 +4,7 @@ from itdb_ctf.db import engine
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.models import EstadoInscripcion, MetodoAuth
 from itdb_ctf.inscripcion import inscripcion_logic as insc
+from itdb_ctf.websockets import canales, suscriptor
 
 class InscripcionState(AuthState):
 
@@ -11,6 +12,8 @@ class InscripcionState(AuthState):
     id_evento_ges:str = ""
     eventos:list[tuple[str, str]] = []
     tab = "inscribir" # /gestionar
+    streaming: bool = False
+    tick_token: int = 0
 
     busqueda_ins:str = ""
     id_metodo_filtro:str = ""
@@ -110,6 +113,26 @@ class InscripcionState(AuthState):
             self.cargar_candidatos()
         if self.id_evento_ges:
             self.cargar_participantes()
+
+    @rx.event(background=True)
+    async def escuchar_insc(self):
+        """Refresca las listas de este admin cuando otro admin inscribe/descalifica."""
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: (
+                (s.id_evento_ges, s.id_evento_car)
+                if (s.id_evento_ges or s.id_evento_car) else None
+            ),
+            canales_getter=lambda s: [
+                canales.ch_inscripcion(int(e))
+                for e in {s.id_evento_ges, s.id_evento_car} if e
+            ],
+            recargar=lambda s: s.cargar_datos(),
+        )
+
+    @rx.event
+    def parar_insc(self):
+        self.streaming = False
         
     def cargar_candidatos(self):
         if not self.id_evento_car:

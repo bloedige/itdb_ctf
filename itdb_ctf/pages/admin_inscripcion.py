@@ -1,6 +1,7 @@
-import reflex as rx 
+import reflex as rx
 from itdb_ctf.components.navbar import navbar_staff
 from itdb_ctf.inscripcion.inscripcion_wiew import inscripcion_view
+from itdb_ctf.inscripcion.inscripcion_state import InscripcionState
 
 def admin_inscripcion_page() -> rx.Component:
     return rx.grid(
@@ -9,4 +10,6 @@ def admin_inscripcion_page() -> rx.Component:
         spacing="5",
         width="100%",
         grid_template_columns="12% 1fr",
+        on_mount=InscripcionState.escuchar_insc,
+        on_unmount=InscripcionState.parar_insc,
     )

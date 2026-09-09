@@ -14,6 +14,7 @@ from sqlalchemy import func
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento, Modalidad, Resuelve, Reto, Usuario
 from itdb_ctf.asociar.asociar_logic import estado_evento
+from itdb_ctf.websockets.freeze_logic import esta_congelado, corte_freeze
 
 _ORDEN_ESTADO = {"activo": 0, "futuro": 1, "concluido": 2, "abierto": 3}
 
@@ -72,6 +73,7 @@ def info_evento(id_evento: int | None) -> dict:
         "fec_inicio": "",
         "fec_fin": "",
         "freeze": False,
+        "fec_freeze": "",
         "pct_transcurrido": 0,
         "tiempo_texto": "",
     }
@@ -82,7 +84,11 @@ def info_evento(id_evento: int | None) -> dict:
         if not ev:
             return vacio
         titulo = ev.titulo
-        freeze = bool(ev.freeze)
+        try:
+            freeze = esta_congelado(id_evento)
+            _corte = corte_freeze(id_evento)
+        except Exception:
+            freeze, _corte = False, None
         fi = _aware(ev.fec_inicio)
         ff = _aware(ev.fec_fin)
         estado = estado_evento(ev)
@@ -108,6 +114,7 @@ def info_evento(id_evento: int | None) -> dict:
         "fec_inicio": fi.strftime("%d/%m/%Y %H:%M") if fi else "—",
         "fec_fin": ff.strftime("%d/%m/%Y %H:%M") if ff else "—",
         "freeze": freeze,
+        "fec_freeze": _corte.strftime("%d/%m/%Y %H:%M") if _corte else "",
         "pct_transcurrido": max(0, min(100, pct)),
         "tiempo_texto": tiempo_texto,
     }

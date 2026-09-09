@@ -1,9 +1,10 @@
 .env
 .states
-CLAUDE.md
 __pycache__/
 assets/external/
 *.py[cod]
 .web
 *.db
 reflex.lock/
+CLAUDE.md
+reddis.md

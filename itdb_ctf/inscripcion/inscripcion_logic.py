@@ -5,6 +5,7 @@ from itdb_ctf.db import engine
 from itdb_ctf.models import Evento, Participa, Usuario, Rol, EstadoInscripcion, MetodoAuth
 from itdb_ctf.auth.auth_logic import DominiNoPermitido, validar_dominio, separar_apellidos
 from itdb_ctf.utils.validaciones import formato_email_valido
+from itdb_ctf.websockets import canales
 def estado_evento(ev) -> str:
     if not ev.fec_inicio:
         return "abierto"
@@ -145,6 +146,8 @@ def inscribir_lote(ids_usuario:list[int], id_evento:int) -> tuple[int, str]:
             ok += 1
         except ValueError as e:
             errors.append(f"{id_u}: {e}")
+    if ok:
+        canales.publicar_inscripcion(id_evento)
     return ok, errors
 
 def validar_quitar(id_participa:int) ->tuple[bool, str]:
@@ -165,24 +168,28 @@ def quitar_incripcion(id_participa:int):
         raise ValueError(msg)
     with Session(engine) as s:
         p = s.get(Participa, id_participa)
+        id_ev = p.id_evento
         s.delete(p)
         s.commit()
-        return True
+    canales.publicar_inscripcion(id_ev)
+    return True
 
 def alternar_estado(id_participa:int):
     with Session(engine) as s:
         p = s.get(Participa, id_participa)
-        if not p: 
+        if not p:
             raise ValueError("Registro inexistente.")
         est_act = s.get(EstadoInscripcion, p.id_estado_inscripcion)
         est = "inscrito" if est_act.etiqueta == "descalificado" else "descalificado"
         id_est = id_estado(est)
-        if not id_est: 
+        if not id_est:
             raise ValueError(f"{est} no configurado.")
         p.id_estado_inscripcion = id_est
         s.add(p)
         s.commit()
-        return est
+        id_ev = p.id_evento
+    canales.publicar_inscripcion(id_ev)   # push: el estudiante pierde/recupera acceso
+    return est
       
 
 def parsear_cvs(contenido:bytes) -> list[str]:

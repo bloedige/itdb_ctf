@@ -12,6 +12,7 @@ from itdb_ctf.perfil.perfil_logic import (
     aciertos_errores,
 )
 from itdb_ctf.scoreboard.scoreboard_logic import opcion_evolucion_usuario
+from itdb_ctf.websockets.freeze_logic import corte_freeze
 
 
 class PerfilBaseState(AuthState):
@@ -55,11 +56,13 @@ class PerfilBaseState(AuthState):
         self.envios = []
 
     def _cargar(self, id_evento: int):
+        # el freeze congela la curva propia del estudiante (no la del staff)
+        corte = corte_freeze(id_evento) if self.codigo_rol == "user" else None
         self.datos = perfil_datos(self.id_usuario, id_evento)
         self.resueltos = retos_resueltos(self.id_usuario, id_evento)
         self.distribucion = distribucion_categorias(self.id_usuario, id_evento)
         self.reparto = reparto_puntos(self.id_usuario, id_evento)
-        self.evolucion_opcion = opcion_evolucion_usuario(id_evento, self.id_usuario)
+        self.evolucion_opcion = opcion_evolucion_usuario(id_evento, self.id_usuario, corte)
         self.envios = aciertos_errores(self.id_usuario, id_evento)
 
 

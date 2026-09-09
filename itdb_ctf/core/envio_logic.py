@@ -4,6 +4,7 @@ from itdb_ctf.models import Evento, Resuelve, Contiene, Reto, EstadoInscripcion,
 from itdb_ctf.core.puntaje_logic import refrescar_puntaje
 from itdb_ctf.utils.security import flag_hasher
 from itdb_ctf.asociar.asociar_logic import estado_evento
+from itdb_ctf.websockets import canales
 
 def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, dir_ip:str |None=None ) -> tuple[bool,str]:
     with Session(engine) as s :
@@ -17,9 +18,9 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, di
         if not ev:
             return False, "Evento no disponible."
         est_evento = estado_evento(ev)
-        if estado_evento == "futuro":
+        if est_evento == "futuro":
             return False, "El evento aún no ha iniciado."
-        if estado_evento == "concluido":
+        if est_evento == "concluido":
             return False, "El evento ha finalizado."
         # --- El usuario debe estar INSCRITO en el evento
         est_inscrito = s.exec(select(EstadoInscripcion.id_estado_inscripcion).where(EstadoInscripcion.etiqueta=="inscrito")).first()
@@ -51,6 +52,7 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, di
             s.flush()
             refrescar_puntaje(s, id_reto, id_evento)
             s.commit()
+            canales.publicar_scoreboard(id_evento)   # push tiempo real
             return True, "¡Flag correcta!"
         s.commit()
         return False, "Flag incorrecta."

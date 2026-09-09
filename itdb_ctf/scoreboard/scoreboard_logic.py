@@ -2,8 +2,11 @@ from datetime import datetime, timezone
 
 from sqlmodel import Session, select
 from itdb_ctf.db import engine
-from itdb_ctf.models import Resuelve, Usuario, Contiene, Compra, Evento, Modalidad
+from itdb_ctf.models import (
+    Resuelve, Usuario, Contiene, Compra, Evento, Modalidad, Participa, EstadoInscripcion,
+)
 from itdb_ctf.core.puntaje_logic import puntaje_total_usuario
+from itdb_ctf.websockets import cache
 
 # Paleta para la curva de evolución (top 10). Los 5 primeros == scoreboard_view.COLORES.
 PALETA = [
@@ -16,28 +19,45 @@ VERDE = "#00ffc3"   # curva individual (perfil), igual que el gráfico recharts 
 FLAG_PATH = "path://M4 2 L6 2 L6 22 L4 22 Z M6 3 L20 8 L6 13 Z"
 
 
-def scoreboard(id_evento:int) -> list[dict]:
+def scoreboard(id_evento: int, corte: datetime | None = None) -> list[dict]:
+    """Ranking del evento. `corte` (freeze): solo cuenta aciertos con
+    `fec_envio <= corte` y recalcula puntajes a ese instante."""
     with Session(engine) as s:
-        filas = s.exec(select(Resuelve.id_usuario, Usuario.alias, Usuario.nombre)
-                       .join(Usuario, Resuelve.id_usuario == Usuario.id_usuario)
-                       .where(Resuelve.id_evento == id_evento, Resuelve.flag_correcta == True)).all()
+        q_filas = (select(Resuelve.id_usuario, Usuario.alias, Usuario.nombre)
+                   .join(Usuario, Resuelve.id_usuario == Usuario.id_usuario)
+                   .where(Resuelve.id_evento == id_evento, Resuelve.flag_correcta == True))  # noqa: E712
+        if corte is not None:
+            q_filas = q_filas.where(Resuelve.fec_envio <= corte)
+        filas = s.exec(q_filas).all()
+        # excluir descalificados del evento
+        descal = set(s.exec(
+            select(Participa.id_usuario)
+            .join(EstadoInscripcion,
+                  Participa.id_estado_inscripcion == EstadoInscripcion.id_estado_inscripcion)
+            .where(Participa.id_evento == id_evento,
+                   EstadoInscripcion.etiqueta == "descalificado")
+        ).all())
         vistos = {}
         for id_u, ali, nom in filas:
-            if not id_u in vistos:
-                vistos[id_u]= ali if ali else nom
+            if id_u in descal or id_u in vistos:
+                continue
+            vistos[id_u] = ali if ali else nom
         ultimas = {}
         for id_u in vistos:
-            ultimas[id_u] = s.exec(select(Resuelve.fec_envio).where(
+            q_ult = (select(Resuelve.fec_envio).where(
                 Resuelve.id_usuario == id_u,
                 Resuelve.id_evento == id_evento,
-                Resuelve.flag_correcta == True)
-                .order_by(Resuelve.fec_envio.desc())).first()
+                Resuelve.flag_correcta == True)  # noqa: E712
+                .order_by(Resuelve.fec_envio.desc()))
+            if corte is not None:
+                q_ult = q_ult.where(Resuelve.fec_envio <= corte)
+            ultimas[id_u] = s.exec(q_ult).first()
         ranking = [
             {
-                "id_usuario":id_usuario,
-                "nombre":nombre,
-                "puntaje":puntaje_total_usuario(s, id_usuario, id_evento),
-                "ultima":ultimas[id_usuario],
+                "id_usuario": id_usuario,
+                "nombre": nombre,
+                "puntaje": puntaje_total_usuario(s, id_usuario, id_evento, corte),
+                "ultima": ultimas[id_usuario],
             }
             for id_usuario, nombre in vistos.items()
         ]
@@ -64,21 +84,23 @@ def _modo_evento(s: Session, ev: Evento) -> str:
     return "activo"
 
 
-def _timeline_usuario(s: Session, id_usuario: int, id_evento: int, valor_reto: dict) -> list[tuple]:
+def _timeline_usuario(s: Session, id_usuario: int, id_evento: int, valor_reto: dict,
+                      corte: datetime | None = None) -> list[tuple]:
     """[(fec, acumulado_con_piso_0)] ordenado, solo aciertos + compras del usuario."""
-    solves = s.exec(
-        select(Resuelve.fec_envio, Resuelve.id_reto).where(
-            Resuelve.id_usuario == id_usuario,
-            Resuelve.id_evento == id_evento,
-            Resuelve.flag_correcta == True,  # noqa: E712
-        )
-    ).all()
-    compras = s.exec(
-        select(Compra.fec_compra, Compra.puntos_usados).where(
-            Compra.id_usuario == id_usuario,
-            Compra.id_evento == id_evento,
-        )
-    ).all()
+    q_solves = select(Resuelve.fec_envio, Resuelve.id_reto).where(
+        Resuelve.id_usuario == id_usuario,
+        Resuelve.id_evento == id_evento,
+        Resuelve.flag_correcta == True,  # noqa: E712
+    )
+    q_compras = select(Compra.fec_compra, Compra.puntos_usados).where(
+        Compra.id_usuario == id_usuario,
+        Compra.id_evento == id_evento,
+    )
+    if corte is not None:
+        q_solves = q_solves.where(Resuelve.fec_envio <= corte)
+        q_compras = q_compras.where(Compra.fec_compra <= corte)
+    solves = s.exec(q_solves).all()
+    compras = s.exec(q_compras).all()
     eventos = [(f, valor_reto.get(r, 0)) for f, r in solves if f is not None]
     eventos += [(f, -p) for f, p in compras if f is not None]
     eventos.sort(key=lambda e: e[0])
@@ -90,22 +112,24 @@ def _timeline_usuario(s: Session, id_usuario: int, id_evento: int, valor_reto: d
 
 
 def _construir_opcion(modo: str, ev: Evento, entradas: list[tuple[str, list]],
-                      *, con_leyenda: bool, colores: list) -> dict:
+                      *, con_leyenda: bool, colores: list,
+                      corte: datetime | None = None) -> dict:
     """`option` de ECharts a partir de `[(nombre, [(fec, acum), ...]), ...]`.
 
     Eje X según `modo`: abierto -> fecha/hora real; activo/concluido -> horas
-    desde `fec_inicio`. Devuelve `{}` si no hay ninguna actividad.
+    desde `fec_inicio`. Con `corte` (freeze) el eje termina en ese instante.
+    Devuelve `{}` si no hay ninguna actividad.
     """
     if not any(tl for _, tl in entradas):
         return {}
 
     tiempo_real = modo == "abierto"
-    ahora = datetime.now(timezone.utc)
+    tope = corte if corte is not None else datetime.now(timezone.utc)
 
     if tiempo_real:
         fechas = [tl[0][0] for _, tl in entradas if tl]
         x_min = int(min(fechas).timestamp() * 1000)
-        x_max = int(ahora.timestamp() * 1000)
+        x_max = int(tope.timestamp() * 1000)
 
         def to_x(fec):
             return int(fec.timestamp() * 1000)
@@ -113,7 +137,7 @@ def _construir_opcion(modo: str, ev: Evento, entradas: list[tuple[str, list]],
         t0 = ev.fec_inicio
         if t0 is None:
             t0 = min(tl[0][0] for _, tl in entradas if tl)
-        fin = ev.fec_fin if ev.fec_fin else ahora
+        fin = corte if corte is not None else (ev.fec_fin if ev.fec_fin else tope)
         x_min = 0.0
         x_max = round(max((fin - t0).total_seconds() / 3600, 0.1), 2)
 
@@ -202,7 +226,7 @@ def _construir_opcion(modo: str, ev: Evento, entradas: list[tuple[str, list]],
     }
 
 
-def opcion_evolucion(id_evento: int, top: int = 10) -> dict:
+def opcion_evolucion(id_evento: int, top: int = 10, corte: datetime | None = None) -> dict:
     """`option` de ECharts para la curva multi-participante (scoreboard / dashboards)."""
     with Session(engine) as s:
         ev = s.get(Evento, id_evento)
@@ -211,7 +235,7 @@ def opcion_evolucion(id_evento: int, top: int = 10) -> dict:
         modo = _modo_evento(s, ev)
         if modo == "futuro":
             return {}
-        rank = scoreboard(id_evento)[:top]
+        rank = scoreboard(id_evento, corte)[:top]
         if not rank:
             return {}
         valor_reto = {
@@ -219,13 +243,14 @@ def opcion_evolucion(id_evento: int, top: int = 10) -> dict:
             for c in s.exec(select(Contiene).where(Contiene.id_evento == id_evento)).all()
         }
         entradas = [
-            (r["nombre"], _timeline_usuario(s, r["id_usuario"], id_evento, valor_reto))
+            (r["nombre"], _timeline_usuario(s, r["id_usuario"], id_evento, valor_reto, corte))
             for r in rank
         ]
-    return _construir_opcion(modo, ev, entradas, con_leyenda=True, colores=PALETA)
+    return _construir_opcion(modo, ev, entradas, con_leyenda=True, colores=PALETA, corte=corte)
 
 
-def opcion_evolucion_usuario(id_evento: int | None, id_usuario: int | None) -> dict:
+def opcion_evolucion_usuario(id_evento: int | None, id_usuario: int | None,
+                             corte: datetime | None = None) -> dict:
     """`option` de ECharts para la curva individual del jugador (perfil)."""
     if not id_evento or not id_usuario:
         return {}
@@ -242,5 +267,24 @@ def opcion_evolucion_usuario(id_evento: int | None, id_usuario: int | None) -> d
             c.id_reto: c.puntaje_actual
             for c in s.exec(select(Contiene).where(Contiene.id_evento == id_evento)).all()
         }
-        entradas = [(nombre, _timeline_usuario(s, id_usuario, id_evento, valor_reto))]
-    return _construir_opcion(modo, ev, entradas, con_leyenda=False, colores=[VERDE])
+        entradas = [(nombre, _timeline_usuario(s, id_usuario, id_evento, valor_reto, corte))]
+    return _construir_opcion(modo, ev, entradas, con_leyenda=False, colores=[VERDE], corte=corte)
+
+
+def ranking_y_evolucion(id_evento: int | None,
+                        corte: datetime | None = None) -> tuple[list[dict], dict]:
+    """`(ranking, option_evolucion)` con cache en Redis por `(id_evento, corte)`.
+
+    Se computa una sola vez por combinación sin importar cuántos clientes lo pidan;
+    lo invalida `canales.publicar_scoreboard()` al aceptarse una flag / compra /
+    cambio de freeze. Sin Redis → recomputa siempre.
+    """
+    if not id_evento:
+        return [], {}
+    hit = cache.obtener(id_evento, corte)
+    if hit is not None:
+        return hit.get("ranking", []), hit.get("opcion", {})
+    ranking = scoreboard(id_evento, corte)
+    opcion = opcion_evolucion(id_evento, top=10, corte=corte)
+    cache.guardar(id_evento, corte, ranking, opcion)
+    return ranking, opcion

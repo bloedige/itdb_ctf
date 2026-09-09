@@ -2,6 +2,7 @@ import reflex as rx
 
 from itdb_ctf.components.navbar import navbar_staff
 from itdb_ctf.dashboards.eventos_cerrados_dashboard_view import eventos_cerrados_dashboard_view
+from itdb_ctf.dashboards.eventos_cerrados_dashboard_states import EventosCerradosDashboardState
 
 
 def eventos_cerrados_dashboard_page() -> rx.Component:
@@ -14,4 +15,6 @@ def eventos_cerrados_dashboard_page() -> rx.Component:
         ),
         width="100%",
         grid_template_columns="12% 1fr",
+        on_mount=EventosCerradosDashboardState.escuchar,
+        on_unmount=EventosCerradosDashboardState.parar,
     )

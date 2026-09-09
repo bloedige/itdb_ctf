@@ -1,7 +1,7 @@
 import reflex as rx
 
 from itdb_ctf.auth.auth_state import AuthState
-from itdb_ctf.scoreboard.scoreboard_logic import scoreboard, opcion_evolucion
+from itdb_ctf.scoreboard.scoreboard_logic import ranking_y_evolucion
 from itdb_ctf.dashboards import dashboard_metricas_logic as m
 from itdb_ctf.dashboards.eventos_cerrados_dashboard_logic import (
     listar_eventos_cerrados,
@@ -9,6 +9,7 @@ from itdb_ctf.dashboards.eventos_cerrados_dashboard_logic import (
     actividad_evento,
     feed_resoluciones,
 )
+from itdb_ctf.websockets import freeze_logic, canales, suscriptor
 
 
 class EventosCerradosDashboardState(AuthState):
@@ -22,6 +23,8 @@ class EventosCerradosDashboardState(AuthState):
     ranking: list[dict] = []
     evol_opcion: dict = {}
     feed: list[dict] = []
+    streaming: bool = False
+    tick_token: int = 0
 
     @rx.var
     def hay_eventos(self) -> bool:
@@ -62,8 +65,38 @@ class EventosCerradosDashboardState(AuthState):
         self.dificultad = m.desglose_dificultad(id_ev)
         self.actividad = actividad_evento(id_ev)
         self.feed = feed_resoluciones(id_ev)
-        self.ranking = scoreboard(id_ev)[:10]
-        self.evol_opcion = opcion_evolucion(id_ev, top=10)
+        r, o = ranking_y_evolucion(id_ev, None)   # admin -> siempre en vivo (cacheado)
+        self.ranking = r[:10]
+        self.evol_opcion = o
+
+    def _refrescar_vivo(self):
+        """Refresco liviano para el suscriptor: lo que cambia con aciertos / freeze."""
+        if not self.id_sel:
+            return
+        id_ev = int(self.id_sel)
+        self.info = info_evento(id_ev)            # badge / botón freeze
+        r, o = ranking_y_evolucion(id_ev, None)   # cacheado
+        self.ranking = r[:10]
+        self.evol_opcion = o
+        self.feed = feed_resoluciones(id_ev)
+
+    @rx.event(background=True)
+    async def escuchar(self):
+        """Suscripción Redis: el badge de freeze y el ranking se actualizan solos
+        para todos los admin que estén mirando el mismo evento."""
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: int(s.id_sel) if s.id_sel else None,
+            canales_getter=lambda s: (
+                [canales.ch_scoreboard(int(s.id_sel)), canales.ch_freeze(int(s.id_sel))]
+                if s.id_sel else []
+            ),
+            recargar=lambda s: s._refrescar_vivo(),
+        )
+
+    @rx.event
+    def parar(self):
+        self.streaming = False
 
     @rx.event
     def cargar_todo(self):
@@ -87,5 +120,18 @@ class EventosCerradosDashboardState(AuthState):
 
     @rx.event
     def congelar(self):
-        """Placeholder: aún no congela el scoreboard."""
-        pass
+        """Alterna el freeze del scoreboard del evento seleccionado (en Redis)."""
+        guard = self.requiere_admin()
+        if guard:
+            return guard
+        if not self.id_sel:
+            return
+        id_ev = int(self.id_sel)
+        if freeze_logic.esta_congelado(id_ev):
+            freeze_logic.descongelar(id_ev)
+            msg = "Scoreboard descongelado."
+        else:
+            fecha = freeze_logic.congelar(id_ev)
+            msg = "Scoreboard congelado." if fecha else "No se pudo congelar (Redis no disponible)."
+        self._recargar()
+        return rx.toast.success(msg)

@@ -2,6 +2,8 @@ from sqlmodel import Session, select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento,Modalidad,ModoPuntaje
 from itdb_ctf.asociar.asociar_logic import estado_evento
+from itdb_ctf.websockets.freeze_logic import esta_congelado
+from itdb_ctf.websockets import canales
     
 def validar_evento(id_modadlidad, fec_inicio, fec_fin, id_evento=None):
     etiqueta = etiqueta_modalidad(id_modadlidad) 
@@ -52,7 +54,9 @@ def crear_evento(id_usuario,id_modalidad,id_modo_puntaje,titulo,descripcion=None
         s.add(ev)
         s.commit()
         s.refresh(ev)
-    return ev.id_evento
+        id_ev = ev.id_evento
+    canales.publicar_lista_eventos()
+    return id_ev
 
 def editar_evento(id_evento, values:dict):
     error = validar_evento(values.get("id_modalidad"), values.get("fec_inicio"), values.get("fec_fin"), id_evento)
@@ -66,7 +70,9 @@ def editar_evento(id_evento, values:dict):
             setattr(ev, campo, valor)
         s.add(ev)
         s.commit()
-        return True
+    canales.publicar_evento(id_evento)
+    canales.publicar_lista_eventos()
+    return True
 
 def activar_desactivar_evento(id_evento) -> bool:
     with Session(engine) as s:
@@ -75,7 +81,9 @@ def activar_desactivar_evento(id_evento) -> bool:
         ev.activo = not ev.activo
         s.add(ev)
         s.commit()
-        return True
+    canales.publicar_evento(id_evento)
+    canales.publicar_lista_eventos()
+    return True
     
 def listar_evento():
     with Session(engine) as s:
@@ -93,19 +101,10 @@ def listar_evento():
             "modo_puntaje":mp,
             "activo":e.activo,
             "auto_inscripcion":bool(e.auto_inscripcion),
-            "freeze":bool(e.freeze),
+            "freeze":esta_congelado(e.id_evento),
             "estado":estado_evento(e)
             } for e , m, mp in s.exec(stmt).all()
         ]
-        
-def freeze_scoreboard(id_evento) -> bool:
-    with Session(engine) as s:
-        ev =  s.get(Evento, id_evento)
-        if not ev: return False
-        ev.freeze = not ev.freeze
-        s.add(ev)
-        s.commit()
-        return True
 
 def obtener_evento(id_evento):
     with Session(engine) as s:

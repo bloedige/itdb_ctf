@@ -33,7 +33,7 @@ def barra_estado() -> rx.Component:
                 _badge_estado(),
                 rx.cond(
                     S.esta_congelado,
-                    rx.badge("Scoreboard congelado", color_scheme="cyan", size="2"),
+                    rx.badge("Congelado (vista estudiante)", color_scheme="cyan", size="2"),
                 ),
                 rx.text(
                     f"{S.info['fec_inicio']}  →  {S.info['fec_fin']}",
@@ -42,10 +42,24 @@ def barra_estado() -> rx.Component:
                 rx.spacer(),
                 rx.text(S.info["tiempo_texto"], size="2", weight="medium"),
                 rx.cond(
+                    S.hay_seleccion,
+                    rx.link(
+                        rx.button(
+                            rx.icon("eye", size=15),
+                            "Ver como jugador",
+                            variant="soft",
+                            color_scheme="gray",
+                            size="1",
+                        ),
+                        href=f"/evento/{S.id_sel}/scoreboard",
+                        is_external=True,
+                    ),
+                ),
+                rx.cond(
                     S.evento_activo,
                     rx.button(
                         rx.icon("snowflake", size=15),
-                        "Congelar scoreboard",
+                        rx.cond(S.esta_congelado, "Descongelar", "Congelar scoreboard"),
                         on_click=S.congelar,
                         variant="soft",
                         color_scheme="cyan",

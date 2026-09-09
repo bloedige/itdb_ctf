@@ -2,14 +2,29 @@ import reflex as rx
 from datetime import datetime, timezone
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.auto_inscripcion.auto_inscripcion_evento_logic import auto_inscripcion, eventos
+from itdb_ctf.websockets import canales, suscriptor
+from itdb_ctf.websockets.suscriptor import SuscriptorMixin
 
-class AutoInscripcionState(AuthState):
+class AutoInscripcionState(SuscriptorMixin, AuthState):
     eventos:list[dict] = []
     ahora:datetime = datetime.now(timezone.utc)
 
     @rx.event
     def actualizar_tiempo(self):
         self.ahora = datetime.now(timezone.utc)
+
+    @rx.event(background=True)
+    async def escuchar_eventos(self):
+        await suscriptor.escuchar(
+            self,
+            clave_getter=lambda s: "eventos",
+            canales_getter=lambda s: [canales.CH_EVENTOS],
+            recargar=lambda s: s.cargar_eventos(),
+        )
+
+    @rx.event
+    def parar_eventos(self):
+        self.streaming = False
         
     @rx.event
     def cargar_eventos(self):
