@@ -180,13 +180,6 @@ def evento_abierto_dashboard_view() -> rx.Component:
         rx.hstack(
             rx.heading("Dashboard — Evento Abierto", size="6"),
             rx.spacer(),
-            rx.button(
-                rx.icon("refresh-cw", size=16),
-                "Actualizar",
-                on_click=EventoAbiertoDashboardState.actualizar,
-                variant="soft",
-                color_scheme="amber",
-            ),
             width="100%",
             align="center",
         ),

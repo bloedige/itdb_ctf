@@ -176,13 +176,19 @@ def navbar_staff() -> rx.Component:
                 AuthState.codigo_rol,
                 (
                     "autor",
-                    link("Gestion de retos", "/admin/retos"),
+                    rx.grid(
+                        link("Gestion de retos", "/admin/retos"),
+                        link("Dashboard retos", "/admin/dashboard/retos"),
+                        width="100%", spacing="1", justify="start",
+                    ),
                 ),
                 (
                     "admin",
                     rx.grid(
                         link("Dashboard", "/admin/dashboard"),
                         link("Dashboard eventos", "/admin/dashboard/eventos-cerrados"),
+                        link("Dashboard retos", "/admin/dashboard/retos"),
+                        link("Dashboard usuarios", "/admin/dashboard/usuarios"),
                         link("Gestion de evento", "/admin/eventos"),
                         link("Gestion de retos", "/admin/retos"),
                         link("Retos en eventos", "/admin/asociar"),
@@ -196,6 +202,8 @@ def navbar_staff() -> rx.Component:
                     rx.grid(
                         link("Dashboard", "/admin/dashboard"),
                         link("Dashboard eventos", "/admin/dashboard/eventos-cerrados"),
+                        link("Dashboard retos", "/admin/dashboard/retos"),
+                        link("Dashboard usuarios", "/admin/dashboard/usuarios"),
                         link("Gestion de evento", "/admin/eventos"),
                         link("Gestion de retos", "/admin/retos"),
                         link("Retos en eventos", "/admin/asociar"),

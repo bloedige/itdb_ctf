@@ -92,6 +92,58 @@ def grafica_desglose(titulo: str, data) -> rx.Component:
     )
 
 
+def grafica_barra(
+    titulo: str,
+    data,
+    data_key: str = "valor",
+    nombre: str = "",
+    x_key: str = "etiqueta",
+    fill: str = AZUL,
+) -> rx.Component:
+    return panel(
+        titulo,
+        rx.recharts.bar_chart(
+            rx.recharts.bar(data_key=data_key, name=nombre or titulo, fill=fill),
+            rx.recharts.x_axis(data_key=x_key),
+            rx.recharts.y_axis(),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.graphing_tooltip(),
+            data=data,
+            width="100%",
+            height=280,
+        ),
+    )
+
+
+def grafica_pastel(
+    titulo: str,
+    data,
+    colores_var,
+    data_key: str = "valor",
+    name_key: str = "etiqueta",
+) -> rx.Component:
+    return panel(
+        titulo,
+        rx.recharts.pie_chart(
+            rx.recharts.pie(
+                rx.foreach(data, lambda _d, i: rx.recharts.cell(fill=colores_var[i % 8])),
+                data=data,
+                data_key=data_key,
+                name_key=name_key,
+                cx="50%",
+                cy="50%",
+                inner_radius=55,
+                outer_radius=90,
+                padding_angle=1,
+            ),
+            rx.recharts.graphing_tooltip(),
+            rx.recharts.legend(),
+            width="100%",
+            height=280,
+        ),
+    )
+
+
 def _fila_ranking(fila: dict) -> rx.Component:
     return rx.table.row(
         rx.table.cell(fila["posicion"]),

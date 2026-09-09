@@ -183,13 +183,6 @@ def eventos_cerrados_dashboard_view() -> rx.Component:
                 ),
                 width="20em",
             ),
-            rx.button(
-                rx.icon("refresh-cw", size=16),
-                "Actualizar",
-                on_click=S.actualizar,
-                variant="soft",
-                color_scheme="amber",
-            ),
             width="100%",
             align="end",
             spacing="3",

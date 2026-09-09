@@ -23,6 +23,8 @@ from itdb_ctf.usuario.usuario_states import CrearUsuarioState, ListarUsuarioStat
 from itdb_ctf.inscripcion.inscripcion_state import InscripcionState
 from itdb_ctf.dashboards.evento_abierto_dashboard_states import EventoAbiertoDashboardState
 from itdb_ctf.dashboards.eventos_cerrados_dashboard_states import EventosCerradosDashboardState
+from itdb_ctf.dashboards.retos_dashboard_states import RetosDashboardState
+from itdb_ctf.dashboards.usuarios_dashboard_states import UsuariosDashboardState
 
 #pages abierto
 
@@ -49,6 +51,8 @@ from itdb_ctf.pages.admin_usuario import admin_usuario_page
 from itdb_ctf.pages.admin_inscripcion import admin_inscripcion_page
 from itdb_ctf.pages.evento_abierto_dashboard import evento_abierto_dashboard_page
 from itdb_ctf.pages.eventos_cerrados_dashboard import eventos_cerrados_dashboard_page
+from itdb_ctf.pages.retos_dashboard import retos_dashboard_page
+from itdb_ctf.pages.usuarios_dashboard import usuarios_dashboard_page
 
 app.add_page(login_page, route="/login")
 app.add_page(informacion_page, route="/informacion", on_load=InformacionState.cargar_info)
@@ -69,3 +73,5 @@ app.add_page(admin_asociar_page, route="/admin/asociar", on_load=[AsociarState.c
 app.add_page(admin_inscripcion_page, route="/admin/inscribir", on_load=[InscripcionState.cargar_todo])
 app.add_page(evento_abierto_dashboard_page, route="/admin/dashboard", on_load=EventoAbiertoDashboardState.cargar_dashboard)
 app.add_page(eventos_cerrados_dashboard_page, route="/admin/dashboard/eventos-cerrados", on_load=EventosCerradosDashboardState.cargar_todo)
+app.add_page(retos_dashboard_page, route="/admin/dashboard/retos", on_load=RetosDashboardState.cargar_dashboard)
+app.add_page(usuarios_dashboard_page, route="/admin/dashboard/usuarios", on_load=UsuariosDashboardState.cargar_dashboard)
