@@ -7,4 +7,3 @@ assets/external/
 *.db
 reflex.lock/
 CLAUDE.md
-reddis.md
