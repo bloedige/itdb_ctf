@@ -1,5 +1,4 @@
 import reflex as rx
-
 from itdb_ctf.components.form import select_catalog,input_box,text_area,card_text, button, badge_msg, close_dialog_button
 from itdb_ctf.reto.reto_states import CrearRetosState, EditarRetosState, ListarRetosState
 
@@ -95,7 +94,7 @@ def form_pistas()->rx.Component:
 
 def form_crear_reto_view()->rx.Component:
     return rx.dialog.root(
-        rx.dialog.trigger(rx.button(rx.icon("plus"), "Crear reto", on_click=CrearRetosState.open_close_dialog)),
+        rx.dialog.trigger(rx.button(rx.icon("plus"), "Crear reto", on_click=CrearRetosState.open_close_dialog, variant="surface", color_scheme="jade")),
         rx.dialog.content(
             rx.grid(
                 rx.grid(
@@ -130,12 +129,6 @@ def form_crear_reto_view()->rx.Component:
         open=CrearRetosState.dialog_bool,
     )
 
-
-#editar
-
-import reflex as rx 
-from itdb_ctf.reto.reto_states import EditarRetosState
-from itdb_ctf.components.form import select_catalog, input_box, text_area, close_dialog_button, button, badge_msg
 
 def archivo_edit() -> rx.Component:
     return rx.vstack(
@@ -299,7 +292,7 @@ def button_edit(id_reto) -> rx.Component:
         "Editar",
         on_click=EditarRetosState.cargar_reto(id_reto),
         size="1",
-        variant="soft",
+        variant="surface",
     ),
 
 def form_editar_reto_view() -> rx.Component:
@@ -337,13 +330,6 @@ def form_editar_reto_view() -> rx.Component:
         open=EditarRetosState.dialog_bool,
     )
 
-
-# listar
-
-import reflex as rx
-from itdb_ctf.reto.reto_states import ListarRetosState
-from itdb_ctf.reto.form_editar_reto_view import button_edit
-
 def fila_reto(reto:dict) -> rx.Component:
     return rx.table.row(
         rx.table.cell(reto['id']),
@@ -356,28 +342,28 @@ def fila_reto(reto:dict) -> rx.Component:
         rx.table.cell(
             rx.cond(
                 reto['activo'],
-                rx.badge("Activo",color_scheme="green"),
-                rx.badge("Inactivo",color_scheme="gray"),                
+                rx.text("Activo",color_scheme="jade"),
+                rx.text("Inactivo",color_scheme="gray"),                
             ),
         ),
         rx.table.cell(
-            rx.hstack(
+            rx.grid(
                 rx.cond(
                     reto['edit'],
-                    rx.flex(
+                    rx.grid(
                         button_edit(reto['id']),
                         rx.button(
                         rx.cond(reto['activo'],"Desactivar","Activar"),
                         on_click=lambda:ListarRetosState.alternar_activo(reto['id']),
-                        color_scheme=rx.cond(reto['activo'],"red","green"),
+                        color_scheme=rx.cond(reto['activo'],"ruby","jade"),
                         size="1",
-                        variant="soft",
+                        variant="surface",
                         ),
-                        spacing="2",
+                        columns="2",
+                        place_items="center",
                     ),
                     None,
                 ),
-                spacing="2",
             ),
         ),  
     )
@@ -411,22 +397,22 @@ def tabla_retos_view()->rx.Component:
 def retos_view() -> rx.Component:
     return rx.flex(
         rx.card(
-            rx.grid(
-                rx.flex(
-                    rx.hstack(rx.icon("search", size=10 ),rx.text("Buscar",size="1", weight="light", color_scheme="gray")),
-                    rx.input(placeholder="Buscar por titulo...", value=ListarRetosState.busqueda, on_change=ListarRetosState.set_busqueda, width="100%"),
+            rx.flex(
+                rx.heading("Gestion — Retos", size="4"),
+                rx.grid(
+                    input_box("Buscar", "Buscar por titulo...", ListarRetosState.busqueda, ListarRetosState.set_busqueda, "text"),
+                    form_crear_reto_view(),
                     width="100%",
-                    direction="column",
-                    spacing="1",
+                    grid_auto_flow="column",
+                    place_items="center",
+                    spacing="5",
                 ),
-                form_crear_reto_view(),
                 width="100%",
-                grid_auto_flow="column",
-                place_items="center",
-                spacing="5",
+                direction="column",
+                spacing="3",
             ),
             position="sticky",
-            top="1.5em",
+            top="0",
             width="100%",
             z_index="99",
         ),
@@ -434,7 +420,6 @@ def retos_view() -> rx.Component:
         form_editar_reto_view(),
         align="center",
         direction="column",
-        width="80%",
+        width="90%",
         spacing="5",
-        margin_top="1.5em",
     )

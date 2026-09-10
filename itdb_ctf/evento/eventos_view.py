@@ -1,5 +1,4 @@
 import reflex as rx
-
 from itdb_ctf.evento.evento_states import CreaEventoState, EditarEventoState, ListarEventoState
 from itdb_ctf.components.form import input_box, text_area ,select_catalog, input_datetime, checked, badge_msg, button, close_dialog_button
 
@@ -36,7 +35,7 @@ def form_evento() -> rx.Component:
 
 def form_crear_evento_view() -> rx.Component:
     return rx.dialog.root(
-        rx.dialog.trigger(rx.button(rx.icon("plus"),"Crear evento", on_click=CreaEventoState.open_close_dialog)),
+        rx.dialog.trigger(rx.button(rx.icon("plus"),"Crear evento", on_click=CreaEventoState.open_close_dialog, variant="surface", color_scheme="jade")),
         rx.dialog.content(
             form_evento(),
             close_dialog_button(CreaEventoState.open_close_dialog),
@@ -86,8 +85,8 @@ def button_edit(id_evento) -> rx.Component:
         "Editar",
         on_click=EditarEventoState.cargar_evento(id_evento),
         size="1", 
-        variant="soft", 
-        color_scheme="cyan",
+        variant="surface", 
+        color_scheme="blue",
     ),
 
 def form_editar_evento_view() -> rx.Component:
@@ -110,30 +109,31 @@ def fila_evento(evento:dict) -> rx.Component:
         rx.table.cell(
             rx.cond(
                 evento['auto_inscripcion'],
-                rx.badge("True", color_scheme="blue"),
-                rx.badge("False", color_scheme="gray"),
+                rx.text("True", color_scheme="blue"),
+                rx.text("False", color_scheme="gray"),
             ),
         ),
         rx.table.cell(
             rx.cond(
                 evento['activo'],
-                rx.badge("Activo", color_scheme="green"),
-                rx.badge("Inactivo", color_scheme="red"),
+                rx.text("Activo", color_scheme="jade",),
+                rx.text("Inactivo", color_scheme="gray",),
             ),
         ),
         rx.table.cell(
-            rx.hstack(
+            rx.grid(
                 button_edit(evento['id']),
                 rx.cond(
                     evento['estado'] != "abierto",
                     rx.button(
                         rx.cond(evento['activo'],"Desactivar","activar"),
                         on_click=lambda: ListarEventoState.arternar_activo(evento['id']),
-                        color_scheme=rx.cond(evento['activo'],"red","green"),
-                        size="1", variant="soft",
+                        color_scheme=rx.cond(evento['activo'],"ruby","jade"),
+                        size="1", variant="surface",
                     ),
                 ),
-                spacing="2",
+                columns="2",
+                place_items="center",
             ),
         
         ),
@@ -162,22 +162,22 @@ def tabla_eventos_view() -> rx.Component:
 def eventos_view() -> rx.Component:
     return rx.flex(
         rx.card(
-            rx.grid(
                 rx.flex(
-                    rx.hstack(rx.icon("search", size=10 ),rx.text("Buscar",size="1", weight="light", color_scheme="gray")),
-                    rx.input(placeholder="Buscar por titulo...", value=ListarEventoState.busqueda, on_change=ListarEventoState.set_busqueda, width="100%"),
+                    rx.heading("Gestion — Eventos", size="4"),
+                    rx.grid(
+                        input_box("Buscar", "Buscar por titulo...", ListarEventoState.busqueda, ListarEventoState.set_busqueda, "text"),
+                        form_crear_evento_view(),
+                        width="100%",
+                        grid_auto_flow="column",
+                        place_items="center",
+                        spacing="5",
+                    ),
                     width="100%",
                     direction="column",
-                    spacing="1",
+                    spacing="3",
                 ),
-                form_crear_evento_view(),
-                width="100%",
-                grid_auto_flow="column",
-                place_items="center",
-                spacing="5",
-            ),
             position="sticky",
-            top="1.5em",
+            top="0",
             width="100%",
             z_index="99",
         ),
@@ -185,7 +185,6 @@ def eventos_view() -> rx.Component:
         form_editar_evento_view(),
         align="center",
         direction="column",
-        width="80%",
+        width="90%",
         spacing="5",
-        margin_top="1.5em",
     )

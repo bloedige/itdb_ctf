@@ -11,7 +11,11 @@ def form_edit_content() -> rx.Componen:
         input_box("Materno","Materno...",EditarUsuarioState.materno, EditarUsuarioState.set_materno, "text"),
         input_box("Alias","Alias...",EditarUsuarioState.alias, EditarUsuarioState.set_alias, "text"),
         input_box("Correo electronico","itdb@itdonbosco.org..." ,EditarUsuarioState.email, EditarUsuarioState.set_email, "email"),
-        select_catalog("Rol", "Seleccionar...", EditarUsuarioState.roles, EditarUsuarioState.set_id_rol, EditarUsuarioState.id_rol),
+        rx.cond(
+            EditarUsuarioState.no_user,
+            select_catalog("Rol", "Seleccionar...", EditarUsuarioState.roles, EditarUsuarioState.set_id_rol, EditarUsuarioState.id_rol),
+            None
+        ),
         rx.center(
             rx.text("!!!Reseter password desde el panel¡¡¡", color_scheme="gray", weight="light", size="1"),
             width="100%",
@@ -32,17 +36,18 @@ def form_edit_content() -> rx.Componen:
         spacing="4",
     )
 
-def form_editar_usuario_view(id_usuario:int):
+def editar_button(id_usuario):
+    return rx.button(
+        "Editar",
+        size="1",
+        variant="surface",
+        color_scheme="blue",
+        on_click=[EditarUsuarioState.cargar_usario(id_usuario), EditarUsuarioState.open_close_dialog],
+    ),
+
+
+def form_editar_usuario_view():
     return rx.dialog.root(
-        rx.dialog.trigger(
-            rx.button(
-                "Editar",
-                size="1",
-                variant="surface",
-                color_scheme="blue",
-                on_click=[EditarUsuarioState.cargar_usario(id_usuario), EditarUsuarioState.open_close_dialog],
-            ),
-        ),
         rx.dialog.content(
             form_edit_content(),
             close_dialog_button(EditarUsuarioState.open_close_dialog),

@@ -58,8 +58,8 @@ def alert_reset_password(id_usuario, email, alias, rol) -> rx.Component:
             rx.button(
                 "Restablecer",
                 color_scheme="amber",
-                variant="surface",
                 size="1",
+                variant="surface",
             ),
         ),
         rx.alert_dialog.content(
@@ -98,7 +98,7 @@ def alert_estado(id_usuario, activo, email) -> rx.Component:
         rx.alert_dialog.trigger(
             button(
                 rx.cond(activo, "Desactivar", "Activar"),
-                rx.cond(activo, "ruby", "jade"),
+                rx.cond(activo, "red", "jade"),
                 [],
                 size="1"
             ),

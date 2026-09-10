@@ -19,11 +19,11 @@ def link(legend:str, url:str) -> rx.Component:
     )
 
 def logo() -> rx.Component:
-    return rx.grid(           
+    return rx.flex(           
         rx.image(
             src="/isotipo.svg",
             alt="ITDB - CTF",
-            width="7.5vh",
+            width="3.5em",
         ),
         rx.flex(
             rx.flex(
@@ -32,7 +32,8 @@ def logo() -> rx.Component:
                 rx.text("D", size="5", weight="bold"),
                 rx.text("B", size="5", weight="bold"),
                 width="100%",
-                justify="between",
+                justify="center",
+                gap=".85em",
              ),
             rx.flex(
                 rx.text("Capture", weight="regular"),
@@ -48,10 +49,9 @@ def logo() -> rx.Component:
             width="100%",
             place_items="center",
         ),
-        width="100%",
-        grid_auto_flow="column",
-        justify="between",
-        align="center",
+        width="auto",
+        gap="1em",
+        justify="center",
     ),
 
 def _item_menu(icono: str, texto: str, accion, color: str) -> rx.Component:
@@ -59,8 +59,10 @@ def _item_menu(icono: str, texto: str, accion, color: str) -> rx.Component:
     return rx.button(
         rx.hstack(
             rx.icon(icono, size=20),
+            rx.cond(AuthState.codigo_rol == "user", rx.spacer(), None),
             rx.text(texto),
             direction=rx.cond(AuthState.codigo_rol == "user", "row-reverse", "row"),
+            width=rx.cond(AuthState.codigo_rol == "user", "100%",None),
         ),
         on_click=accion,
         variant="ghost",
@@ -184,7 +186,11 @@ def navbar_cerrado(id_evento) -> rx.Component:
 
 def navbar_staff() -> rx.Component:
     return rx.flex(
-        logo(),
+        rx.flex(
+            logo(),
+            width="auto",
+            justify="center",
+         ),
         rx.divider(),
         rx.grid(
             rx.match(
@@ -206,9 +212,11 @@ def navbar_staff() -> rx.Component:
                         link("Dashboard usuarios", "/admin/dashboard/usuarios"),
                         link("Gestion de evento", "/admin/eventos"),
                         link("Gestion de retos", "/admin/retos"),
-                        link("Retos en eventos", "/admin/asociar"),
+                        link("Asociar retos", "/admin/asociar"),
+                        link("Gestionar retos de evento", "/admin/asociar/gestionar"),
                         link("Gestion de usuario", "/admin/usuarios"),
                         link("Inscribir usuarios", "/admin/inscribir"),
+                        link("Gestionar participantes", "/admin/inscribir/gestionar"),
                         width="100%", spacing="1", justify="start",
                     ),
                 ),
@@ -221,9 +229,11 @@ def navbar_staff() -> rx.Component:
                         link("Dashboard usuarios", "/admin/dashboard/usuarios"),
                         link("Gestion de evento", "/admin/eventos"),
                         link("Gestion de retos", "/admin/retos"),
-                        link("Retos en eventos", "/admin/asociar"),
+                        link("Asociar retos", "/admin/asociar"),
+                        link("Gestionar retos de evento", "/admin/asociar/gestionar"),
                         link("Gestion de usuario", "/admin/usuarios"),
                         link("Inscribir usuarios", "/admin/inscribir"),
+                        link("Gestionar participantes", "/admin/inscribir/gestionar"),
                         width="100%", spacing="1", align="start",
                     ),
                 ),

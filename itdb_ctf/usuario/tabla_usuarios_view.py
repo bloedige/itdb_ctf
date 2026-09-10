@@ -1,6 +1,7 @@
 import reflex as rx
 from itdb_ctf.usuario.usuario_states import ListarUsuarioState
-from itdb_ctf.usuario.form_editar_usuario_view import form_editar_usuario_view
+from itdb_ctf.usuario.form_editar_usuario_view import editar_button
+from itdb_ctf.usuario.form_crear_usuario_view import form_crear_usuario_view
 from itdb_ctf.usuario.credenciales_usuario_view import alert_reset_password, alert_estado
 from itdb_ctf.components.form import select_catalog, input_box
 
@@ -41,7 +42,7 @@ def fila_usuario(u:dict) -> rx.Component:
             rx.grid(
                 rx.cond(
                     u['edit'], 
-                    form_editar_usuario_view(u['id_usuario']),
+                    editar_button(u['id_usuario']),
                     rx.spacer(),
                 ),
                 rx.cond(
@@ -73,14 +74,14 @@ def fila_usuario(u:dict) -> rx.Component:
     )
 
 def filtros() -> rx.Component:
-    return rx.card(
-        rx.heading("Filtros", size="3"),
+    return rx.flex(
         rx.grid(
             input_box("Buscar por correo", "example@example.com", ListarUsuarioState.busqueda, ListarUsuarioState.set_busqueda, "email"),
             select_catalog("Filtrar por rol","Todos...", ListarUsuarioState.roles, ListarUsuarioState.set_id_rol_filtro, ListarUsuarioState.id_rol_filtro),
             select_catalog("Filtrar por metodo auth","Todos...", ListarUsuarioState.metodos , ListarUsuarioState.set_id_metodo_filtro, ListarUsuarioState.id_metodo_filtro),
             select_catalog("Filtrar por estado", "todos..", ListarUsuarioState.estados, ListarUsuarioState.set_activo_filtro, ListarUsuarioState.activo_filtro),
-            grid_template_columns="40% 1fr 1fr 1fr",
+            form_crear_usuario_view(),
+            grid_template_columns="30% 1fr 1fr 1fr 1fr",
             place_items="center",
             width="100%",
             spacing="2",
@@ -92,7 +93,12 @@ def filtros() -> rx.Component:
 def tabla_usuario_view() -> rx.Component:
     return rx.vstack(
         rx.card(
-            filtros(),
+            rx.vstack(
+                rx.heading("Gestión — Usuarios", size="4"),
+                filtros(),
+                spacing="4",
+                width="100%",
+            ),
             width="100%",
         ),
         rx.card(
@@ -113,5 +119,5 @@ def tabla_usuario_view() -> rx.Component:
             width="100%",
         ),
         spacing="5",
-        width="100%",
+        width="90%",
     )

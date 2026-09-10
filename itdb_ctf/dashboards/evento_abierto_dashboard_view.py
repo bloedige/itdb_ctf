@@ -12,10 +12,6 @@ from itdb_ctf.dashboards.dashboard_componentes import (
     panel_ranking,
 )
 
-
-# --------------------------------------------------------------------------- KPIs
-
-
 def fila_kpis() -> rx.Component:
     r = EventoAbiertoDashboardState.resumen
     return rx.grid(
@@ -56,12 +52,8 @@ def fila_kpis() -> rx.Component:
     )
 
 
-# ------------------------------------------------------------------------ charts
-
-
 def grafica_evolucion() -> rx.Component:
     return _grafica_evolucion(EventoAbiertoDashboardState.evol_opcion)
-
 
 def grafica_actividad() -> rx.Component:
     return panel(
@@ -86,7 +78,6 @@ def grafica_actividad() -> rx.Component:
         ),
     )
 
-
 def grafica_inscripciones() -> rx.Component:
     return panel(
         "Inscripciones por mes · últimos 12 meses",
@@ -103,15 +94,12 @@ def grafica_inscripciones() -> rx.Component:
     )
 
 
-# ------------------------------------------------------------------------ tables
-
 
 def tabla_ranking() -> rx.Component:
     return panel_ranking(
         EventoAbiertoDashboardState.hay_ranking,
         EventoAbiertoDashboardState.ranking,
     )
-
 
 def fila_reto(fila: dict) -> rx.Component:
     return rx.table.row(
@@ -128,7 +116,6 @@ def fila_reto(fila: dict) -> rx.Component:
         ),
         style={"opacity": rx.cond(fila["sin_resolver"], "0.55", "1")},
     )
-
 
 def _tabla_retos(titulo: str, filas) -> rx.Component:
     return panel(
@@ -154,23 +141,17 @@ def _tabla_retos(titulo: str, filas) -> rx.Component:
         ),
     )
 
-
 def tabla_retos_mas_resueltos() -> rx.Component:
     return _tabla_retos(
         "Retos más resueltos · top 10",
         EventoAbiertoDashboardState.retos_mas_resueltos,
     )
 
-
 def tabla_retos_mas_dificiles() -> rx.Component:
     return _tabla_retos(
         "Retos más difíciles · top 10",
         EventoAbiertoDashboardState.retos_mas_dificiles,
     )
-
-
-# -------------------------------------------------------------------------- view
-
 
 def evento_abierto_dashboard_view() -> rx.Component:
     return rx.vstack(

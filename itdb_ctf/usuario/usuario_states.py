@@ -4,6 +4,7 @@ from itdb_ctf.db import engine
 from itdb_ctf.models import Rol, MetodoAuth
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.usuario import usuario_logic as user
+from itdb_ctf.utils.validaciones import formato_email_valido
 
 class CredencialesUsuarioState(AuthState):
     cred_titulo:str = ""
@@ -91,7 +92,7 @@ class CrearUsuarioState(AuthState):
             if not v:
                 self.mensaje = msg
                 return False
-        if "@" not in self.email:
+        if formato_email_valido(self.email):
             self.mensaje = "Correo no valido"
             return False
         return True
@@ -207,6 +208,10 @@ class EditarUsuarioState(AuthState):
     def set_drop_mensaje(self):
         self.mensaje = ""
 
+    @rx.var
+    def no_user(self) -> bool:
+        return self.id_usuario_edit != self.id_usuario
+         
     def open_close_dialog(self):
         self.dilog_bool = not self.dilog_bool
 
@@ -239,7 +244,7 @@ class EditarUsuarioState(AuthState):
             if not v:
                 self.mensaje = msg
                 return False
-        if "@" not in self.email:
+        if formato_email_valido(self.email):
             self.mensaje = "Correo invalido"
             return False
         return True

@@ -3,6 +3,7 @@ from itdb_ctf.auth.local_auth import verificar_credenciales
 from itdb_ctf.auth.jwt_utils import emitir_jwt
 from itdb_ctf.auth.auth_state import AuthState
 from itdb_ctf.core.rate_limit import login_bloqueado, registrar_fallo_login, limpiar_login
+from itdb_ctf.utils.validaciones import formato_email_valido
 
 class LocalAuthState(AuthState):
     email: str = ""
@@ -25,6 +26,9 @@ class LocalAuthState(AuthState):
             return rx.toast.error("Credenciales inválidas.")
         limpiar_login(ip, self.email)
         self.token = emitir_jwt(usuario)
-        if self.codigo_rol != "user":
-            return rx.redirect("/admin/retos")
-        return rx.redirect("/informacion")
+        match self.codigo_rol:
+            case "autor":
+                return rx.redirect("/admin/dashboard/retos")
+            case "user":
+                return rx.redirect("/informacion")
+        return rx.redirect("/admin/dashboard")
