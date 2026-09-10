@@ -5,8 +5,12 @@ from itdb_ctf.core.puntaje_logic import refrescar_puntaje
 from itdb_ctf.utils.security import flag_hasher
 from itdb_ctf.asociar.asociar_logic import estado_evento
 from itdb_ctf.websockets import canales
+from itdb_ctf.core.rate_limit import permitir_flag
 
 def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, dir_ip:str |None=None ) -> tuple[bool,str]:
+    ok, faltan = permitir_flag(id_usuario, id_reto)
+    if not ok:
+        return False, f"Demasiados intentos. Esperá {faltan} s."
     with Session(engine) as s :
         reto = s.get(Reto,id_reto)
         if not reto or not reto.activo:
