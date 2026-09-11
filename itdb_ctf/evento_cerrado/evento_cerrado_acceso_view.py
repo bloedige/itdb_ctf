@@ -6,14 +6,11 @@ from itdb_ctf.evento_cerrado.evento_cerrado_acceso_state import EventoCerradoAcc
 
 
 def _aviso_denegado() -> rx.Component:
+    """Mismo estilo simple (texto centrado) en las 4 pestañas de evento cerrado —
+    antes acá había un icono y en la vista de Retos era solo texto; se unificó."""
     return rx.center(
-        rx.vstack(
-            rx.icon("shield-x", size=54, color="var(--red-9)"),
-            rx.heading(A.motivo, size="5", text_align="center"),
-            spacing="4",
-            align="center",
-        ),
-        height="70vh",
+        rx.text(A.motivo, weight="medium", size="4", color="gray"),
+        height="50vh",
         width="100%",
     )
 

@@ -29,6 +29,14 @@ class ScoreboardState(AuthState):
         id_route = self.router.page.params.get("id_evento_cerrado")
         return int(id_route) if id_route else id_evento_abierto()
 
+    @rx.var
+    def perfil_base(self) -> str:
+        """Prefijo para el link "ver perfil" de una fila del ranking: dentro de
+        un evento cerrado apunta a `/evento/{id}/perfil/{id_usuario}`, en el
+        abierto a `/perfil/{id_usuario}`."""
+        id_ev_cerrado = self.router.page.params.get("id_evento_cerrado")
+        return f"/evento/{id_ev_cerrado}/perfil" if id_ev_cerrado else "/perfil"
+
     def _aplica_freeze(self) -> bool:
         """El corte de freeze aplica a estudiantes, o a staff con `?preview=1`
         (para que un admin vea el scoreboard tal como lo ve el jugador)."""

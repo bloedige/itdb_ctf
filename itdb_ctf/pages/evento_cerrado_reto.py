@@ -7,10 +7,11 @@ from itdb_ctf.evento_cerrado.evento_cerrado_acceso_state import EventoCerradoAcc
 from itdb_ctf.evento_cerrado.evento_cerrado_acceso_view import con_acceso
 
 def evento_cerrado_reto_page() -> rx.Component:
-    return rx.vstack(
+    return rx.grid(
         navbar_cerrado(EventoCerradoInfromacionState.id_cerrado),
         con_acceso(evento_cerrado_retos_view()),
         width="100%",
+        justify_items="center",
         on_mount=[
             EventoCerradoAccesoState.escuchar_acceso,
             EventoCerradoRetoState.escuchar_retos,

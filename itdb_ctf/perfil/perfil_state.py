@@ -90,3 +90,55 @@ class PerfilEventoCerradoState(PerfilBaseState):
             self._sin_datos()
             return
         self._cargar(id_ev)
+
+
+class PerfilPublicoBaseState(PerfilBaseState):
+    """Perfil de OTRO usuario, visto desde el link del scoreboard. Reusa
+    `perfil_contenido` (con `mostrar_email=False`) cargando por el `id_usuario`
+    de la URL en vez de `self.id_usuario`."""
+
+    def _id_objetivo(self) -> int:
+        # OJO: el segmento de ruta se llama `id_objetivo`, no `id_usuario` — ese
+        # nombre ya lo usa `AuthState.id_usuario` (el propio usuario logueado) y
+        # Reflex no deja que un arg de ruta dinámica choque con un var existente.
+        try:
+            return int(self.router.page.params.get("id_objetivo", 0))
+        except (TypeError, ValueError):
+            return 0
+
+    def _cargar_para(self, id_evento: int, id_usuario: int):
+        corte = corte_freeze(id_evento) if self.codigo_rol == "user" else None
+        self.datos = perfil_datos(id_usuario, id_evento)
+        self.resueltos = retos_resueltos(id_usuario, id_evento)
+        self.distribucion = distribucion_categorias(id_usuario, id_evento)
+        self.reparto = reparto_puntos(id_usuario, id_evento)
+        self.evolucion_opcion = opcion_evolucion_usuario(id_evento, id_usuario, corte)
+        self.envios = aciertos_errores(id_usuario, id_evento)
+
+
+class PerfilPublicoAbiertoState(PerfilPublicoBaseState):
+    @rx.event
+    def cargar_perfil_publico(self):
+        guard = self.requiere_login()
+        if guard:
+            return guard
+        id_ev = id_evento_abierto()
+        id_usr = self._id_objetivo()
+        if not id_ev or not id_usr or not inscrito(id_usr, id_ev):
+            self._sin_datos()
+            return
+        self._cargar_para(id_ev, id_usr)
+
+
+class PerfilPublicoCerradoState(PerfilPublicoBaseState):
+    @rx.event
+    def cargar_perfil_publico(self):
+        guard = self.requiere_login()
+        if guard:
+            return guard
+        id_ev = int(self.router.page.params.get("id_evento_cerrado", 0))
+        id_usr = self._id_objetivo()
+        if not id_ev or not id_usr or not participa(id_usr, id_ev):
+            self._sin_datos()
+            return
+        self._cargar_para(id_ev, id_usr)

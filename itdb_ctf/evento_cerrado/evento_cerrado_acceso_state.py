@@ -11,8 +11,18 @@ Solo aplica a `codigo_rol == "user"`. El staff siempre tiene acceso.
 import reflex as rx
 
 from itdb_ctf.auth.auth_state import AuthState
-from itdb_ctf.evento_cerrado.evento_cerrado_logic import acceso_evento_cerrado
+from itdb_ctf.evento_cerrado.evento_cerrado_logic import (
+    acceso_evento_cerrado,
+    acceso_perfil_evento_cerrado,
+    acceso_publico_evento_cerrado,
+)
 from itdb_ctf.websockets import canales, suscriptor
+
+# Información y Scoreboard: públicas (cualquiera, evento activo o concluido).
+# Perfil: solo inscritos, pero también en eventos ya concluidos (es tu historial).
+# Retos: solo inscritos, y solo mientras el evento está activo.
+_RUTAS_PUBLICAS = ("/informacion", "/scoreboard")
+_RUTAS_PERFIL = ("/perfil",)
 
 
 class EventoCerradoAccesoState(AuthState):
@@ -27,6 +37,9 @@ class EventoCerradoAccesoState(AuthState):
         except (TypeError, ValueError):
             return 0
 
+    def _ruta(self) -> str:
+        return self.router.page.raw_path or self.router.page.path or ""
+
     @rx.event
     def verificar(self):
         guard = self.requiere_login()
@@ -39,7 +52,13 @@ class EventoCerradoAccesoState(AuthState):
         if not id_ev:
             self.acceso, self.motivo = True, ""
             return
-        ok, msg = acceso_evento_cerrado(id_ev, self.id_usuario)
+        ruta = self._ruta()
+        if ruta.endswith(_RUTAS_PUBLICAS):
+            ok, msg = acceso_publico_evento_cerrado(id_ev)
+        elif ruta.endswith(_RUTAS_PERFIL):
+            ok, msg = acceso_perfil_evento_cerrado(id_ev, self.id_usuario)
+        else:
+            ok, msg = acceso_evento_cerrado(id_ev, self.id_usuario)
         self.acceso = ok
         self.motivo = msg or "No tenés acceso a este evento."
 

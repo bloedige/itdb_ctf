@@ -19,6 +19,8 @@ def estado_inscripcion(id_usuario:int, id_evento:int) -> tuple[bool,str]:
         return True, ""
 
 def acceso_evento_cerrado(id_evento:int, id_usuario:int) -> tuple[bool,str]:
+    """Retos: solo para inscritos, y solo mientras el evento está activo (no se
+    puede jugar un evento que todavía no empezó o que ya concluyó)."""
     with Session(engine) as s:
         ev = s.get(Evento, id_evento)
         if not ev or not ev.activo or etiqueta_modalidad(ev.id_modalidad) != "cerrado":
@@ -29,9 +31,30 @@ def acceso_evento_cerrado(id_evento:int, id_usuario:int) -> tuple[bool,str]:
         if est == "futuro":
             return False, "El evento aún no inicia."
         ok, msg = estado_inscripcion(id_usuario, id_evento)
-        
+
         return ok, msg
-        
+
+def acceso_publico_evento_cerrado(id_evento:int) -> tuple[bool,str]:
+    """Información y Scoreboard: visibles para cualquiera, participe o no, y
+    aunque el evento ya haya concluido (son la vitrina/resultados públicos)."""
+    with Session(engine) as s:
+        ev = s.get(Evento, id_evento)
+        if not ev or not ev.activo or etiqueta_modalidad(ev.id_modalidad) != "cerrado":
+            return False, "Evento no encontrado."
+        if estado_evento(ev) == "futuro":
+            return False, "El evento aún no inicia."
+        return True, ""
+
+def acceso_perfil_evento_cerrado(id_evento:int, id_usuario:int) -> tuple[bool,str]:
+    """Perfil: visible mientras estés inscrito (y no descalificado), incluso si
+    el evento ya concluyó — es tu historial en ese evento. Si nunca te
+    inscribiste, no hay nada que mostrar."""
+    with Session(engine) as s:
+        ev = s.get(Evento, id_evento)
+        if not ev or not ev.activo or etiqueta_modalidad(ev.id_modalidad) != "cerrado":
+            return False, "Evento no encontrado."
+        return estado_inscripcion(id_usuario, id_evento)
+
 
 def info_evento_cerrado(id_evento:int) -> dict | None:
     with Session(engine) as s:

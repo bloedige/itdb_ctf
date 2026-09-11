@@ -117,8 +117,8 @@ def evento_cerrado_retos_view() -> rx.Component:
     return rx.cond(
         EventoCerradoRetoState.acceso,
         rx.vstack(
-            rx.heading(EventoCerradoRetoState.titulo),
             rx.grid(
+                 rx.heading("Catalogo de retos", size="5"),
                 filtros(
                     EventoCerradoRetoState.categorias,
                     EventoCerradoRetoState.id_categoria_filtro,
@@ -128,14 +128,15 @@ def evento_cerrado_retos_view() -> rx.Component:
                     EventoCerradoRetoState.set_id_dificultad_filtro,
                     "amber"
                 ),
-                width="70%", place_items="center",   
+                width="100%",   
+                spacing="4",
             ),
             rx.grid(
                 rx.foreach(EventoCerradoRetoState.retos, reto_card_view),
                 columns={"base": "1", "md": "4"},
-                spacing="4", width="70%", place_items="center",
+                spacing="4", width="100%", place_items="center",
             ),
-            align="center", spacing="5", width="100%",
+            align="center", spacing="5", width="60%",
         ),
         rx.center(
             rx.text(EventoCerradoRetoState.motivo, weight="medium", size="4", color="gray"),

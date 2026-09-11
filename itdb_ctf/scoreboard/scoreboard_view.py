@@ -21,13 +21,17 @@ def grafica_evolucion() -> rx.Component:
     )
 
 def fila_ranking(fila:dict) -> rx.Component:
-    return rx.card(
+    return rx.box(
         rx.grid(
             rx.text(fila['posicion'],
                     weight="medium",
                     size="4",
             ),
-            rx.text(fila['nombre'],weight="medium", size="3"),
+            rx.link(
+                rx.text(fila['nombre'], weight="medium", size="3"),
+                href=f"{ScoreboardState.perfil_base}/{fila['id_usuario']}",
+                underline="hover",
+            ),
             rx.text(f"{fila['puntaje']} pts.",weight="medium", size="3"),
             place_items="center",
             spacing="2",
@@ -35,12 +39,13 @@ def fila_ranking(fila:dict) -> rx.Component:
             width="100%",
         ),
         width="100%",
+        border_bottom="1px solid gray",
     ) 
 
 def scoreboard_view() -> rx.Component:
     return rx.grid(
         rx.grid(
-            rx.heading("Scoreboard"),
+            rx.heading("Scoreboard", size="5"),
             rx.cond(
                 ScoreboardState.solves,
                 grafica_evolucion(),
@@ -64,6 +69,6 @@ def scoreboard_view() -> rx.Component:
             width="100%",
         ),
         place_items="center",
-        width=["90%", "90%", "90%", "50%"],
+        width=["90%", "90%", "90%", "60%"],
         spacing="5",
     )

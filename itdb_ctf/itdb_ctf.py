@@ -12,7 +12,12 @@ from itdb_ctf.auto_inscripcion.auto_inscripcion_evento_state import AutoInscripc
 
 from itdb_ctf.evento_cerrado.evento_cerrado_informacion_state import EventoCerradoInfromacionState
 from itdb_ctf.evento_cerrado.evento_cerrado_reto_state import EventoCerradoRetoState
-from itdb_ctf.perfil.perfil_state import PerfilGeneralState, PerfilEventoCerradoState
+from itdb_ctf.perfil.perfil_state import (
+    PerfilGeneralState,
+    PerfilEventoCerradoState,
+    PerfilPublicoAbiertoState,
+    PerfilPublicoCerradoState,
+)
 from itdb_ctf.perfil.gestion_state import PerfilGestionState
 from itdb_ctf.evento_cerrado.evento_cerrado_acceso_state import EventoCerradoAccesoState
 from itdb_ctf.components.nav_state import NavState
@@ -43,7 +48,9 @@ from itdb_ctf.pages.evento_cerrado_informacion import evento_cerrado_informacion
 from itdb_ctf.pages.evento_cerrado_reto import evento_cerrado_reto_page
 from itdb_ctf.pages.evento_cerrado_scoreboard import evento_cerrado_scoreboard_page
 from itdb_ctf.pages.evento_cerrado_perfil import evento_cerrado_perfil_page
+from itdb_ctf.pages.evento_cerrado_perfil_publico import evento_cerrado_perfil_publico_page
 from itdb_ctf.pages.perfil import perfil_page
+from itdb_ctf.pages.perfil_publico import perfil_publico_page
 
 #pages staff
 
@@ -65,11 +72,13 @@ app.add_page(catalogo_page, route="/retos", on_load=CatalogoState.cargar_retos)
 app.add_page(scoreboard_page, route="/scoreboard", on_load=ScoreboardState.cargar_ranking)
 app.add_page(eventos_page, route="/eventos", on_load=AutoInscripcionState.cargar_eventos)
 app.add_page(perfil_page, route="/perfil", on_load=PerfilGeneralState.cargar_perfil)
+app.add_page(perfil_publico_page, route="/perfil/[id_objetivo]", on_load=PerfilPublicoAbiertoState.cargar_perfil_publico)
 
 app.add_page(evento_cerrado_informacion_page, route="/evento/[id_evento_cerrado]/informacion", on_load=[EventoCerradoInfromacionState.cargar_info, EventoCerradoAccesoState.verificar])
 app.add_page(evento_cerrado_reto_page, route="/evento/[id_evento_cerrado]/retos", on_load=[EventoCerradoInfromacionState.cargar_info, EventoCerradoRetoState.cargar_retos, EventoCerradoAccesoState.verificar])
 app.add_page(evento_cerrado_scoreboard_page, route="/evento/[id_evento_cerrado]/scoreboard", on_load=[EventoCerradoInfromacionState.cargar_info, ScoreboardState.cargar_ranking, EventoCerradoAccesoState.verificar])
 app.add_page(evento_cerrado_perfil_page, route="/evento/[id_evento_cerrado]/perfil", on_load=[EventoCerradoInfromacionState.cargar_info, PerfilEventoCerradoState.cargar_perfil, EventoCerradoAccesoState.verificar])
+app.add_page(evento_cerrado_perfil_publico_page, route="/evento/[id_evento_cerrado]/perfil/[id_objetivo]", on_load=[EventoCerradoInfromacionState.cargar_info, PerfilPublicoCerradoState.cargar_perfil_publico])
 
 app.add_page(admin_eventos_page, route="/admin/eventos", on_load=[CreaEventoState.cargar_catalogos, ListarEventoState.cargar_lista])
 app.add_page(admin_retos_page, route="/admin/retos", on_load=[CrearRetosState.cargar_catalogos, ListarRetosState.cargar_lista])

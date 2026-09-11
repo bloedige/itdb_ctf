@@ -132,7 +132,7 @@ def card_evento(ev:dict) -> rx.Component:
                 spacing="4",
             ),
             ),
-        width="50%",
+        width="100%",
     ),
 
 def auto_inscripcion_eventos_view() -> rx.Component:
@@ -142,12 +142,13 @@ def auto_inscripcion_eventos_view() -> rx.Component:
             on_change=AutoInscripcionState.actualizar_tiempo,
             style={"display":"none"}
         ),
+        rx.heading("Eventos", size="5",),
         rx.grid(
             rx.foreach(AutoInscripcionState.eventos_procesados, card_evento),
             place_items="center",
             width="100%",
             spacing="4"
         ),
-        width="100%",
-
+        width="60%",
+        spacing="4",
     )

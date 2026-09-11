@@ -204,19 +204,15 @@ def reto_card_view(reto:dict)->rx.Component:
     )
 
 def catalogo_view()->rx.Component:
-     return rx.vstack(
-        rx.vstack(
-            filtros_view(),
-            rx.grid(
-                rx.foreach(CatalogoState.retos,reto_card_view),
-                columns={"base":"1", "md":"4"},
-                spacing="4",
-                width="70%",
-                place_items="center"
-            ),
-        width="100%",
-        align="center",
-        spacing="5",
+     return rx.vstack( 
+        rx.heading("Catalogo de retos",size="5"),
+        filtros_view(),
+        rx.grid(
+            rx.foreach(CatalogoState.retos,reto_card_view),
+            columns={"base":"1", "md":"4"},
+            spacing="4",
+            width="100%",
+            place_items="center"
         ),
-        width="100%",
+        width="60%",
     )

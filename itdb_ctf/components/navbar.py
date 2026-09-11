@@ -46,6 +46,7 @@ def logo() -> rx.Component:
             ),
             align="center",
             spacing="2",
+            on_click=rx.redirect("/informacion")
         ),
         href="/informacion",
         underline="none",
@@ -374,7 +375,7 @@ def navbar_cerrado(id_evento) -> rx.Component:
             rx.cond(
                 titulo != "",
                 rx.hstack(
-                    rx.text(f"// {titulo}", size="2", color=NAV_INK_2, white_space="nowrap"),
+                    rx.text(f"{titulo}", size="2", color=NAV_INK_2, white_space="nowrap"),
                     _badge_estado(EventoCerradoInfromacionState.estado_evento),
                     align="center",
                     spacing="2",

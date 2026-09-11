@@ -4,14 +4,11 @@ from itdb_ctf.scoreboard.scoreboard_view import scoreboard_view
 from itdb_ctf.scoreboard.scoreboard_state import ScoreboardState
 
 def scoreboard_page() -> rx.Component:
-    return rx.vstack(
+    return rx.grid(
         navbar(),
-        rx.grid(
-            scoreboard_view(),
-            width="100%",
-            place_items="center",
-        ),
+        scoreboard_view(),
         width="100%",
+        justify_items="center",
         on_mount=ScoreboardState.escuchar_scoreboard,
         on_unmount=ScoreboardState.stop_refresh,
     )

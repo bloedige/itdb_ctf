@@ -9,7 +9,7 @@ from itdb_ctf.perfil.perfil_view import perfil_contenido
 
 
 def evento_cerrado_perfil_page() -> rx.Component:
-    return rx.vstack(
+    return rx.grid(
         navbar_cerrado(EventoCerradoInfromacionState.id_cerrado),
         con_acceso(
             perfil_contenido(
@@ -19,6 +19,7 @@ def evento_cerrado_perfil_page() -> rx.Component:
             ),
         ),
         width="100%",
+        justify_items="center",
         spacing="0",
         on_mount=EventoCerradoAccesoState.escuchar_acceso,
         on_unmount=EventoCerradoAccesoState.parar_acceso,

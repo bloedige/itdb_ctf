@@ -22,38 +22,41 @@ def _card(titulo, contenido) -> rx.Component:
     )
 
 
-def card_identidad(E) -> rx.Component:
+def card_identidad(E, mostrar_email: bool = True) -> rx.Component:
     d = E.datos
+    identidad = [rx.heading(d["alias"], size="3")]
+    if mostrar_email:
+        identidad.append(rx.text(d["email"], size="1", color_scheme="gray"))
     return rx.card(
-        rx.hstack(
-            rx.grid(
-                rx.avatar(src=d["avatar"], fallback=d["iniciales"], size="5"),
+        rx.flex(
+            rx.flex(
+                rx.avatar(src=d["avatar"], fallback=d["iniciales"], size="4",),
                 rx.vstack(
-                    rx.heading(d["alias"], size="4"),
-                    rx.text(d["email"], size="1", color_scheme="gray"),
+                    *identidad,
                     spacing="1",
                     align="start",
                 ),
                 spacing="3",
-                align_items="center",
-                justify_items="center",
-                grid_template_columns="1fr 1fr",
+                align="center",
+                justify="start",
+                direction="row",
+                gap="1em",
             ),
             rx.vstack(
                 rx.hstack(
                     rx.vstack(
                         rx.text("Puntaje", size="1", color_scheme="gray"),
-                        rx.heading(d["puntaje"], size="4"),
+                        rx.heading(d["puntaje"], size="3"),
                         spacing="0", align="center",
                     ),
                     rx.vstack(
                         rx.text(f"Posición de {d['total']}", size="1", color_scheme="gray"),
-                        rx.heading(f"#{d['posicion']}", size="4"),
+                        rx.heading(f"#{d['posicion']}", size="3"),
                         spacing="0", align="center",
                     ),
                     rx.vstack(
                         rx.text("Resueltos", size="1", color_scheme="gray"),
-                        rx.heading(d["resueltos"], size="4"),
+                        rx.heading(d["resueltos"], size="3"),
                         spacing="0", align="center",
                     ),
                     justify="between",
@@ -75,37 +78,16 @@ def card_identidad(E) -> rx.Component:
                 justify="between",
                 width="100%",
             ),
+            direction="row",
+            gap="1em",
             spacing="3",
             width="100%",
-            justify="center",
-            align="center",
+            justify_items="start",
+            align_items="center",
         ),
         width="100%",
         style={"--card-padding": "0.75em"},
     )
-
-
-def panel_progreso(E) -> rx.Component:
-    d = E.datos
-    return rx.card(
-        rx.vstack(
-            rx.hstack(
-                rx.text("Progreso", size="2", weight="medium", color_scheme="gray"),
-                rx.spacer(),
-                rx.text(
-                    f"{d['resueltos']} / {d['retos_total']} retos · {d['pct_progreso']}%",
-                    size="2", weight="medium",
-                ),
-                width="100%",
-            ),
-            rx.progress(value=d["pct_progreso"], width="100%"),
-            spacing="2",
-            width="100%",
-        ),
-        width="100%",
-        style={"--card-padding": "0.75em"},
-    )
-
 
 def _fila_alloc(d: dict, i: int, colores) -> rx.Component:
     return rx.hstack(
@@ -226,25 +208,32 @@ def tabla_resueltos(E) -> rx.Component:
                     width="100%",
                 ),
                 width="100%",
-                height="92vh",
+                max_height="57vh",
                 overflow_y="auto",
             ),
         ),
     )
 
 
-def perfil_contenido(E, titulo: str = "Mi perfil", vacio: str = "No participás en este evento.") -> rx.Component:
-    return rx.vstack(
-        rx.heading(titulo, size="6"),
-        rx.cond(
-            E.hay_datos,
+def perfil_contenido(
+    E,
+    titulo: str = "Mi perfil",
+    vacio: str = "No participás en este evento.",
+    mostrar_email: bool = True,
+) -> rx.Component:
+    # El heading solo tiene sentido cuando hay algo que titular: si no hay datos
+    # (no inscrito, o admin sin participación) es puro ruido visual encima del
+    # aviso de "no participás".
+    return rx.cond(
+        E.hay_datos,
+        rx.vstack(
+            rx.heading(titulo, size="5"),
             rx.grid(
                 rx.vstack(
                     rx.hstack(
-                    card_identidad(E),
-                    #panel_progreso(E),
+                    card_identidad(E, mostrar_email),
                     width="100%",
-                    
+
                     ),
                     evolucion_view(E),
                     tabla_resueltos(E),
@@ -262,13 +251,13 @@ def perfil_contenido(E, titulo: str = "Mi perfil", vacio: str = "No participás 
                 spacing="4",
                 width="100%",
             ),
-            rx.center(
-                rx.text(vacio, size="4", weight="light", color_scheme="gray"),
-                height="50vh",
-                width="100%",
-            ),
+            spacing="4",
+            width="80%",
+            padding="1.5em",
         ),
-        spacing="4",
-        width="100%",
-        padding="1.5em",
+        rx.center(
+            rx.text(vacio, size="4", weight="light", color_scheme="gray"),
+            height="50vh",
+            width="100%",
+        ),
     )

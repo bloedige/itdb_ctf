@@ -4,10 +4,12 @@ from itdb_ctf.catalogo.catalogo_view import catalogo_view
 from itdb_ctf.catalogo.catalogo_states import CatalogoState, listarPistaState
 
 def catalogo_page()->rx.Component:
-    return rx.vstack(
+    return rx.grid(
         navbar(),
         catalogo_view(),
         width="100%",
+        spacing="4",
+        justify_items="center",
         on_mount=[CatalogoState.escuchar_catalogo, listarPistaState.escuchar_pistas],
         on_unmount=[CatalogoState.parar_catalogo, listarPistaState.parar_pistas],
     )
