@@ -368,25 +368,68 @@ def fila_reto(reto:dict) -> rx.Component:
         ),  
     )
 
+def fila_reto_movil(reto:dict) -> rx.Component:
+    return rx.card(
+        rx.flex(
+            rx.text(reto['titulo'], size="2", weight="medium"),
+            rx.cond(
+                reto['edit'],
+                rx.grid(
+                    button_edit(reto['id']),
+                    rx.button(
+                        rx.cond(reto['activo'],"Desactivar","Activar"),
+                        on_click=lambda:ListarRetosState.alternar_activo(reto['id']),
+                        color_scheme=rx.cond(reto['activo'],"ruby","jade"),
+                        size="1",
+                        variant="surface",
+                    ),
+                    columns="2",
+                    place_items="center",
+                ),
+                None,
+            ),
+            justify="between",
+            width="100%",
+        ),
+        width="100%",
+    )
+
 def tabla_retos_view()->rx.Component:
     return rx.vstack(
-        rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    rx.table.column_header_cell("ID"),
-                    rx.table.column_header_cell("Titulo"),
-                    rx.table.column_header_cell("Categoria"),
-                    rx.table.column_header_cell("Dificultad"),
-                    rx.table.column_header_cell("Modo"),
-                    rx.table.column_header_cell("Puntaje"),
-                    rx.table.column_header_cell("Minimo"),
-                    rx.table.column_header_cell("Estado"),
-                    rx.table.column_header_cell("Acciones"),                    
+        rx.tablet_and_desktop(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        rx.table.column_header_cell("ID"),
+                        rx.table.column_header_cell("Titulo"),
+                        rx.table.column_header_cell("Categoria"),
+                        rx.table.column_header_cell("Dificultad"),
+                        rx.table.column_header_cell("Modo"),
+                        rx.table.column_header_cell("Puntaje"),
+                        rx.table.column_header_cell("Minimo"),
+                        rx.table.column_header_cell("Estado"),
+                        rx.table.column_header_cell("Acciones"),
+                    ),
                 ),
+                rx.table.body(
+                    rx.foreach(ListarRetosState.lista,fila_reto)
+                ),
+                width="100%",
             ),
-            rx.table.body(
-                rx.foreach(ListarRetosState.lista,fila_reto)
-            ),  
+            width="100%",
+        ),
+        rx.mobile_only(
+            rx.vstack(
+                rx.grid(
+                    rx.text("Titulo", size="1", weight="medium"),
+                    rx.text("Acciones", size="1", weight="medium"),
+                    grid_template_columns="1fr 30%",
+                    width="100%",
+                ),
+                rx.foreach(ListarRetosState.lista, fila_reto_movil),
+                spacing="2",
+                width="100%",
+            ),
             width="100%",
         ),
         spacing="2",
@@ -420,6 +463,6 @@ def retos_view() -> rx.Component:
         form_editar_reto_view(),
         align="center",
         direction="column",
-        width="90%",
-        spacing="5",
+        width=rx.breakpoints(sm="95%", md="80%"),
+        spacing="4",
     )

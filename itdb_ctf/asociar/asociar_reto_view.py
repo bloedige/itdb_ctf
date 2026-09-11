@@ -101,30 +101,45 @@ def dialog_override(reto: dict) -> rx.Component:
     )
 
 
+def accion_candidato(reto: dict) -> rx.Component:
+    return rx.cond(
+        AsociarRetoState.ids_in_carrito.contains(reto['id_reto']),
+        rx.badge(rx.icon("check", size=20), "Agregado", color_scheme="gray", variant="surface"),
+        dialog_override(reto),
+    )
+
+
 def fila_candidato(reto: dict) -> rx.Component:
     return rx.card(
-        rx.grid(
-            rx.text(reto['titulo'], size="2", weight="medium"),
-            rx.text(f"{reto['puntaje_inicial']} pts.", size="2", weight="regular"),
-            rx.text(
-                rx.cond(
-                    reto['puntaje_minimo'],
-                    f"{reto['puntaje_minimo']} pts.",
-                    "---",
+        rx.tablet_and_desktop(
+            rx.grid(
+                rx.text(reto['titulo'], size="2", weight="medium"),
+                rx.text(f"{reto['puntaje_inicial']} pts.", size="2", weight="regular"),
+                rx.text(
+                    rx.cond(
+                        reto['puntaje_minimo'],
+                        f"{reto['puntaje_minimo']} pts.",
+                        "---",
+                    ),
+                    size="2", weight="regular",
                 ),
-                size="2", weight="regular",
+                rx.text(reto['categoria'], size="2", weight="regular"),
+                rx.text(reto['dificultad'], size="2", weight="regular"),
+                rx.text(reto['modo'], size="2", weight="regular"),
+                accion_candidato(reto),
+                place_items="center",
+                columns="7",
+                width="100%",
             ),
-            rx.text(reto['categoria'], size="2", weight="regular"),
-            rx.text(reto['dificultad'], size="2", weight="regular"),
-            rx.text(reto['modo'], size="2", weight="regular"),
-            rx.cond(
-                AsociarRetoState.ids_in_carrito.contains(reto['id_reto']),
-                rx.badge(rx.icon("check", size=20), "Agregado", color_scheme="gray", variant="surface"),
-                dialog_override(reto),
-            ),
-            place_items="center",
-            columns="7",
             width="100%",
+        ),
+        rx.mobile_only(
+            rx.flex(
+                rx.text(reto['titulo'], size="2", weight="medium"),
+                accion_candidato(reto),
+                justify="between",
+                width="100%",
+            ),
         ),
         width="100%",
     )
@@ -271,7 +286,7 @@ def asociar_reto_view() -> rx.Component:
             spacing="5",
             width="100%",
         ),
-        grid_template_columns="75% 1fr",
-        width="90%",
-        spacing="5",
+        grid_template_columns=rx.breakpoints(initial="1fr", md="75% 1fr"),
+        width=rx.breakpoints(sm="95%", md="80%"),
+        spacing="4",
     )

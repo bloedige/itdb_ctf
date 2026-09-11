@@ -73,6 +73,49 @@ def fila_usuario(u:dict) -> rx.Component:
         )
     )
 
+def fila_usuario_movil(u:dict) -> rx.Component:
+    return rx.card(
+        rx.flex(
+            rx.flex(
+                rx.text(u['alias'], size="2", weight="medium", color_scheme=rx.cond(u['mismo'], "blue", "")),
+                rx.cond(u['mismo'], rx.text("tú", size="1", color_scheme="blue")),
+                spacing="2",
+            ),
+            rx.grid(
+                rx.cond(
+                    u['edit'],
+                    editar_button(u['id_usuario']),
+                    rx.spacer(),
+                ),
+                rx.cond(
+                    u['reset'],
+                    alert_reset_password(u['id_usuario'], u['email_inst'], u['alias'], u['rol']),
+                    rx.spacer(),
+                ),
+                rx.cond(
+                    u['estado'],
+                    alert_estado(u['id_usuario'],u['activo'],u['email_inst']),
+                    rx.spacer(),
+                ),
+                columns="3",
+                place_items="center",
+                spacing="2",
+            ),
+            justify="between",
+            width="100%",
+        ),
+        width="100%",
+        bg=rx.cond(
+            u['mismo'],
+            "#3b83f637",
+            rx.cond(
+                ~u['estado'],
+                "#80808045",
+                "",
+            )
+        )
+    )
+
 def filtros() -> rx.Component:
     return rx.flex(
         rx.grid(
@@ -102,22 +145,39 @@ def tabla_usuario_view() -> rx.Component:
             width="100%",
         ),
         rx.card(
-            rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    rx.table.column_header_cell("Alias"),
-                    rx.table.column_header_cell("Correo"),
-                    rx.table.column_header_cell("Rol"),
-                    rx.table.column_header_cell("Metodo"),
-                    rx.table.column_header_cell("Estado"),
-                    rx.table.column_header_cell("Acciones"),
+            rx.tablet_and_desktop(
+                rx.table.root(
+                    rx.table.header(
+                        rx.table.row(
+                            rx.table.column_header_cell("Alias"),
+                            rx.table.column_header_cell("Correo"),
+                            rx.table.column_header_cell("Rol"),
+                            rx.table.column_header_cell("Metodo"),
+                            rx.table.column_header_cell("Estado"),
+                            rx.table.column_header_cell("Acciones"),
+                        ),
+                    ),
+                    rx.table.body(rx.foreach(ListarUsuarioState.lista, fila_usuario)),
+                    width="100%",
                 ),
+                width="100%",
             ),
-            rx.table.body(rx.foreach(ListarUsuarioState.lista, fila_usuario)),
-            width="100%",
+            rx.mobile_only(
+                rx.vstack(
+                    rx.grid(
+                        rx.text("Alias", size="1", weight="medium"),
+                        rx.text("Acciones", size="1", weight="medium"),
+                        grid_template_columns="1fr 30%",
+                        width="100%",
+                    ),
+                    rx.foreach(ListarUsuarioState.lista, fila_usuario_movil),
+                    spacing="2",
+                    width="100%",
+                ),
+                width="100%",
             ),
             width="100%",
         ),
-        spacing="5",
-        width="90%",
+        spacing="4",
+        width=rx.breakpoints(sm="95%", md="80%"),
     )

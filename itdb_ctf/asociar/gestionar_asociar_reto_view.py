@@ -89,25 +89,40 @@ def alert_dialog(id_reto, titulo) -> rx.Component:
     )
 
 
+def acciones_gestion(reto: dict) -> rx.Component:
+    return rx.grid(
+        dialog_edit(reto),
+        alert_dialog(reto['id_reto'], reto['titulo']),
+        columns="2",
+        place_items="center",
+        width="100%",
+    )
+
+
 def fila_gestion(reto: dict) -> rx.Component:
     return rx.card(
-        rx.grid(
-            rx.text(reto['titulo'], size="2", weight="medium"),
-            rx.text(f"{reto['puntaje_inicial']} pts.", size="2", weight="regular"),
-            rx.text(f"{reto['puntaje_minimo']} pts.", size="2", weight="regular"),
-            rx.text(reto['categoria'], size="2", weight="regular"),
-            rx.text(reto['dificultad'], size="2", weight="regular"),
-            rx.text(reto['modo'], size="2", weight="regular"),
+        rx.tablet_and_desktop(
             rx.grid(
-                dialog_edit(reto),
-                alert_dialog(reto['id_reto'], reto['titulo']),
-                columns="2",
+                rx.text(reto['titulo'], size="2", weight="medium"),
+                rx.text(f"{reto['puntaje_inicial']} pts.", size="2", weight="regular"),
+                rx.text(f"{reto['puntaje_minimo']} pts.", size="2", weight="regular"),
+                rx.text(reto['categoria'], size="2", weight="regular"),
+                rx.text(reto['dificultad'], size="2", weight="regular"),
+                rx.text(reto['modo'], size="2", weight="regular"),
+                acciones_gestion(reto),
+                columns="7",
                 place_items="center",
                 width="100%",
             ),
-            columns="7",
-            place_items="center",
             width="100%",
+        ),
+        rx.mobile_only(
+            rx.flex(
+                rx.text(reto['titulo'], size="2", weight="medium"),
+                acciones_gestion(reto),
+                justify="between",
+                width="100%",
+            ),
         ),
         width="100%",
     )
@@ -159,6 +174,6 @@ def gestionar_asociar_reto_view() -> rx.Component:
     return rx.vstack(
         filtros(),
         contenido(),
-        spacing="5",
-        width="80%",
+        spacing="4",
+        width=rx.breakpoints(sm="95%", md="80%"),
     )

@@ -140,24 +140,70 @@ def fila_evento(evento:dict) -> rx.Component:
         style={"text-transform":"capitalize"}
     )
 
-def tabla_eventos_view() -> rx.Component:   
-    return rx.table.root(
-        rx.table.header(
-            rx.table.row(
-                rx.table.column_header_cell("ID"),
-                rx.table.column_header_cell("Titulo"),
-                rx.table.column_header_cell("Modalidad"),
-                rx.table.column_header_cell("Modo puntaje"),
-                rx.table.column_header_cell("Auto Insc."),
-                rx.table.column_header_cell("Estado"),
-                rx.table.column_header_cell("Acciones"),
+def fila_evento_movil(evento:dict) -> rx.Component:
+    return rx.card(
+        rx.flex(
+            rx.text(evento['titulo'], size="2", weight="medium"),
+            rx.grid(
+                button_edit(evento['id']),
+                rx.cond(
+                    evento['estado'] != "abierto",
+                    rx.button(
+                        rx.cond(evento['activo'],"Desactivar","activar"),
+                        on_click=lambda: ListarEventoState.arternar_activo(evento['id']),
+                        color_scheme=rx.cond(evento['activo'],"ruby","jade"),
+                        size="1", variant="surface",
+                    ),
+                ),
+                columns="2",
+                place_items="center",
             ),
+            justify="between",
+            width="100%",
         ),
-    rx.table.body(
-        rx.foreach(ListarEventoState.lista, fila_evento),
-    ),
-    width="100%",
-    ),
+        width="100%",
+        style={"text-transform":"capitalize"},
+    )
+
+def tabla_eventos_view() -> rx.Component:
+    return rx.vstack(
+        rx.tablet_and_desktop(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        rx.table.column_header_cell("ID"),
+                        rx.table.column_header_cell("Titulo"),
+                        rx.table.column_header_cell("Modalidad"),
+                        rx.table.column_header_cell("Modo puntaje"),
+                        rx.table.column_header_cell("Auto Insc."),
+                        rx.table.column_header_cell("Estado"),
+                        rx.table.column_header_cell("Acciones"),
+                    ),
+                ),
+                rx.table.body(
+                    rx.foreach(ListarEventoState.lista, fila_evento),
+                ),
+                width="100%",
+            ),
+            width="100%",
+        ),
+        rx.mobile_only(
+            rx.vstack(
+                rx.grid(
+                    rx.text("Titulo", size="1", weight="medium"),
+                    rx.text("Acciones", size="1", weight="medium"),
+                    grid_template_columns="1fr 30%",
+                    width="100%",
+                ),
+                rx.foreach(ListarEventoState.lista, fila_evento_movil),
+                spacing="2",
+                width="100%",
+            ),
+            width="100%",
+        ),
+        spacing="2",
+        width="100%",
+    )
 
 def eventos_view() -> rx.Component:
     return rx.flex(
@@ -185,6 +231,6 @@ def eventos_view() -> rx.Component:
         form_editar_evento_view(),
         align="center",
         direction="column",
-        width="90%",
-        spacing="5",
+        width=rx.breakpoints(sm="95%", md="80%"),
+        spacing="4",
     )

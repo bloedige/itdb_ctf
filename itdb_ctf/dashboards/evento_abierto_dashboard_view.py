@@ -201,6 +201,6 @@ def evento_abierto_dashboard_view() -> rx.Component:
             ),
         ),
         spacing="4",
-        width="100%",
+        width=rx.breakpoints(sm="95%", md="80%"),
         padding="1.5em",
     )
