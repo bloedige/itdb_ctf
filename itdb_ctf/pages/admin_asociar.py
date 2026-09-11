@@ -7,7 +7,7 @@ def admin_asociar_page() -> rx.Component:
     return rx.grid(
         navbar_staff(),
         asociar_reto_view(),
-        spacing="5",
+        spacing="4",
         width="100%",
         grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),
         justify_items="center",

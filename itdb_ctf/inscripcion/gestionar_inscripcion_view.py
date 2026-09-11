@@ -93,6 +93,8 @@ def alert_quitar(id_participa, nombre, email) -> rx.Component:
 
 def fila_participante(u: dict) -> rx.Component:
     return rx.card(
+        rx.tablet_and_desktop(
+
         rx.grid(
             rx.text(u['alias'], size="2", weight="medium"),
             rx.text(u['email_inst'], size="1", weight="regular"),
@@ -117,6 +119,26 @@ def fila_participante(u: dict) -> rx.Component:
             spacing="2",
             width="100%",
         ),
+        ),
+        rx.mobile_only(
+        rx.grid(
+            rx.text(u['alias'], size="2", weight="medium"),
+            rx.grid(
+                alert_descalificar(u['id_participa'], u['descalificado'], u['nombre'], u['email_inst']),
+                rx.cond(
+                    u['quitar'],
+                    alert_quitar(u['id_participa'], u['nombre'], u['email_inst']),
+                ),
+                place_items="center",
+                columns=rx.cond(u['quitar'], "2", ""),
+                width="100%",
+            ),
+            grid_template_columns="1fr 30%",
+            spacing="2",
+            width="100%",
+        ),
+
+        ),
         bg=rx.cond(u['descalificado'], "#A3292942", ""),
         width="100%",
     )
@@ -131,7 +153,7 @@ def filtros() -> rx.Component:
                 input_box("Estudiantes", "Nombre, email, alias", GestionarInscripcionState.busqueda_ges, GestionarInscripcionState.set_busqueda_ges, "text"),
                 select_catalog("Estado en evento", "Todos...", GestionarInscripcionState.estados, GestionarInscripcionState.set_id_estado_filtro, GestionarInscripcionState.id_estado_filtro),
                 place_items="center",
-                grid_template_columns="1fr 15%",
+                grid_template_columns="1fr 20%",
                 width="100%",
                 spacing="3",
             ),
@@ -152,14 +174,25 @@ def contenido() -> rx.Component:
             rx.cond(
                 GestionarInscripcionState.id_evento_ges != "",
                 rx.vstack(
-                    rx.grid(
-                        rx.text("Alias", size="1", weight="medium"),
-                        rx.text("Correo", size="1", weight="medium"),
-                        rx.text("Fecha inscripción", size="1", weight="medium"),
-                        rx.text("Estado", size="1", weight="medium"),
-                        rx.text("acciones", size="1", weight="medium"),
-                        columns="5",
-                        place_items="center",
+                    rx.tablet_and_desktop(
+                        rx.grid(
+                            rx.text("Alias", size="1", weight="medium"),
+                            rx.text("Correo", size="1", weight="medium"),
+                            rx.text("Fecha inscripción", size="1", weight="medium"),
+                            rx.text("Estado", size="1", weight="medium"),
+                            rx.text("acciones", size="1", weight="medium"),
+                            columns="5",
+                            place_items="center",
+                            width="100%",
+                        ),
+                    ),
+                    rx.mobile_only(
+                        rx.grid(
+                            rx.text("Alias", size="1", weight="medium"),
+                            rx.text("Acciones", size="1", weight="medium"),
+                            grid_template_columns="1fr 30%",
+                            width="100%", 
+                        ),
                         width="100%",
                     ),
                     rx.foreach(GestionarInscripcionState.participantes, fila_participante),
@@ -167,18 +200,15 @@ def contenido() -> rx.Component:
                 ),
                 rx.text("seleccione evento a gestionar", color_scheme="gray", size="2"),
             ),
-            width="100%",
-            spacing="5",
+            width="100%", 
         ),
         width="100%",
-        spacing="5",
     )
 
-
 def gestionar_inscripcion_view() -> rx.Component:
-    return rx.vstack(
+    return rx.grid(
         filtros(),
         contenido(),
-        spacing="5",
-        width="80%",
+        spacing="4",
+        width=rx.breakpoints(sm="95%", md="80%"),
     )

@@ -2,34 +2,45 @@ import reflex as rx
 from itdb_ctf.components.form import button, select_catalog, input_box, close_dialog_button
 from itdb_ctf.inscripcion.inscripcion_state import InscribirState
 
+def accion_fila(u:dict) -> rx.Component:
+    return rx.cond(
+        InscribirState.ids_carrito.contains(u['id_usuario']),
+        rx.badge(rx.icon("check"), "Agregado", color_scheme="gray", variant="surface"),
+        rx.button(
+            rx.icon("plus"),
+            "Agregar",
+            size="1",
+            variant="surface",
+            color_scheme="jade",
+            on_click=InscribirState.agregar_carrito(u['id_usuario'], u['nombre'], u['email_inst']),
+        ),
+    ),
 
 def fila_candidato(u: dict) -> rx.Component:
     return rx.card(
-        rx.grid(
-            rx.text(u['alias'], size="2", weight="medium"),
-            rx.text(u['nombre'], size="2", weight="regular"),
-            rx.text(u['email_inst'], size="1", weight="regular"),
-            rx.text(u['metodo'], size="2", weight="medium"),
-            rx.cond(
-                InscribirState.ids_carrito.contains(u['id_usuario']),
-                rx.badge(rx.icon("check"), "Agregado", color_scheme="gray", variant="surface"),
-                rx.button(
-                    rx.icon("plus"),
-                    "Agregar",
-                    size="1",
-                    variant="surface",
-                    color_scheme="jade",
-                    on_click=InscribirState.agregar_carrito(u['id_usuario'], u['nombre'], u['email_inst']),
-                ),
+        rx.tablet_and_desktop(
+            rx.grid(
+                rx.text(u['alias'], size="2", weight="medium"),
+                rx.text(u['nombre'], size="2", weight="regular"),
+                rx.text(u['email_inst'], size="1", weight="regular"),
+                rx.text(u['metodo'], size="2", weight="medium"),
+                accion_fila(u),
+                columns="5",
+                place_items="center",
+                spacing="2",
+                width="100%",
             ),
-            columns="5",
-            place_items="center",
-            spacing="2",
-            width="100%",
+        ),
+        rx.mobile_only(
+            rx.flex(
+                rx.text(u['alias'], size="2", weight="medium"),
+                accion_fila(u),
+                justify="between",
+                width="100%",
+            ),
         ),
         width="100%",
     )
-
 
 def item_carrito(item: dict) -> rx.Component:
     return rx.flex(
@@ -39,7 +50,6 @@ def item_carrito(item: dict) -> rx.Component:
         width="100%",
         spacing="1",
     )
-
 
 def card_carrito() -> rx.Component:
     return rx.card(
@@ -61,8 +71,8 @@ def card_carrito() -> rx.Component:
             rx.divider(),
             select_catalog("Evento", "Seleccionar evento", InscribirState.eventos, InscribirState.set_id_evento_car, InscribirState.id_evento_car),
             rx.grid(
-                button("Inscribir", "jade", [InscribirState.guardar_carrito], size="2"),
                 button("Vaciar", "ruby", [InscribirState.vaciar_carrito], size="2"),
+                button("Inscribir", "jade", [InscribirState.guardar_carrito], size="2"),
                 columns="2",
                 spacing="2",
                 width="100%",
@@ -76,16 +86,15 @@ def card_carrito() -> rx.Component:
         z_index="99",
     )
 
-
 def filtros() -> rx.Component:
     return rx.card(
         rx.vstack(
             rx.heading("Inscribir estudiantes a eventos", size="4"),
             rx.grid(
                 input_box("Estudiantes", "Nombre, email, alias", InscribirState.busqueda_ins, InscribirState.set_busqueda_ins, "text"),
-                select_catalog("Metodo auth", "Todos...", InscribirState.metodos, InscribirState.set_id_metodo_filtro, InscribirState.id_metodo_filtro),
+                select_catalog("Modo auth", "Todos...", InscribirState.metodos, InscribirState.set_id_metodo_filtro, InscribirState.id_metodo_filtro),
                 place_items="center",
-                grid_template_columns="1fr 15%",
+                grid_template_columns="1fr 20%",
                 width="100%",
                 spacing="3",
             ),
@@ -98,21 +107,32 @@ def filtros() -> rx.Component:
         z_index="99",
     )
 
-
 def contenido() -> rx.Component:
     return rx.card(
         rx.vstack(
             rx.cond(
                 InscribirState.id_evento_car != "",
                 rx.vstack(
-                    rx.grid(
-                        rx.text("Alias", size="1", weight="medium"),
-                        rx.text("Nombre", size="1", weight="medium"),
-                        rx.text("Correo", size="1", weight="medium"),
-                        rx.text("Metodo auth", size="1", weight="medium"),
-                        rx.text("acciones", size="1", weight="medium"),
-                        columns="5",
-                        place_items="center",
+                    rx.tablet_and_desktop(
+                        rx.grid(
+                            rx.text("Alias", size="1", weight="medium"),
+                            rx.text("Nombre", size="1", weight="medium"),
+                            rx.text("Correo", size="1", weight="medium"),
+                            rx.text("Modo auth", size="1", weight="medium"),
+                            rx.text("Acciones", size="1", weight="medium"),
+                            columns="5",
+                            place_items="center",
+                            width="100%",
+                        ),
+                        width="100%",
+                    ),
+                    rx.mobile_only(
+                        rx.grid(
+                            rx.text("Alias", size="1", weight="medium"),
+                            rx.text("Acciones", size="1", weight="medium"),
+                            grid_template_columns="1fr 30%",
+                            width="100%",
+                        ),
                         width="100%",
                     ),
                     rx.foreach(InscribirState.candidatos, fila_candidato),
@@ -126,7 +146,6 @@ def contenido() -> rx.Component:
         width="100%",
         spacing="5",
     )
-
 
 def prev_csv(titulo, items, color, motivo=False) -> rx.Component:
     return rx.vstack(
@@ -157,7 +176,6 @@ def prev_csv(titulo, items, color, motivo=False) -> rx.Component:
         spacing="1",
         width="100%",
     )
-
 
 def archivo_csv() -> rx.Component:
     return rx.card(
@@ -209,7 +227,6 @@ def archivo_csv() -> rx.Component:
         ),
     )
 
-
 def reporte_csv() -> rx.Component:
     return rx.vstack(
         rx.heading("Reporte de inscripción por csv", size="3", weight="bold"),
@@ -231,7 +248,6 @@ que se completan cuando el estudiante inicia sesion.""",
         ),
     )
 
-
 def dialog_csv() -> rx.Component:
     return rx.dialog.root(
         rx.dialog.trigger(
@@ -244,19 +260,29 @@ def dialog_csv() -> rx.Component:
             ),
         ),
         rx.dialog.content(
-            rx.grid(
-                reporte_csv(),
-                archivo_csv(),
-                grid_template_columns="65% 1fr",
-                spacing="4",
-                width="100%",
+            rx.tablet_and_desktop(
+                rx.grid(
+                    reporte_csv(),
+                    archivo_csv(),
+                    grid_template_columns="70% 1fr",
+                    spacing="4",
+                    width="100%",
+                ),
+            ),
+            rx.mobile_only(
+                rx.grid(
+                    archivo_csv(),
+                    reporte_csv(),
+                    spacing="4",
+                    width="100%",
+                ),
             ),
             close_dialog_button(InscribirState.open_close_dialog_csv),
-            max_width="900px",
+            max_width=rx.breakpoints(sm="95vw", md="70vw"),  
+            height="90vh",          
         ),
         open=InscribirState.csv_dialog,
     )
-
 
 def card_csv() -> rx.Component:
     return rx.card(
@@ -268,32 +294,44 @@ def card_csv() -> rx.Component:
         ),
         width="100%",
         position="sticky",
-                top="0",
-                z_index="99",
-    )
-               
-
+        top="0",
+        z_index="99",
+    )             
 
 def inscribir_view() -> rx.Component:
-    return rx.vstack(
-        rx.grid(
-            rx.vstack(
-                filtros(),
-                contenido(),
-                spacing="4",
-                width="100%",
-            ),
-                rx.flex(
+    return rx.grid(
+        rx.tablet_and_desktop(
+            rx.grid(
+                rx.vstack(
+                    filtros(),
+                    contenido(),
+                    spacing="4",
+                    width="100%",
+                ),
+                rx.vstack(
                     card_csv(),
                     card_carrito(),
                     spacing="4",
-                    direction="column",
                     width="100%",
                 ),
-            grid_template_columns="80% 1fr",
-            spacing="4",
-            width="100%",
+                grid_template_columns="80% 1fr",
+                spacing="4",
+                width="100%",
+            ),
+            width="80%",
         ),
-        spacing="4",
-        width="90%",
+        rx.mobile_only(
+            rx.grid(
+                filtros(),
+                card_csv(),
+                contenido(),
+                card_carrito(),
+                width="100%",
+                spacing="3",
+            ),
+            width="95%",
+        ),
+        justify_items="center",
+        width="100%",
     )
+

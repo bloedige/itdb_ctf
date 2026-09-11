@@ -13,5 +13,5 @@ def admin_usuario_page() -> rx.Component:
         grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),
         width="100%",
         justify_items="center",
-        spacing="5",
+        spacing="4",
     )

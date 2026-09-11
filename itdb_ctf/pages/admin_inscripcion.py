@@ -7,7 +7,7 @@ def admin_inscripcion_page() -> rx.Component:
     return rx.grid(
         navbar_staff(),
         inscribir_view(),
-        spacing="5",
+        spacing="4",
         justify_items="center",
         width="100%",
         grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),

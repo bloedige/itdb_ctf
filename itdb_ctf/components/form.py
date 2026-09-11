@@ -5,7 +5,7 @@ def select_catalog(legend, placeholder, opciones, on_change, value=None ,disable
         rx.text(
             legend, 
             size="1", 
-            eight="light",
+            weight="light",
         ),
         rx.select.root(
             rx.select.trigger(placeholder=placeholder, width="100%",),
