@@ -211,7 +211,7 @@ def eventos_cerrados_dashboard_view() -> rx.Component:
                     rx.grid(
                         _grafica_evolucion(S.evol_opcion),
                         panel_ranking(S.hay_ranking, S.ranking),
-                        columns={"base": "1", "lg": "60% 1fr"},
+                        columns={"base": "1", "md": "60% 1fr"},
                         spacing="3",
                         width="100%",
                     ),
@@ -246,6 +246,6 @@ def eventos_cerrados_dashboard_view() -> rx.Component:
             ),
         ),
         spacing="4",
-        width=rx.breakpoints(sm="95%", md="80%"),
+        width=rx.breakpoints(sm="95%", md="90%"),
         padding="1.5em",
     )

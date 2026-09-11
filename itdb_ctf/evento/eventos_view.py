@@ -231,6 +231,6 @@ def eventos_view() -> rx.Component:
         form_editar_evento_view(),
         align="center",
         direction="column",
-        width=rx.breakpoints(sm="95%", md="80%"),
+        width=rx.breakpoints(sm="95%", md="90%"),
         spacing="4",
     )

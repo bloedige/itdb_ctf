@@ -21,7 +21,6 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
 
     candidatos: list[dict] = []
     carrito: list[dict] = []
-    prev_retos: list[dict] = []
     id_evento_dest: str = ""
 
     id_dialog: int = 0
@@ -63,7 +62,7 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
     @rx.event
     def set_id_evento_dest(self, v: str):
         self.id_evento_dest = v
-        return [AsociarRetoState.cargar_candidatos, AsociarRetoState.cargar_destino]
+        return AsociarRetoState.cargar_candidatos
 
     @rx.event
     def set_id_modo_puntaje(self, v: str):
@@ -110,7 +109,6 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
         self.id_evento_dest = ""
         self.candidatos = []
         self.carrito = []
-        self.prev_retos = []
         self.modo_def = 0
         self.inicial_def = 0
         self.minimo_def = 0
@@ -129,15 +127,8 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
         dif = int(self.id_dificultad_filtro) if self.id_dificultad_filtro else None
         self.candidatos = asociar.retos_asociables(dest, self.busqueda, cat, dif, mod, self.aislados_bool)
 
-    def cargar_destino(self):
-        if self.id_evento_dest:
-            self.prev_retos = asociar.prev_retos(int(self.id_evento_dest))
-        else:
-            self.prev_retos = []
-        self.cargar_candidatos()
-
     def _refrescar_vivo(self):
-        self.cargar_destino()
+        self.cargar_candidatos()
 
     @rx.event(background=True)
     async def escuchar_asociar(self):
@@ -243,7 +234,6 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
             except ValueError as e:
                 fallos.append(f"{item['titulo']} : {e}")
         self.carrito = []
-        self.cargar_destino()
         self.cargar_candidatos()
         return rx.toast.success(f"{exitos} reto(s) asociado(s)" + (f" Fallaron: {' '.join(fallos)}" if fallos else ""))
 

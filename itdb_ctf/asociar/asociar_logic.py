@@ -255,27 +255,6 @@ def retos_asociables(id_evento_dest:int, busqueda:str | None=None, id_categoria:
             })
         return resultado
 
-def prev_retos(id_evento:int):
-    with Session(engine) as s:
-            stmt = (select(Reto, Contiene, Categoria.etiqueta, Dificultad.etiqueta, ModoPuntaje.etiqueta)
-                          .join(Contiene, Reto.id_reto == Contiene.id_reto)
-                          .join(Categoria, Reto.id_categoria == Categoria.id_categoria)
-                          .join(Dificultad, Reto.id_dificultad == Dificultad.id_dificultad)
-                          .join(ModoPuntaje, Reto.id_modo_puntaje == ModoPuntaje.id_modo_puntaje)
-                          .order_by(Categoria.id_categoria)
-                          .where(Contiene.id_evento == id_evento))
-            return[
-                {
-                "titulo":r.titulo, 
-                "categoria":cat,
-                "dificultad":dif,
-                "modo":mod,
-                "puntaje_inicial":c.puntaje_inicial,
-                "puntaje_minimo":c.puntaje_minimo, 
-                }
-                for r, c, cat, dif, mod in s.exec(stmt).all()
-            ]
-     
 def obtener_contiene(id_contiene:int):
     with Session(engine) as s:
         c = s.get(Contiene,id_contiene)

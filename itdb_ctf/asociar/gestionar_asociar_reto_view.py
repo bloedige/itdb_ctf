@@ -175,5 +175,5 @@ def gestionar_asociar_reto_view() -> rx.Component:
         filtros(),
         contenido(),
         spacing="4",
-        width=rx.breakpoints(sm="95%", md="80%"),
+        width=rx.breakpoints(sm="95%", md="90%"),
     )

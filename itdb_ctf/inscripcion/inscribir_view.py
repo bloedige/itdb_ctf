@@ -295,7 +295,7 @@ def card_csv() -> rx.Component:
         width="100%",
         position="sticky",
         top="0",
-        z_index="99",
+        z_index="95",
     )             
 
 def inscribir_view() -> rx.Component:
@@ -318,7 +318,7 @@ def inscribir_view() -> rx.Component:
                 spacing="4",
                 width="100%",
             ),
-            width="80%",
+            width="90%",
         ),
         rx.mobile_only(
             rx.grid(

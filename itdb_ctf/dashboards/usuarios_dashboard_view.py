@@ -127,6 +127,6 @@ def usuarios_dashboard_view() -> rx.Component:
             width="100%",
         ),
         spacing="4",
-        width=rx.breakpoints(sm="95%", md="80%"),
+        width=rx.breakpoints(sm="95%", md="90%"),
         padding="1.5em",
     )

@@ -172,7 +172,13 @@ def card_carrito() -> rx.Component:
             rx.divider(),
             rx.cond(
                 AsociarRetoState.carrito != [],
-                rx.foreach(AsociarRetoState.carrito, item_carrito),
+                rx.vstack(
+                    rx.foreach(AsociarRetoState.carrito, item_carrito),
+                    spacing="1",
+                    overflow_y="auto",
+                    max_height="40vh",
+                    width="100%",
+                ),
                 rx.spacer(),
             ),
             select_catalog("Evento destino", "Seleccionar...", AsociarRetoState.eventos_dest, AsociarRetoState.set_id_evento_dest),
@@ -183,55 +189,10 @@ def card_carrito() -> rx.Component:
                 width="100%",
                 spacing="2",
             ),
+            width="100%",
         ),
         width="100%",
         spacing="3",
-    )
-
-
-def retos_evento_destino(reto: dict) -> rx.Component:
-    return rx.box(
-        rx.grid(
-            rx.text(reto['titulo'], size="1", weight="light"),
-            rx.text(reto['categoria'], size="1", weight="light"),
-            rx.text(reto['dificultad'], size="1", weight="light"),
-            rx.text(
-                rx.cond(
-                    reto['puntaje_minimo'],
-                    f"{reto['puntaje_inicial']}.pts {reto['puntaje_minimo']}.pts",
-                    f"{reto['puntaje_inicial']}.pts ---",
-                ),
-                size="1", weight="light", align="center",
-            ),
-            rx.text(reto['modo'], size="1", weight="light"),
-            place_items="center",
-            columns="5",
-            width="100%",
-            padding=".4em",
-        ),
-        border_bottom="1px solid gray",
-        padding=".4em",
-        width="100%",
-    )
-
-
-def card_retos_evento_destino() -> rx.Component:
-    return rx.card(
-        rx.text("Retos de evento", size="3", weight="medium"),
-        rx.grid(
-            rx.text("Titulo", size="1", weight="medium"),
-            rx.text("Categoria", size="1", weight="medium"),
-            rx.text("Dificultad", size="1", weight="medium"),
-            rx.text("Puntaje", size="1", weight="medium"),
-            rx.text("Modo", size="1", weight="medium"),
-            padding=".4em",
-            place_items="center",
-            columns="5",
-            width="100%",
-            spacing="2",
-        ),
-        rx.foreach(AsociarRetoState.prev_retos, retos_evento_destino),
-        width="100%",
     )
 
 
@@ -239,16 +200,38 @@ def filtros() -> rx.Component:
     return rx.card(
         rx.vstack(
             rx.heading("Asociar retos en eventos", size="4"),
-            rx.grid(
-                input_box("Buscar por titulo", "Titutlo...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
-                select_catalog("Categorias", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
-                select_catalog("Dificultad", "Seleccionar...", AsociarRetoState.dificultades, AsociarRetoState.set_id_dificultad_filtro),
-                select_catalog("Modo puntaje", "Seleccionar...", AsociarRetoState.modos, AsociarRetoState.set_id_modo_filtro),
-                checked("Aislados", AsociarRetoState.aislados_bool, AsociarRetoState.set_aislados_bool),   
-                place_items="center",
-                grid_template_columns="30% 1fr 1fr 1fr 1fr",
-                columns={"base": "1", "md": "5"},
-                spacing="2",
+            rx.tablet_and_desktop(
+                rx.grid(
+                    input_box("Buscar por titulo", "Titutlo...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
+                    select_catalog("Categorias", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
+                    select_catalog("Dificultad", "Seleccionar...", AsociarRetoState.dificultades, AsociarRetoState.set_id_dificultad_filtro),
+                    select_catalog("Modo puntaje", "Seleccionar...", AsociarRetoState.modos, AsociarRetoState.set_id_modo_filtro),
+                    checked("Aislados", AsociarRetoState.aislados_bool, AsociarRetoState.set_aislados_bool),   
+                    place_items="center",
+                    grid_template_columns="30% 1fr 1fr 1fr 1fr",
+                    spacing="2",
+                    width="100%",
+                ),
+                width="100%",
+            ),
+            rx.mobile_only(
+                rx.grid(
+                    input_box("Buscar por titulo", "Titutlo...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
+
+                    rx.grid(
+                    select_catalog("Categorias", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
+                    select_catalog("Dificultad", "Seleccionar...", AsociarRetoState.dificultades, AsociarRetoState.set_id_dificultad_filtro),
+                    select_catalog("Modo puntaje", "Seleccionar...", AsociarRetoState.modos, AsociarRetoState.set_id_modo_filtro),
+                    checked("Aislados", AsociarRetoState.aislados_bool, AsociarRetoState.set_aislados_bool),   
+                    place_items="center",
+                    grid_template_columns="1fr 1fr",
+                    width="100%",
+                    spacing="2",
+                    ),
+                    place_items="center",
+                    spacing="2",
+                    width="100%",
+                ),
                 width="100%",
             ),
             spacing="4",
@@ -267,6 +250,7 @@ def contenido() -> rx.Component:
                 rx.text("seleccione evento de destino", color_scheme="gray", size="2"),
             ),
             spacing="3",
+            width="100%",
         ),
         width="100%",
     )
@@ -274,19 +258,10 @@ def contenido() -> rx.Component:
 
 def asociar_reto_view() -> rx.Component:
     return rx.grid(
-        rx.vstack(
-            filtros(),
-            contenido(),
-            spacing="5",
-            width="100%",
-        ),
-        rx.vstack(
-            card_carrito(),
-            card_retos_evento_destino(),
-            spacing="5",
-            width="100%",
-        ),
+        filtros(),
+        contenido(),
+        card_carrito(),
         grid_template_columns=rx.breakpoints(initial="1fr", md="75% 1fr"),
-        width=rx.breakpoints(sm="95%", md="80%"),
+        width=rx.breakpoints(sm="95%", md="90%"),
         spacing="4",
     )
