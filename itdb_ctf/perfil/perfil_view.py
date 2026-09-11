@@ -25,8 +25,8 @@ def _card(titulo, contenido) -> rx.Component:
 def card_identidad(E) -> rx.Component:
     d = E.datos
     return rx.card(
-        rx.vstack(
-            rx.hstack(
+        rx.hstack(
+            rx.grid(
                 rx.avatar(src=d["avatar"], fallback=d["iniciales"], size="5"),
                 rx.vstack(
                     rx.heading(d["alias"], size="4"),
@@ -35,32 +35,50 @@ def card_identidad(E) -> rx.Component:
                     align="start",
                 ),
                 spacing="3",
-                align="center",
-                width="100%",
+                align_items="center",
+                justify_items="center",
+                grid_template_columns="1fr 1fr",
             ),
-            rx.divider(),
-            rx.hstack(
-                rx.vstack(
-                    rx.text("Puntaje", size="1", color_scheme="gray"),
-                    rx.heading(d["puntaje"], size="6"),
-                    spacing="0", align="center",
+            rx.vstack(
+                rx.hstack(
+                    rx.vstack(
+                        rx.text("Puntaje", size="1", color_scheme="gray"),
+                        rx.heading(d["puntaje"], size="4"),
+                        spacing="0", align="center",
+                    ),
+                    rx.vstack(
+                        rx.text(f"Posición de {d['total']}", size="1", color_scheme="gray"),
+                        rx.heading(f"#{d['posicion']}", size="4"),
+                        spacing="0", align="center",
+                    ),
+                    rx.vstack(
+                        rx.text("Resueltos", size="1", color_scheme="gray"),
+                        rx.heading(d["resueltos"], size="4"),
+                        spacing="0", align="center",
+                    ),
+                    justify="between",
                 ),
                 rx.vstack(
-                    rx.text("Posición", size="1", color_scheme="gray"),
-                    rx.heading(f"#{d['posicion']}", size="6"),
-                    rx.text(f"de {d['total']}", size="1", color_scheme="gray"),
-                    spacing="0", align="center",
-                ),
-                rx.vstack(
-                    rx.text("Resueltos", size="1", color_scheme="gray"),
-                    rx.heading(d["resueltos"], size="6"),
-                    spacing="0", align="center",
+                    rx.hstack(
+                        rx.text("Progreso", size="2", weight="medium", color_scheme="gray"),
+                        rx.spacer(),
+                        rx.text(
+                            f"{d['resueltos']} / {d['retos_total']} retos · {d['pct_progreso']}%",
+                            size="2", weight="medium",
+                        ),
+                        width="100%",
+                    ),
+                    rx.progress(value=d["pct_progreso"], width="100%"),
+                    spacing="2",
+                    width="100%",
                 ),
                 justify="between",
                 width="100%",
             ),
             spacing="3",
             width="100%",
+            justify="center",
+            align="center",
         ),
         width="100%",
         style={"--card-padding": "0.75em"},
@@ -222,14 +240,18 @@ def perfil_contenido(E, titulo: str = "Mi perfil", vacio: str = "No participás 
             E.hay_datos,
             rx.grid(
                 rx.vstack(
-                    panel_progreso(E),
+                    rx.hstack(
+                    card_identidad(E),
+                    #panel_progreso(E),
+                    width="100%",
+                    
+                    ),
                     evolucion_view(E),
                     tabla_resueltos(E),
                     spacing="4",
                     width="100%",
                 ),
                 rx.vstack(
-                    card_identidad(E),
                     allocation_view(E),
                     puntos_view(E),
                     aciertos_view(E),

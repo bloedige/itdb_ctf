@@ -15,6 +15,7 @@ from itdb_ctf.evento_cerrado.evento_cerrado_reto_state import EventoCerradoRetoS
 from itdb_ctf.perfil.perfil_state import PerfilGeneralState, PerfilEventoCerradoState
 from itdb_ctf.perfil.gestion_state import PerfilGestionState
 from itdb_ctf.evento_cerrado.evento_cerrado_acceso_state import EventoCerradoAccesoState
+from itdb_ctf.components.nav_state import NavState
 
 #states staff
 
@@ -66,9 +67,9 @@ app.add_page(eventos_page, route="/eventos", on_load=AutoInscripcionState.cargar
 app.add_page(perfil_page, route="/perfil", on_load=PerfilGeneralState.cargar_perfil)
 
 app.add_page(evento_cerrado_informacion_page, route="/evento/[id_evento_cerrado]/informacion", on_load=[EventoCerradoInfromacionState.cargar_info, EventoCerradoAccesoState.verificar])
-app.add_page(evento_cerrado_reto_page, route="/evento/[id_evento_cerrado]/retos", on_load=[EventoCerradoRetoState.cargar_retos, EventoCerradoAccesoState.verificar])
-app.add_page(evento_cerrado_scoreboard_page, route="/evento/[id_evento_cerrado]/scoreboard", on_load=[ScoreboardState.cargar_ranking, EventoCerradoAccesoState.verificar])
-app.add_page(evento_cerrado_perfil_page, route="/evento/[id_evento_cerrado]/perfil", on_load=[PerfilEventoCerradoState.cargar_perfil, EventoCerradoAccesoState.verificar])
+app.add_page(evento_cerrado_reto_page, route="/evento/[id_evento_cerrado]/retos", on_load=[EventoCerradoInfromacionState.cargar_info, EventoCerradoRetoState.cargar_retos, EventoCerradoAccesoState.verificar])
+app.add_page(evento_cerrado_scoreboard_page, route="/evento/[id_evento_cerrado]/scoreboard", on_load=[EventoCerradoInfromacionState.cargar_info, ScoreboardState.cargar_ranking, EventoCerradoAccesoState.verificar])
+app.add_page(evento_cerrado_perfil_page, route="/evento/[id_evento_cerrado]/perfil", on_load=[EventoCerradoInfromacionState.cargar_info, PerfilEventoCerradoState.cargar_perfil, EventoCerradoAccesoState.verificar])
 
 app.add_page(admin_eventos_page, route="/admin/eventos", on_load=[CreaEventoState.cargar_catalogos, ListarEventoState.cargar_lista])
 app.add_page(admin_retos_page, route="/admin/retos", on_load=[CrearRetosState.cargar_catalogos, ListarRetosState.cargar_lista])

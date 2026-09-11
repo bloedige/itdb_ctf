@@ -10,7 +10,7 @@ def admin_asociar_gestionar_page() -> rx.Component:
         spacing="5",
         justify_items="center",
         width="100%",
-        grid_template_columns="12% 1fr",
+        grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),
         on_mount=GestionarRetoState.escuchar_gestionar,
         on_unmount=GestionarRetoState.parar_gestionar,
     )

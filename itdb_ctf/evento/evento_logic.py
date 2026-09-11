@@ -5,13 +5,16 @@ from itdb_ctf.asociar.asociar_logic import estado_evento
 from itdb_ctf.websockets.freeze_logic import esta_congelado
 from itdb_ctf.websockets import canales
     
-def validar_evento(id_modadlidad, fec_inicio, fec_fin, id_evento=None):
+def validar_evento(id_modadlidad, id_modo_puntaje, fec_inicio, fec_fin, id_evento=None):
     etiqueta = etiqueta_modalidad(id_modadlidad) 
+    mp = etiqueta_modo_puntaje(id_modo_puntaje)
     if etiqueta == "abierto":
         if existe_evento_abierto(id_evento):
             return "El evento abierto ya existe."
         if fec_inicio or fec_fin:
             return "El evento abierto no requiere fechas inicio / fin."
+        if mp == "dinamico":
+            return "El evento abierto debe ser de modo de puntaje estatico."
     elif etiqueta == "cerrado":
         if not (fec_inicio and fec_fin):
             return "EL evento cerrado requiere de fecha inicio y fin."
@@ -24,6 +27,11 @@ def etiqueta_modalidad(id_modalidad: int) -> str:
         modalidad = s.get(Modalidad, id_modalidad)
         return modalidad.etiqueta if modalidad else "" 
 
+def etiqueta_modo_puntaje(id_modo_puntaje: int) -> str:
+    with Session(engine) as s:
+        modo_puntaje = s.get(ModoPuntaje, id_modo_puntaje)
+        return modo_puntaje.etiqueta if modo_puntaje else "" 
+    
 def existe_evento_abierto(excluir_id=None) -> bool:
     with Session(engine) as s:
         abierto = s.exec(select(Modalidad).where(Modalidad.etiqueta == "abierto")).first()
@@ -37,7 +45,7 @@ def existe_evento_abierto(excluir_id=None) -> bool:
 def crear_evento(id_usuario,id_modalidad,id_modo_puntaje,titulo,descripcion=None,
                  fec_inicio=None,fec_fin=None,auto_inscripcion=False):
     
-    error = validar_evento(id_modalidad, fec_inicio, fec_fin)
+    error = validar_evento(id_modalidad,id_modo_puntaje, fec_inicio, fec_fin)
     if error:
         raise ValueError(error)
     with Session(engine)as s:

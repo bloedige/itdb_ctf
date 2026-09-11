@@ -14,7 +14,7 @@ def admin_eventos_page() -> rx.Component:
         ),
         spacing="5",
         width="100%",
-        grid_template_columns="12% 1fr",
+        grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),
         on_mount=ListarEventoState.escuchar_eventos_admin,
         on_unmount=ListarEventoState.parar_eventos_admin,
     )

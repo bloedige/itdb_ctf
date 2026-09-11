@@ -316,6 +316,7 @@ def editar_contiene(id_contiene:int, id_modo_puntaje:int, inicial:int, minimo:in
 
         c.id_modo_puntaje = id_modo_puntaje
         c.puntaje_inicial = inicial
+        c.puntaje_actual = inicial
         c.puntaje_minimo = minimo if dinamico else None
         s.add(c)
         s.commit()
