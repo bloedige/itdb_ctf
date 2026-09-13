@@ -13,5 +13,5 @@ def retos_dashboard_page() -> rx.Component:
             justify="center",
         ),
         width="100%",
-        grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),
+        grid_template_columns=rx.breakpoints(initial="1fr", md="12% 1fr"),
     )

@@ -195,7 +195,6 @@ def card_carrito() -> rx.Component:
         spacing="3",
     )
 
-
 def filtros() -> rx.Component:
     return rx.card(
         rx.vstack(
@@ -217,7 +216,6 @@ def filtros() -> rx.Component:
             rx.mobile_only(
                 rx.grid(
                     input_box("Buscar por titulo", "Titutlo...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
-
                     rx.grid(
                     select_catalog("Categorias", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
                     select_catalog("Dificultad", "Seleccionar...", AsociarRetoState.dificultades, AsociarRetoState.set_id_dificultad_filtro),
@@ -258,10 +256,31 @@ def contenido() -> rx.Component:
 
 def asociar_reto_view() -> rx.Component:
     return rx.grid(
-        filtros(),
-        contenido(),
-        card_carrito(),
-        grid_template_columns=rx.breakpoints(initial="1fr", md="75% 1fr"),
-        width=rx.breakpoints(sm="95%", md="90%"),
-        spacing="4",
+        rx.tablet_and_desktop(
+            rx.grid(
+                rx.vstack(
+                    filtros(),
+                    contenido(),
+                    spacing="4",
+                    width="100%",
+                ),
+                card_carrito(),
+                grid_template_columns="75% 1fr",
+                spacing="4",
+                width="100%",
+            ),
+            width="90%",
+        ),
+        rx.mobile_only(
+            rx.grid(
+                filtros(),
+                contenido(),
+                card_carrito(),
+                width="100%",
+                spacing="3",
+            ),
+            width="95%",
+        ),
+        justify_items="center",
+        width="100%",
     )

@@ -125,7 +125,7 @@ def button(legend, color, actions, disabled=None, size=None) -> rx.Component:
         legend,
         color_scheme=color,
         on_click=actions,
-        variant="surface",
+        variant="solid",
         disabled=disabled, 
         size=size,                      
     )

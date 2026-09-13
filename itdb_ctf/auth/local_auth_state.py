@@ -2,6 +2,7 @@ import reflex as rx
 from itdb_ctf.auth.local_auth import verificar_credenciales
 from itdb_ctf.auth.jwt_utils import emitir_jwt
 from itdb_ctf.auth.auth_state import AuthState
+from itdb_ctf.components.nav_state import NavState
 from itdb_ctf.core.rate_limit import login_bloqueado, registrar_fallo_login, limpiar_login
 from itdb_ctf.utils.validaciones import formato_email_valido
 
@@ -28,7 +29,7 @@ class LocalAuthState(AuthState):
         self.token = emitir_jwt(usuario)
         match self.codigo_rol:
             case "autor":
-                return rx.redirect("/admin/dashboard/retos")
+                return [NavState.cerrar_menu, rx.redirect("/admin/dashboard/retos")]
             case "user":
-                return rx.redirect("/informacion")
-        return rx.redirect("/admin/dashboard")
+                return [NavState.cerrar_menu, rx.redirect("/informacion")]
+        return [NavState.cerrar_menu, rx.redirect("/admin/dashboard")]

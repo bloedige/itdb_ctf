@@ -17,9 +17,17 @@ BORDE     = "rgba(250,184,8,.22)"
 LINEA     = "rgba(255,255,255,.10)"
 PELIGRO   = "#ff6b6b"
 
-# breakpoints: [base, sm, md, lg, xl] — los links se ven desde `md`
-_VER_LINKS = ["none", "none", "flex", "flex", "flex"]
-_VER_MOVIL = ["flex", "flex", "none", "none", "none"]
+# `rx.mobile_only`/`rx.tablet_and_desktop` cambian en el breakpoint "sm" fijo
+# de Reflex (~30em/480px), que no coincide con el `md` de Radix (1024px) que
+# usa `grid_template_columns=rx.breakpoints(initial=..., md=...)` en las
+# páginas — de ahí el sidebar ocupando toda la pantalla en el rango entre
+# medio. Estos dos hacen lo mismo pero alineados al mismo breakpoint `md`.
+def _solo_movil(*children, **props) -> rx.Component:
+    return rx.box(*children, **props, display=rx.breakpoints(initial="block", md="none"))
+
+
+def _solo_tablet_desktop(*children, **props) -> rx.Component:
+    return rx.box(*children, **props, display=rx.breakpoints(initial="none", md="block"))
 
 
 def _path():
@@ -153,17 +161,19 @@ def _perfil_menu() -> rx.Component:
     )
 
 
-def _hamburguesa(accion=None) -> rx.Component:
-    return rx.center(
-        rx.cond(NavState.menu_movil, rx.icon("x", size=20), rx.icon("menu", size=20)),
-        on_click=accion if accion is not None else NavState.toggle_menu,
-        display=_VER_MOVIL,
-        width="38px",
-        height="38px",
-        border="1px solid rgba(255,255,255,.16)",
-        border_radius="8px",
-        color=rx.cond(NavState.menu_movil, ORO, "white"),
-        cursor="pointer",
+def _hamburguesa(accion=None, staff: bool = False) -> rx.Component:
+    envolver = _solo_movil if staff else rx.mobile_only
+    return envolver(
+        rx.center(
+            rx.cond(NavState.menu_movil, rx.icon("x", size=20), rx.icon("menu", size=20)),
+            on_click=accion if accion is not None else NavState.toggle_menu,
+            width="38px",
+            height="38px",
+            border="1px solid rgba(255,255,255,.16)",
+            border_radius="8px",
+            color=rx.cond(NavState.menu_movil, ORO, "white"),
+            cursor="pointer",
+        ),
     )
 
 
@@ -200,53 +210,55 @@ def _accion_perfil(icono: str, texto: str, accion, color: str = NAV_INK) -> rx.C
     )
 
 
-def _drawer(cuerpo) -> rx.Component:
+def _drawer(cuerpo, staff: bool = False) -> rx.Component:
     """Panel deslizante para móvil. `cuerpo` es una lista de componentes."""
-    return rx.box(
-        rx.box(  # fondo oscuro
-            on_click=NavState.cerrar_menu,
-            position="fixed",
-            inset="0",
-            background="rgba(1,8,26,.55)",
-            opacity=rx.cond(NavState.menu_movil, "1", "0"),
-            pointer_events=rx.cond(NavState.menu_movil, "auto", "none"),
-            transition="opacity .2s ease",
-            z_index="200",
-        ),
-        rx.vstack(
-            rx.hstack(
-                rx.spacer(),
-                rx.center(
-                    rx.icon("x", size=20),
-                    on_click=NavState.cerrar_menu,
-                    width="36px",
-                    height="36px",
-                    border_radius="8px",
-                    color="white",
-                    cursor="pointer",
-                    _hover={"background": "rgba(255,255,255,.06)"},
-                ),
-                width="100%",
-                align="center",
-                margin_bottom="0.25em",
+    envolver = _solo_movil if staff else rx.mobile_only
+    return envolver(
+        rx.box(
+            rx.box(  # fondo oscuro
+                on_click=NavState.cerrar_menu,
+                position="fixed",
+                inset="0",
+                background="rgba(1,8,26,.55)",
+                opacity=rx.cond(NavState.menu_movil, "1", "0"),
+                pointer_events=rx.cond(NavState.menu_movil, "auto", "none"),
+                transition="opacity .2s ease",
+                z_index="200",
             ),
-            *cuerpo,
-            position="fixed",
-            top="0",
-            bottom="0",
-            right="0",
-            width="60vw",
-            background=AZUL_2,
-            border_left=f"1px solid {BORDE}",
-            padding="1em",
-            spacing="1",
-            align="stretch",
-            overflow_y="auto",
-            transform=rx.cond(NavState.menu_movil, "translateX(0)", "translateX(100%)"),
-            transition="transform .22s ease",
-            z_index="201",
+            rx.vstack(
+                rx.hstack(
+                    rx.spacer(),
+                    rx.center(
+                        rx.icon("x", size=20),
+                        on_click=NavState.cerrar_menu,
+                        width="36px",
+                        height="36px",
+                        border_radius="8px",
+                        color="white",
+                        cursor="pointer",
+                        _hover={"background": "rgba(255,255,255,.06)"},
+                    ),
+                    width="100%",
+                    align="center",
+                    margin_bottom="0.25em",
+                ),
+                *cuerpo,
+                position="fixed",
+                top="0",
+                bottom="0",
+                right="0",
+                width="60vw",
+                background=AZUL_2,
+                border_left=f"1px solid {BORDE}",
+                padding="1em",
+                spacing="1",
+                align="stretch",
+                overflow_y="auto",
+                transform=rx.cond(NavState.menu_movil, "translateX(0)", "translateX(100%)"),
+                transition="transform .22s ease",
+                z_index="201",
+            ),
         ),
-        display=_VER_MOVIL,
     )
 
 
@@ -285,16 +297,18 @@ def navbar() -> rx.Component:
         rx.hstack(
             logo(),
             rx.spacer(),
-            rx.hstack(
-                *[_nav_link(t, u) for t, u, _ in _LINKS_ABIERTO],
-                spacing="5",
-                align="center",
-                display=_VER_LINKS,
+            rx.tablet_and_desktop(
+                rx.hstack(
+                    *[_nav_link(t, u) for t, u, _ in _LINKS_ABIERTO],
+                    spacing="5",
+                    align="center",
+                ),
             ),
-            rx.box(
-                rx.cond(AuthState.autenticado, _perfil_menu()),
-                display=_VER_LINKS,
-                margin_left="1.5em",
+            rx.tablet_and_desktop(
+                rx.box(
+                    rx.cond(AuthState.autenticado, _perfil_menu()),
+                    margin_left="1.5em",
+                ),
             ),
             _hamburguesa(),
             width="100%",
@@ -323,7 +337,7 @@ def navbar() -> rx.Component:
                         ),
                         _drawer_accion("Mi perfil", "user", [NavState.cerrar_menu, rx.redirect("/perfil")]),
                         _drawer_accion("Editar perfil", "pencil", [NavState.cerrar_menu, PerfilGestionState.abrir]),
-                        _drawer_accion("Cerrar sesión", "log_out", AuthState.logout, PELIGRO),
+                        _drawer_accion("Cerrar sesión", "log_out", [NavState.cerrar_menu, AuthState.logout], PELIGRO),
                         width="100%",
                         spacing="1",
                         align="stretch",
@@ -374,30 +388,34 @@ def navbar_cerrado(id_evento) -> rx.Component:
             logo(),
             rx.cond(
                 titulo != "",
-                rx.hstack(
-                    rx.text(f"{titulo}", size="2", color=NAV_INK_2, white_space="nowrap"),
-                    _badge_estado(EventoCerradoInfromacionState.estado_evento),
-                    align="center",
-                    spacing="2",
-                    padding_left="1em",
-                    border_left=f"1px solid {LINEA}",
-                    display=_VER_LINKS,
+                rx.tablet_and_desktop(
+                    rx.hstack(
+                        rx.text(f"{titulo}", size="2", color=NAV_INK_2, white_space="nowrap"),
+                        _badge_estado(EventoCerradoInfromacionState.estado_evento),
+                        align="center",
+                        spacing="2",
+                        padding_left="1em",
+                        border_left=f"1px solid {LINEA}",
+                    ),
                 ),
             ),
             rx.spacer(),
-            rx.hstack(
-                *[_nav_link(t, u) for t, u, _ in links],
-                spacing="5",
-                align="center",
-                display=_VER_LINKS,
+            rx.tablet_and_desktop(
+                rx.hstack(
+                    *[_nav_link(t, u) for t, u, _ in links],
+                    spacing="5",
+                    align="center",
+                ),
             ),
-            rx.box(
-                volver,
-                _avatar(NavState.perfil_min["iniciales"]),
-                display=_VER_LINKS,
-                margin_left="1.5em",
-                align_items="center",
-                gap="0.8em",
+            rx.tablet_and_desktop(
+                rx.box(
+                    volver,
+                    _avatar(NavState.perfil_min["iniciales"]),
+                    display="flex",
+                    margin_left="1.5em",
+                    align_items="center",
+                    gap="0.8em",
+                ),
             ),
             _hamburguesa(),
             width="100%",
@@ -526,7 +544,7 @@ def _tarjeta_perfil_staff() -> rx.Component:
             AuthState.codigo_rol == "autor",
             _accion_perfil("pencil", "Editar perfil", [NavState.cerrar_menu, PerfilGestionState.abrir]),
         ),
-        _accion_perfil("log_out", "Cerrar sesión", AuthState.logout, PELIGRO),
+        _accion_perfil("log_out", "Cerrar sesión", [NavState.cerrar_menu, AuthState.logout], PELIGRO),
         spacing="1",
         align="stretch",
         width="100%",
@@ -536,58 +554,62 @@ def _tarjeta_perfil_staff() -> rx.Component:
 def navbar_staff() -> rx.Component:
     return rx.box(
         # --- sidebar (escritorio) ---
-        rx.vstack(
-            rx.box(
-                logo(),
-                padding="0.9rem 1rem",
-                border_bottom=f"1px solid {LINEA}",
-                width="100%",
-            ),
+        _solo_tablet_desktop(
             rx.vstack(
-                *_secciones_por_rol(),
-                align="stretch",
+                rx.box(
+                    logo(),
+                    padding="0.9rem 1rem",
+                    border_bottom=f"1px solid {LINEA}",
+                    width="100%",
+                ),
+                rx.vstack(
+                    *_secciones_por_rol(),
+                    align="stretch",
+                    width="100%",
+                    flex="1",
+                    min_height="0",
+                    overflow_y="auto",
+                    padding="0.75rem 0.6rem",
+                ),
+                rx.box(
+                    _tarjeta_perfil_staff(),
+                    padding="0.9rem",
+                    border_top=f"1px solid {LINEA}",
+                    width="100%",
+                    flex_shrink="0",
+                ),
                 width="100%",
-                flex="1",
-                min_height="0",
-                overflow_y="auto",
-                padding="0.75rem 0.6rem",
+                height="100%",
+                spacing="0",
+                background=AZUL,
+                border_right=f"1px solid {BORDE}",
             ),
-            rx.box(
-                _tarjeta_perfil_staff(),
-                padding="0.9rem",
-                border_top=f"1px solid {LINEA}",
-                width="100%",
-                flex_shrink="0",
-            ),
-            display=["none", "none", "flex", "flex", "flex"],
-            width="100%",
             height="100%",
-            spacing="0",
-            background=AZUL,
-            border_right=f"1px solid {BORDE}",
         ),
         # --- barra superior (móvil) ---
-        rx.hstack(
-            logo(),
-            rx.spacer(),
-            _hamburguesa(),
-            display=_VER_MOVIL,
-            position="sticky",
-            top="0",
-            z_index="100",
-            width="100%",
-            padding="0.55rem 0.8rem",
-            background=AZUL,
-            border_bottom=f"1px solid {BORDE}",
-            align="center",
-            spacing="2",
+        _solo_movil(
+            rx.hstack(
+                logo(),
+                rx.spacer(),
+                _hamburguesa(staff=True),
+                position="sticky",
+                top="0",
+                z_index="100",
+                width="100%",
+                padding="0.55rem 0.8rem",
+                background=AZUL,
+                border_bottom=f"1px solid {BORDE}",
+                align="center",
+                spacing="2",
+            ),
         ),
         _drawer(
             [
                 *_secciones_por_rol(),
                 rx.divider(margin_block="0.5em"),
                 _tarjeta_perfil_staff(),
-            ]
+            ],
+            staff=True,
         ),
         dialogo_perfil(),
         width="100%",
@@ -595,10 +617,15 @@ def navbar_staff() -> rx.Component:
         # bloque contenedor es el grid de la página —tan alto como el contenido—,
         # así hay recorrido para fijarse. `align_self=start` impide que el grid la
         # estire a esa altura; `height=100vh` la topa a una pantalla. En móvil
-        # vuelve a fluir (la barra superior se fija por su cuenta).
+        # vuelve a fluir (la barra superior se fija por su cuenta). Mismo
+        # breakpoint `md` que usa `rx.tablet_and_desktop`/`grid_template_columns`
+        # de las páginas — antes usaba el breakpoint "md" de Chakra (768px) acá
+        # y el "md" de Radix (1024px) en la grilla de la página, así que entre
+        # medio el sidebar se mostraba dentro de una sola columna y ocupaba casi
+        # toda la pantalla.
         align_self="start",
-        height=["auto", "auto", "100vh", "100vh", "100vh"],
-        position=["static", "static", "sticky", "sticky", "sticky"],
+        height=rx.breakpoints(initial="auto", md="100vh"),
+        position=rx.breakpoints(initial="static", md="sticky"),
         top="0",
         z_index="100",
     )

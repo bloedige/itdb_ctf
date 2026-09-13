@@ -7,7 +7,7 @@ from itdb_ctf.asociar.asociar_logic import estado_evento
 from itdb_ctf.websockets import canales
 from itdb_ctf.core.rate_limit import permitir_flag
 
-def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, dir_ip:str |None=None ) -> tuple[bool,str]:
+def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str) -> tuple[bool,str]:
     ok, faltan = permitir_flag(id_usuario, id_reto)
     if not ok:
         return False, f"Demasiados intentos. Esperá {faltan} s."
@@ -50,7 +50,6 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str, di
             id_evento=id_evento,
             id_reto=id_reto,
             flag_correcta=correcta,
-            dir_ip=dir_ip,
         )) 
         if correcta:
             s.flush()

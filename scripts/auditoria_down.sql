@@ -1,0 +1,16 @@
+BEGIN;
+DROP TRIGGER IF EXISTS tg_auditoria_rol ON rol;
+DROP TRIGGER IF EXISTS tg_auditoria_categoria ON categoria;
+DROP TRIGGER IF EXISTS tg_auditoria_dificultad ON dificultad;
+DROP TRIGGER IF EXISTS tg_auditoria_modo_puntaje ON modo_puntaje;
+DROP TRIGGER IF EXISTS tg_auditoria_modalidad ON modalidad;
+DROP TRIGGER IF EXISTS tg_auditoria_estado_inscripcion ON estado_inscripcion;
+DROP TRIGGER IF EXISTS tg_auditoria_metodo_auth ON metodo_auth;
+DROP TRIGGER IF EXISTS tg_auditoria_usuario ON usuario;
+DROP TRIGGER IF EXISTS tg_auditoria_evento ON evento;
+DROP TRIGGER IF EXISTS tg_auditoria_reto ON reto;
+DROP TRIGGER IF EXISTS tg_auditoria_pista ON pista;
+DROP TRIGGER IF EXISTS tg_auditoria_participa ON participa;
+DROP TRIGGER IF EXISTS tg_auditoria_contiene ON contiene;
+DROP FUNCTION IF EXISTS fn_auditoria();
+COMMIT;

@@ -94,50 +94,50 @@ def alert_quitar(id_participa, nombre, email) -> rx.Component:
 def fila_participante(u: dict) -> rx.Component:
     return rx.card(
         rx.tablet_and_desktop(
-
-        rx.grid(
-            rx.text(u['alias'], size="2", weight="medium"),
-            rx.text(u['email_inst'], size="1", weight="regular"),
-            rx.text(u['fec_ingreso'], size="1", weight="regular"),
-            rx.cond(
-                u['descalificado'],
-                rx.badge("Descalificado", color_scheme="ruby", variant="surface"),
-                rx.badge("Inscrito", color_scheme="jade", variant="surface"),
-            ),
             rx.grid(
-                alert_descalificar(u['id_participa'], u['descalificado'], u['nombre'], u['email_inst']),
+                rx.text(u['alias'], size="2", weight="medium"),
+                rx.text(u['email_inst'], size="1", weight="regular"),
+                rx.text(u['fec_ingreso'], size="1", weight="regular"),
                 rx.cond(
-                    u['quitar'],
-                    alert_quitar(u['id_participa'], u['nombre'], u['email_inst']),
+                    u['descalificado'],
+                    rx.badge("Descalificado", color_scheme="ruby", variant="surface"),
+                    rx.badge("Inscrito", color_scheme="jade", variant="surface"),
                 ),
+                rx.grid(
+                    alert_descalificar(u['id_participa'], u['descalificado'], u['nombre'], u['email_inst']),
+                    rx.cond(
+                        u['quitar'],
+                        alert_quitar(u['id_participa'], u['nombre'], u['email_inst']),
+                    ),
+                    place_items="center",
+                    columns=rx.cond(u['quitar'], "2", ""),
+                    width="100%",
+                ),
+                columns="5",
                 place_items="center",
-                columns=rx.cond(u['quitar'], "2", ""),
+                spacing="2",
                 width="100%",
             ),
-            columns="5",
-            place_items="center",
-            spacing="2",
             width="100%",
-        ),
         ),
         rx.mobile_only(
-        rx.grid(
-            rx.text(u['alias'], size="2", weight="medium"),
             rx.grid(
-                alert_descalificar(u['id_participa'], u['descalificado'], u['nombre'], u['email_inst']),
-                rx.cond(
-                    u['quitar'],
-                    alert_quitar(u['id_participa'], u['nombre'], u['email_inst']),
+                rx.text(u['alias'], size="2", weight="medium"),
+                rx.grid(
+                    alert_descalificar(u['id_participa'], u['descalificado'], u['nombre'], u['email_inst']),
+                    rx.cond(
+                        u['quitar'],
+                        alert_quitar(u['id_participa'], u['nombre'], u['email_inst']),
+                    ),
+                    place_items="center",
+                    columns=rx.cond(u['quitar'], "2", ""),
+                    width="100%",
                 ),
-                place_items="center",
-                columns=rx.cond(u['quitar'], "2", ""),
+                grid_template_columns="1fr 30%",
+                spacing="2",
                 width="100%",
             ),
-            grid_template_columns="1fr 30%",
-            spacing="2",
             width="100%",
-        ),
-
         ),
         bg=rx.cond(u['descalificado'], "#A3292942", ""),
         width="100%",
@@ -185,6 +185,7 @@ def contenido() -> rx.Component:
                             place_items="center",
                             width="100%",
                         ),
+                        width="100%",
                     ),
                     rx.mobile_only(
                         rx.grid(
@@ -206,7 +207,7 @@ def contenido() -> rx.Component:
     )
 
 def gestionar_inscripcion_view() -> rx.Component:
-    return rx.grid(
+    return rx.vstack(
         filtros(),
         contenido(),
         spacing="4",

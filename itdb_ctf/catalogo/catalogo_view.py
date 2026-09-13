@@ -43,7 +43,7 @@ def filtros_view()->rx.Component:
     return rx.vstack(
         filtro_categoria_view(),
         filtro_dificultad_view(),
-        width="70%",
+        width="100%",
         spacing="5",
     )
 
@@ -56,7 +56,7 @@ def pista_trigger(pista:dict) -> rx.Component:
             width="100%",
         ),
         width="100%",
-        bg=rx.cond(pista['adquirido'], "#00FFC350", ""),
+        bg=rx.cond(pista['adquirido'], "#00FFC350", "#B3B3B350"),
     )
 
 def pista_content(pista:dict) -> rx.Component:

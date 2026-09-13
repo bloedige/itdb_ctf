@@ -5,7 +5,6 @@ from itdb_ctf.auth.local_auth_state import LocalAuthState
 
 def logos() -> rx.Component:
     return rx.flex(
-        
         rx.image(
             src="/itdb_logo.png",
             width="6em",    
@@ -85,7 +84,8 @@ def login_card() -> rx.Component:
                 separator("Acceso institucional"),
                 login_institucional(),
                 separator("Acceso local"),
-                login_local(), 
+                login_local(),
                 spacing="3",
-            )
+                width="100%",
+            ),
         )

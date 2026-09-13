@@ -71,7 +71,6 @@ def perfil_datos(id_usuario: int | None, id_evento: int | None) -> dict:
         nombre = f"{u.nombre} {u.paterno}".strip()
         iniciales = _iniciales(u.nombre, u.paterno)
         email = u.email_inst
-        avatar = u.avatar or ""
 
     rank = scoreboard(id_evento)
     total = len(rank)
@@ -87,7 +86,6 @@ def perfil_datos(id_usuario: int | None, id_evento: int | None) -> dict:
         "nombre": nombre,
         "iniciales": iniciales,
         "email": email,
-        "avatar": avatar,
         "puntaje": puntaje,
         "posicion": str(posicion) if posicion is not None else "—",
         "total": total,

@@ -30,7 +30,7 @@ def card_identidad(E, mostrar_email: bool = True) -> rx.Component:
     return rx.card(
         rx.flex(
             rx.flex(
-                rx.avatar(src=d["avatar"], fallback=d["iniciales"], size="4",),
+                rx.avatar(fallback=d["iniciales"], size="4",),
                 rx.vstack(
                     *identidad,
                     spacing="1",

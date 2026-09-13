@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, CHAR, Text, DateTime, func, Index, text
-from sqlalchemy.dialects.postgresql import INET
+from sqlalchemy import Column, CHAR, Text, DateTime, func, Index, text, BigInteger
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 
 ###          CATALOGOS
 
@@ -18,33 +18,31 @@ class Categoria(SQLModel, table=True):
     __tablename__ = "categoria"
     id_categoria: Optional[int] = Field(default=None, primary_key=True)
     etiqueta: str = Field(max_length=30, unique=True)   #web, exploting......
-    descripcion: Optional[str] = Field(default=None, sa_column=Column(Text))
     activo: bool = Field(default=True)
 
 class Dificultad(SQLModel, table=True):
     __tablename__ = "dificultad"
     id_dificultad: Optional[int] = Field(default=None, primary_key=True)
     etiqueta: str = Field(max_length=15, unique=True)  #facil, dificil ......
+    activo: bool = Field(default=True)
 
 class ModoPuntaje(SQLModel, table=True):
     __tablename__ = "modo_puntaje"
     id_modo_puntaje: Optional[int] = Field(default=None, primary_key=True)
     etiqueta: str = Field(max_length=15, unique=True)  # estatico, dinamico
+    activo: bool = Field(default=True)
 
 class Modalidad(SQLModel, table=True):
     __tablename__ = "modalidad"
     id_modalidad: Optional[int] = Field(default=None, primary_key=True)
     etiqueta: str = Field(max_length=15, unique=True)     # abierto, cerrado
-
-class EstadoWriteup(SQLModel, table=True):
-    __tablename__ = "estado_writeup"
-    id_estado_writeup: Optional[int]=Field(default=None, primary_key=True)
-    etiqueta: str = Field(max_length=15, unique=True)  # borrador,pendiente, aprobado, rechazado
+    activo: bool = Field(default=True)
 
 class EstadoInscripcion(SQLModel, table=True):
     __tablename__ = "estado_inscripcion"
     id_estado_inscripcion: Optional[int]=Field(default=None, primary_key=True)
     etiqueta: str = Field(max_length=15, unique=True)    #inscrito, descalificado
+    activo: bool = Field(default=True)
 
 class MetodoAuth(SQLModel, table=True):
     __tablename__ = "metodo_auth"
@@ -75,7 +73,6 @@ class Usuario(SQLModel, table=True):
     alias: Optional[str] = Field(default=None, max_length=30)  # único case-insensitive vía uq_usuario_alias_lower
     password_hash: Optional[str] = Field(default=None, sa_column=Column(CHAR(60)))
     email_inst: str = Field(max_length=150, unique=True, index=True)
-    avatar: Optional[str] =  Field(default=None, max_length=255)
     fec_registro: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now()))
     activo: bool = Field(default=True)
 
@@ -91,10 +88,9 @@ class Evento(SQLModel, table=True):
     fec_inicio: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True)))
     fec_fin: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True)))
     fec_creacion: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now()))
-    # freeze del scoreboard: vive en Redis (itdb:frz:*), ver itdb_ctf/websockets/freeze_logic.py
     auto_inscripcion: Optional[bool] = Field(default=None)
-    activo: bool =Field(default = True)     #se desactiva una vez que su periodo finalice
-    
+    activo: bool =Field(default = True) 
+
 class Reto(SQLModel, table=True):
     __tablename__="reto"
     id_reto: Optional[int] = Field(default=None, primary_key=True)
@@ -122,17 +118,6 @@ class Pista(SQLModel, table=True):
     descripcion: str = Field(sa_column=Column(Text))
     activo: bool = Field(default=True)
 
-class Writeup(SQLModel, table=True):
-    __tablename__="writeup"
-    id_writeup: Optional[int] = Field(default=None, primary_key=True)
-    id_usuario: int = Field(foreign_key="usuario.id_usuario")
-    id_reto: int = Field(foreign_key="reto.id_reto")
-    id_estado_writeup: int = Field(foreign_key="estado_writeup.id_estado_writeup")
-
-    writeup_ruta: str = Field(max_length=25)
-    fec_creacion: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now())) 
-    activo: bool = Field(default=True)
-
 ###     TABLAS ASOCIATIVAS
 
 class Resuelve(SQLModel, table=True):
@@ -142,7 +127,6 @@ class Resuelve(SQLModel, table=True):
     id_reto: int = Field(foreign_key="reto.id_reto")
     id_evento: int = Field(foreign_key="evento.id_evento")
     flag_correcta: bool = Field(default=False)
-    dir_ip: Optional[str] = Field(default=None, sa_column=Column(INET))   
     fec_envio: datetime = Field(sa_column=Column(DateTime(timezone=True),server_default=func.now()))
 
 class Participa(SQLModel, table=True):
@@ -173,3 +157,19 @@ class Contiene(SQLModel, table=True):
     puntaje_minimo: Optional[int] = Field(default=None)
     puntaje_actual: int
 
+class Auditoria(SQLModel, table=True):
+    __tablename__="auditoria"
+    __table_args__= (
+        Index("ix_auditoria_tabla_registro", "tabla", "id_registro"),
+        Index("ix_auditoria_fecha", "fec_registro"),
+        Index("ix_auditoria_usuario", "id_usuario")
+    )
+    id_auditoria:Optional[int] = Field(default=None, sa_column=Column(BigInteger, primary_key=True, autoincrement=True))
+    tabla:str = Field(max_length=30)
+    id_registro:Optional[int] = Field(default=None)
+    operacion:str = Field(max_length=6)
+    id_usuario:Optional[int] = Field(default=None) 
+    datos_antes:Optional[dict] = Field(default=None, sa_column=Column(JSONB))
+    datos_despues:Optional[dict] = Field(default=None, sa_column=Column(JSONB))
+    campos:Optional[list[str]] = Field(default=None, sa_column=Column(ARRAY(Text)))
+    fec_registro:datetime= Field(sa_column=Column(DateTime(timezone=True), server_default=func.now(), nullable=False))

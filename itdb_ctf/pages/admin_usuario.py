@@ -10,7 +10,7 @@ def admin_usuario_page() -> rx.Component:
         tabla_usuario_view(),
         credenciales_dialog(),
         form_editar_usuario_view(),
-        grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),
+        grid_template_columns=rx.breakpoints(initial="1fr", md="12% 1fr"),
         width="100%",
         justify_items="center",
         spacing="4",

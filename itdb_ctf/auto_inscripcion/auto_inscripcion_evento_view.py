@@ -28,7 +28,7 @@ def alert_incripcion(id_evento:int, titulo:str) -> rx.Component:
                 ),
                 spacing="4",
             ),
-            width="50vh",
+            max_width=rx.breakpoints(sm="90vw", md="400px"),
         ),
     )
 
@@ -43,7 +43,8 @@ def card_evento(ev:dict) -> rx.Component:
                     columns="2",
                     place_items="center",
                 ),
-                grid_template_columns="70% 1fr",
+                grid_template_columns=rx.breakpoints(initial="1fr", sm="70% 1fr"),
+                spacing="2",
                 width="100%",
             ),
             rx.accordion.root(
@@ -60,33 +61,34 @@ def card_evento(ev:dict) -> rx.Component:
             ),
             rx.grid(
                 rx.box(
-                    rx.text("Inicia", weight="light", size="3"),
-                    rx.text(ev['fi_str'], weight="regular", size="6"),
+                    rx.text("Inicia", weight="light", size={"sm":"1","md":"3"}),
+                    rx.text(ev['fi_str'], weight="regular", size={"sm":"3","md":"6"}),
                 ),
                 rx.box(
-                    rx.text("Finaliza", weight="light", size="3"),
-                    rx.text(ev['ff_str'], weight="regular", size="6"),
+                    rx.text("Finaliza", weight="light", size={"sm":"1","md":"3"}),
+                    rx.text(ev['ff_str'], weight="regular", size={"sm":"3","md":"6"}),
                 ),
                 rx.match(
                     ev['estado_evento'],
                     (
                         "futuro",
                         rx.box(
-                            rx.text("Inicia en", weight="light", size="3"),
-                            rx.text(ev['contador_inicio'], weight="regular", size="6"),    
+                            rx.text("Inicia en", weight="light", size={"sm":"1","md":"3"}),
+                            rx.text(ev['contador_inicio'], weight="regular", size={"sm":"3","md":"6"}),    
                         ),
                     ),
                     (
                         "activo",
                         rx.box(
-                            rx.text("Finaliza en", weight="light", size="3"),
-                            rx.text(ev['contador_fin'], weight="regular", size="6"),    
+                            rx.text("Finaliza en", weight="light", size={"sm":"1","md":"3"}),
+                            rx.text(ev['contador_fin'], weight="regular", size={"sm":"3","md":"6"}),    
                         ),
                     ),
-                    rx.text("Finalizado", weight="regular", size="6"),
+                    rx.text("Finalizado", weight="regular", size={"sm":"3","md":"6"}),
                 ),
                 width="100%",
                 columns="3",
+                spacing="2",
                 place_items="center",
             ),
             rx.flex(
@@ -95,7 +97,7 @@ def card_evento(ev:dict) -> rx.Component:
                     rx.badge(
                         "Participando",
                         color_scheme="jade",
-                        variant="outline",
+                        variant="surface",
                         size='3',
                     ),
                     rx.cond(
@@ -106,7 +108,7 @@ def card_evento(ev:dict) -> rx.Component:
                             rx.badge(
                                 "Solicite acceso a evento",
                                 color_scheme="amber",
-                                variant="outline",
+                                variant="surface",
                                 size='3',
                             ),
                         ),
@@ -129,11 +131,12 @@ def card_evento(ev:dict) -> rx.Component:
                 ),
                 width="100%",
                 justify="end",
-                spacing="4",
+                wrap="wrap",
+                spacing="3",
             ),
-            ),
-        width="100%",
-    ),
+        ),
+        width="95%",
+    )
 
 def auto_inscripcion_eventos_view() -> rx.Component:
     return rx.vstack(
@@ -149,6 +152,6 @@ def auto_inscripcion_eventos_view() -> rx.Component:
             width="100%",
             spacing="4"
         ),
-        width="60%",
+        width=rx.breakpoints(sm="95%", md="60%"),
         spacing="4",
     )

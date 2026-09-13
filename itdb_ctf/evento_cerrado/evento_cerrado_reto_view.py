@@ -11,7 +11,7 @@ def pista_trigger(pista:dict) -> rx.Component:
             width="100%",
         ),
         width="100%",
-        bg=rx.cond(pista['adquirido'], "#fab80850", ""),
+        bg=rx.cond(pista['adquirido'], "#fab80850", "#B3B3B350"),
     )
 
 def pista_content(pista:dict) -> rx.Component:
@@ -47,7 +47,7 @@ def dialog_pista(pista:dict) -> rx.Component:
         ),
         rx.dialog.content(
             pista_content(pista),
-            max_width="45vh"
+            max_width=["90vw", "90vw", "400px", "400px", "400px"],
         )
     )
 
@@ -108,7 +108,7 @@ def reto_card_view(reto: dict) -> rx.Component:
             reto_trigger(reto),
             on_click=lambda: EventoCerradoListarPistaState.cargar_pistas(reto['id_reto']),
         ),
-        rx.dialog.content(reto_content(reto), max_width="50vh"),
+        rx.dialog.content(reto_content(reto), max_width=["90vw", "90vw", "480px", "480px", "480px"]),
         on_open_change=EventoCerradoEnvioFlagState.drop_flag,
     )
 

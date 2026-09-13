@@ -14,7 +14,7 @@ def admin_retos_page() -> rx.Component:
         ),
         spacing="5",
         width="100%",
-        grid_template_columns=rx.breakpoints(initial="1fr", md="15rem 1fr"),
+        grid_template_columns=rx.breakpoints(initial="1fr", md="12% 1fr"),
         on_mount=ListarRetosState.escuchar_retos_admin,
         on_unmount=ListarRetosState.parar_retos_admin,
     )

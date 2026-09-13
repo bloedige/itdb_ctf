@@ -1,4 +1,5 @@
 
+from datetime import datetime, timezone
 from sqlmodel import Session, select
 from itdb_ctf.db import engine
 from itdb_ctf.models import Evento, Participa, EstadoInscripcion, ModoPuntaje
@@ -29,6 +30,7 @@ def auto_inscripcion( id_evento:int, id_usuario:int) -> tuple[bool,str]:
             id_usuario=id_usuario,
             id_evento=id_evento,
             id_estado_inscripcion=id_estado,
+            fec_ingreso=datetime.now(timezone.utc),
             ))
         s.commit()
     canales.publicar_inscripcion(id_evento)

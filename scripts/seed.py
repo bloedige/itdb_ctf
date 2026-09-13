@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from sqlmodel import select, create_engine,Session
-from itdb_ctf.models import (Rol,Categoria,Dificultad,Modalidad,ModoPuntaje,MetodoAuth,EstadoInscripcion,EstadoWriteup,Usuario,Evento)
+from itdb_ctf.models import (Rol,Categoria,Dificultad,Modalidad,ModoPuntaje,MetodoAuth,EstadoInscripcion,Usuario,Evento)
 from itdb_ctf.utils.security import hasher
 from datetime import datetime, timezone
 load_dotenv()
@@ -36,7 +36,6 @@ MODOS_PUNTAJE = ["estatico", "dinamico"]
 MODALIDADES = ["abierto", "cerrado"]
 DIFICULTADES = ["Fácil", "Media", "Difícil"]
 CATEGORIAS = ["Web", "Forensics", "Crypto", "Reversing", "Pwn", "OSINT", "Misc"]
-ESTADOS_WRITEUP = ["borrador", "pendiente", "aprobado", "rechazado"]
 ESTADOS_INSCR = ["inscrito", "descalificado"]
 
 
@@ -46,7 +45,6 @@ def sembrar_catalogos(session):
         (Modalidad,MODALIDADES),
         (Dificultad,DIFICULTADES),
         (Categoria,CATEGORIAS),
-        (EstadoWriteup,ESTADOS_WRITEUP),
         (EstadoInscripcion,ESTADOS_INSCR),
         (MetodoAuth,METODOS_AUTH),
     ]

@@ -60,7 +60,8 @@ def form_evento_edit() -> rx.Component:
             columns={"base":"1","md":"2"},
             spacing="4",
             width="100%",
-            pointer_events=rx.cond(EditarEventoState.estado == "futuro", "auto", "none"), 
+            pointer_events=rx.cond(EditarEventoState.estado == "futuro", "auto", "none"),
+            opacity=rx.cond(EditarEventoState.estado == "futuro", None, ".6"), 
         ),
         rx.grid(
             rx.cond(EditarEventoState.mensaje != "", badge_msg(EditarEventoState.mensaje,"red"), rx.spacer()),

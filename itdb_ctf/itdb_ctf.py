@@ -1,4 +1,5 @@
 from itdb_ctf.api import app
+from itdb_ctf.utils.auditoria import ActorMiddleware
 from itdb_ctf.auth.auth_state import AuthState
 
 #states abierto
@@ -65,6 +66,8 @@ from itdb_ctf.pages.evento_abierto_dashboard import evento_abierto_dashboard_pag
 from itdb_ctf.pages.eventos_cerrados_dashboard import eventos_cerrados_dashboard_page
 from itdb_ctf.pages.retos_dashboard import retos_dashboard_page
 from itdb_ctf.pages.usuarios_dashboard import usuarios_dashboard_page
+
+app.add_middleware(ActorMiddleware())
 
 app.add_page(login_page, route="/login")
 app.add_page(informacion_page, route="/informacion", on_load=InformacionState.cargar_info)

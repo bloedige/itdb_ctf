@@ -1,6 +1,7 @@
 import reflex as rx
 from itdb_ctf.components.navbar import logo
 from itdb_ctf.auth.local_auth_view import login_card
+
 def login_page() -> rx.Component:
     return rx.grid(
         rx.grid(
@@ -17,15 +18,22 @@ def login_page() -> rx.Component:
             place_items="center",
         ),
         rx.box(
-            #pendiente
-            rx.text("footer"),
+            rx.center(
+                rx.text(
+                    "© 2026 Instituto Tecnológico Don Bosco — ITDB CTF",
+                    size="1",
+                    color="#8fa0c1",
+                ),
+                padding="0.6em",
+            ),
             width="100%",
             bg="#011541BE",
             position="absolute",
-            bottom="0"
+            bottom="0",
         ),
         width="100%",
         height="100vh",
+        justify_items="center",
         
         #bg="url('/fondo.png')",
         #style={
