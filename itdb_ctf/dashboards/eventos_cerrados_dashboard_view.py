@@ -56,6 +56,17 @@ def barra_estado() -> rx.Component:
                     ),
                 ),
                 rx.cond(
+                    S.hay_seleccion,
+                    rx.button(
+                        rx.icon("file-down", size=15),
+                        "Reporte PDF",
+                        on_click=S.descargar_reporte,
+                        variant="soft",
+                        color_scheme="gray",
+                        size="1",
+                    ),
+                ),
+                rx.cond(
                     S.evento_activo,
                     rx.button(
                         rx.icon("snowflake", size=15),

@@ -1,3 +1,5 @@
+import logging
+
 import reflex as rx
 
 from itdb_ctf.auth.auth_state import AuthState
@@ -9,7 +11,10 @@ from itdb_ctf.dashboards.eventos_cerrados_dashboard_logic import (
     actividad_evento,
     feed_resoluciones,
 )
+from itdb_ctf.dashboards.reporte_evento_logic import generar_reporte_evento
 from itdb_ctf.websockets import freeze_logic, canales, suscriptor
+
+_log = logging.getLogger(__name__)
 
 
 class EventosCerradosDashboardState(AuthState):
@@ -117,6 +122,25 @@ class EventosCerradosDashboardState(AuthState):
     @rx.event
     def actualizar(self):
         return EventosCerradosDashboardState.cargar_todo
+
+    @rx.event
+    def descargar_reporte(self):
+        """Genera el PDF del evento seleccionado y lo entrega por `rx.download`.
+
+        Corte en vivo (`corte=None`): el reporte es del admin, así que muestra los
+        datos reales aunque el scoreboard público esté congelado.
+        """
+        guard = self.requiere_admin()
+        if guard:
+            return guard
+        if not self.id_sel:
+            return
+        try:
+            datos, nombre = generar_reporte_evento(int(self.id_sel))
+        except Exception:
+            _log.exception("fallo al generar el reporte del evento %s", self.id_sel)
+            return rx.toast.error("No se pudo generar el reporte.")
+        return rx.download(data=datos, filename=nombre, mime_type="application/pdf")
 
     @rx.event
     def congelar(self):
