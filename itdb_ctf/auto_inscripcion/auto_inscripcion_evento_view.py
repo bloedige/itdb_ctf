@@ -32,107 +32,155 @@ def alert_incripcion(id_evento:int, titulo:str) -> rx.Component:
         ),
     )
 
+def icono() -> rx.Component:
+    return rx.box(
+        rx.image(
+            src="/isotipo.svg",
+            alt="CTF",
+            width="3em",
+            object_fit="cover",
+        ),
+        bg="#0115417E",
+        padding=".5em",
+        border_radius=".5em",
+    )
+def evento_titulo_detalle(ev:dict) -> rx.Component:
+    return rx.box(
+        rx.text(
+            ev['titulo'], 
+            weight="medium", 
+            size="4", 
+            ),
+        rx.text(
+            f"{ev['fi_str']}  •  {ev['modalidad']}  •  {ev['duracion']}",
+            weight="light",
+            font_size=".8em",
+            color="#818181",
+            ),
+    )
+
+def ver_descripcion(desc) -> rx.components:
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            button(
+                "Descripción",
+                "gray",
+                [],
+            ),
+        ),
+        rx.dialog.content(
+            rx.markdown(desc),
+        ),
+    )
+
+def estado_participante(ev:dict) -> rx.Component:
+    return rx.cond(
+        ev['estado_usuario'],
+        rx.badge(
+            ev['estado_usuario'],
+            color_scheme="jade",
+            variant="surface",
+            size='2',
+        ),
+        rx.text(
+            " ",
+            weight="light",
+            font_size=".8em",
+            color="#818181",
+        ),
+    ),
+
+def time(ev:dict) -> rx.Component:
+    return rx.match(
+        ev['estado_evento'],
+        (
+            "futuro",
+            rx.box(
+                rx.text("Inicia en", weight="light",
+                    font_size=".8em",
+                    color="#818181",
+                ),
+                rx.text(ev['contador_inicio'], weight="regular", size="4"),    
+            ),
+        ),
+        (
+            "activo",
+            rx.box(
+                rx.text("Finaliza en", weight="light",
+                    font_size=".8em",
+                    color="#818181",
+                ),
+                rx.text(ev['contador_fin'], weight="regular", size="4"),    
+            ),
+        ),
+        rx.text("Finalizado", weight="regular", size="4"),
+    ),
+
+def actions(ev:dict) -> rx.Component:
+    return rx.match(
+        ev['estado_evento'],
+        (
+            "activo",
+            rx.cond(
+                ev['inscrito'],
+                rx.link(button("Ingresar", "jade", []), href=f"/evento/{ev['id_evento_cerrado']}/informacion"),
+                rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),
+            ),
+        ),
+        (
+            "concluido",
+            rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),  
+        ),
+        rx.cond(
+            ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido") & (ev['estado_evento'] != "activo"),  
+            alert_incripcion(ev['id_evento_cerrado'], ev['titulo']),
+            rx.cond(
+                ~ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido"),
+                rx.text(
+                    "Inscripción mediante cordinador",
+                    font_size=".8em",
+                    color="#818181",
+                ),
+            ),
+        ),
+    ),
+
+
 def card_evento(ev:dict) -> rx.Component:
     return rx.card(
-        rx.vstack(
+        rx.tablet_and_desktop(
             rx.grid(
-                rx.text(ev['titulo'], weight="bold", size="4"),
                 rx.grid(
-                    rx.text(f"Modo: {ev['modo']}", weight="medium", size="3"),
-                    rx.text(f"Duración: {ev['duracion']}", weight="medium", size="3"),
-                    columns="2",
-                    place_items="center",
+                    icono(),
+                    evento_titulo_detalle(ev),
+                    width="100%",
+                    grid_template_columns="3em 1fr",
+                    gap=".8em",
+                    align_items="center",
                 ),
-                grid_template_columns=rx.breakpoints(initial="1fr", sm="70% 1fr"),
-                spacing="2",
-                width="100%",
+                estado_participante(ev),
+                ver_descripcion(ev['descripcion']), 
+                time(ev),
+                actions(ev),   
+                grid_template_columns="1fr 12% 12% 12% 12%",
+                align_items="center",
+                justify_items="center",
             ),
-            rx.accordion.root(
-                rx.accordion.item(
-                    header="Descripcion",
-                    content=rx.markdown(
-                        ev['descripcion'],
-                    ),
-                ),
-                width="100%",
-                collapsible=True,
-                variant="ghost",
-                color_scheme="gray",
-            ),
+        ),
+        rx.mobile_only(
             rx.grid(
-                rx.box(
-                    rx.text("Inicia", weight="light", size={"sm":"1","md":"3"}),
-                    rx.text(ev['fi_str'], weight="regular", size={"sm":"3","md":"6"}),
+                rx.grid(
+                    icono(),
+                    evento_titulo_detalle(ev),
+                    width="100%",
+                    grid_template_columns="3em 1fr",
+                    gap=".8em",
+                    align_items="center",
                 ),
-                rx.box(
-                    rx.text("Finaliza", weight="light", size={"sm":"1","md":"3"}),
-                    rx.text(ev['ff_str'], weight="regular", size={"sm":"3","md":"6"}),
-                ),
-                rx.match(
-                    ev['estado_evento'],
-                    (
-                        "futuro",
-                        rx.box(
-                            rx.text("Inicia en", weight="light", size={"sm":"1","md":"3"}),
-                            rx.text(ev['contador_inicio'], weight="regular", size={"sm":"3","md":"6"}),    
-                        ),
-                    ),
-                    (
-                        "activo",
-                        rx.box(
-                            rx.text("Finaliza en", weight="light", size={"sm":"1","md":"3"}),
-                            rx.text(ev['contador_fin'], weight="regular", size={"sm":"3","md":"6"}),    
-                        ),
-                    ),
-                    rx.text("Finalizado", weight="regular", size={"sm":"3","md":"6"}),
-                ),
-                width="100%",
-                columns="3",
-                spacing="2",
-                place_items="center",
-            ),
-            rx.flex(
-                rx.cond(
-                    ev['inscrito'],
-                    rx.badge(
-                        "Participando",
-                        color_scheme="jade",
-                        variant="surface",
-                        size='3',
-                    ),
-                    rx.cond(
-                        ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido") & (ev['estado_evento'] != "activo"),  
-                        alert_incripcion(ev['id_evento_cerrado'], ev['titulo']),
-                        rx.cond(
-                            ~ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido"),
-                            rx.badge(
-                                "Solicite acceso a evento",
-                                color_scheme="amber",
-                                variant="surface",
-                                size='3',
-                            ),
-                        ),
-                    ),
-                ),
-                rx.match(
-                    ev['estado_evento'],
-                    (
-                        "activo",
-                        rx.cond(
-                            ev['inscrito'],
-                            rx.link(button("Ingresar", "jade", []), href=f"/evento/{ev['id_evento_cerrado']}/informacion"),
-                            rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),
-                        ),
-                    ),
-                    (
-                        "concluido",
-                        rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),  
-                    ),
-                ),
-                width="100%",
-                justify="end",
-                wrap="wrap",
-                spacing="3",
+                actions(ev),   
+                grid_template_columns="1fr 12%",
+                align_items="center",
+                justify_items="center",
             ),
         ),
         width="95%",
@@ -150,7 +198,7 @@ def auto_inscripcion_eventos_view() -> rx.Component:
             rx.foreach(AutoInscripcionState.eventos_procesados, card_evento),
             place_items="center",
             width="100%",
-            spacing="4"
+            spacing="3"
         ),
         width=rx.breakpoints(sm="95%", md="60%"),
         spacing="4",

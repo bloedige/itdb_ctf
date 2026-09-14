@@ -52,7 +52,7 @@ def eventos(id_usuario:int) -> list[dict]:
             "id_evento_cerrado":ev.id_evento,
             "titulo":ev.titulo,
             "descripcion":ev.descripcion or "",
-            "modo":md,
+            "modalidad":md,
             "fec_inicio":ev.fec_inicio,
             "fec_fin":ev.fec_fin,
             "auto_inscripcion":ev.auto_inscripcion,
