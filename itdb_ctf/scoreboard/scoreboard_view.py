@@ -27,10 +27,12 @@ def fila_ranking(fila:dict) -> rx.Component:
                     weight="medium",
                     size="4",
             ),
-            rx.link(
-                rx.text(fila['nombre'], weight="medium", size="3"),
-                href=f"{ScoreboardState.perfil_base}/{fila['id_usuario']}",
-                underline="hover",
+            rx.text(
+                fila['nombre'], 
+                weight="medium", 
+                size="3",
+                on_click=rx.redirect(f"{ScoreboardState.perfil_base}/{fila['id_usuario']}"),
+                cursor="pointer",
             ),
             rx.text(f"{fila['puntaje']} pts.",weight="medium", size="3"),
             place_items="center",
@@ -51,7 +53,7 @@ def scoreboard_view() -> rx.Component:
                 grafica_evolucion(),
             ),
             rx.grid(
-                rx.text("N#",weight="regular", size="3"),
+                rx.text("Pocisión",weight="regular", size="3"),
                 rx.text("Paticipante",weight="regular", size="3"),
                 rx.text("puntaje",weight="regular", size="3"),
                 place_items="center",

@@ -60,6 +60,9 @@ def logo() -> rx.Component:
         underline="none",
         color="white",
         flex_shrink="0",
+        _hover={
+            "text_decoration": "none",  # Removes underline on hover
+        }
     )
 
 
