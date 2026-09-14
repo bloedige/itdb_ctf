@@ -37,6 +37,166 @@ def kpi(titulo: str, valor, detalle="") -> rx.Component:
     )
 
 
+def sparkline(data, data_key: str = "valor", color: str = AZUL, altura: int = 46) -> rx.Component:
+    """Mini-serie sin ejes, grilla ni tooltip: solo la forma de la tendencia."""
+    return rx.recharts.area_chart(
+        rx.recharts.area(
+            data_key=data_key,
+            type_="monotone",
+            stroke=color,
+            stroke_width=2,
+            fill=color,
+            fill_opacity=0.18,
+            dot=False,
+            is_animation_active=False,
+        ),
+        data=data,
+        width="100%",
+        height=altura,
+        # margen propio: sin esto el trazo se pega al borde de la tarjeta
+        margin={"top": 6, "right": 4, "left": 4, "bottom": 4},
+    )
+
+
+def _col_grafica(contenido: rx.Component, rotulo: str = "", ancho: str = "100%") -> rx.Component:
+    """Columna de la gráfica, centrada en su celda. `ancho` deja respirar al
+    trazo dentro del espacio que le toca."""
+    return rx.vstack(
+        contenido,
+        rx.cond(
+            rotulo != "",
+            rx.text(
+                rotulo,
+                size="1",
+                weight="light",
+                color_scheme="gray",
+                style={"font_size": "0.65em", "line_height": "1"},
+            ),
+            rx.fragment(),
+        ),
+        spacing="1",
+        align="center",
+        justify="center",
+        width=ancho,
+        height="100%",
+    )
+
+
+def _tarjeta_kpi(
+    titulo: str, valor, detalle: str, columna: rx.Component, columns: str = "70% 30%"
+) -> rx.Component:
+    """Forma común de las tarjetas: texto | gráfica, con la proporción que se pida.
+    Ambas columnas quedan centradas verticalmente."""
+    return rx.card(
+        rx.grid(
+            rx.grid(
+                rx.text(titulo, size="1", weight="medium", color_scheme="gray"),
+                rx.heading(valor, size="6"),
+                # `detalle` puede llegar como Var: nada de `if` sobre él
+                rx.text(detalle, size="1", weight="light", color_scheme="gray"),
+                spacing="1",
+                align_items="center",
+                justify_items="start",
+                width="100%",
+                height="100%",
+
+            ),
+            rx.center(columna, width="100%", height="100%"),
+            columns=columns,
+            align_items="center",
+            justify_items="center",
+            height="100%",
+            spacing="2",
+            width="100%",
+        ),
+        width="100%",
+    )
+
+
+def kpi_spark(
+    titulo: str,
+    valor,
+    detalle: str,
+    data,
+    rotulo: str = "",
+    data_key: str = "valor",
+    color: str = AZUL,
+) -> rx.Component:
+    """Tarjeta con mini-serie temporal a la derecha.
+
+    `rotulo` dice qué mide la línea (la serie no es la misma magnitud que el
+    número grande, así que sin rótulo se lee ambigua).
+    """
+    return _tarjeta_kpi(
+        titulo, valor, detalle,
+        _col_grafica(sparkline(data, data_key, color), rotulo, ancho="90%"),
+        columns="60% 40%",
+    )
+
+
+# repartos de 2 y 3 tramos (activo/inactivo, roles de staff)
+REPARTO_COLORES = rx.Var.create([VERDE, "#ff6b6b"])
+STAFF_COLORES = rx.Var.create(["#8400ff", "#00b8ff", "#ffd000"])
+
+
+def _barra_reparto(d: dict, i, colores, con_valor: bool = False) -> rx.Component:
+    """Barra con su etiqueta. `con_valor` añade el valor absoluto al final, para
+    las tarjetas que no llevan detalle de texto. Nunca el porcentaje."""
+    fila = [
+        rx.box(
+            width="8px", height="8px", border_radius="2px",
+            background=colores[i], flex_shrink="0",
+        ),
+        rx.text(
+            d["etiqueta"],
+            size="1", weight="light", color_scheme="gray",
+            width="100%",
+        ),
+        rx.box(
+            rx.box(
+                width=f"{d['pct']}%",
+                height="6px",
+                border_radius="3px",
+                background=colores[i],
+            ),
+            flex="1",
+            height="6px",
+            border_radius="3px",
+            background="var(--gray-a4)",
+            width="100%",
+        ),
+    ]
+    if con_valor:
+        fila.append(
+            rx.text(
+                d["valor"],
+                size="1", weight="medium",
+                width="2.2em", text_align="right", flex_shrink="0",
+            )
+        )
+    return rx.grid(*fila, width="100%", align_items="center", spacing="2", grid_template_columns="5% 1fr 1fr 5%")
+
+
+def kpi_barras(
+    titulo: str, valor, detalle: str, data, colores=REPARTO_COLORES,
+    con_valor: bool = False,
+) -> rx.Component:
+    """Tarjeta con el reparto en barras a la derecha. Las cifras van en el
+    detalle, o en las propias barras si la tarjeta no lleva detalle."""
+    return _tarjeta_kpi(
+        titulo, valor, detalle,
+        _col_grafica(
+            rx.grid(
+                rx.foreach(data, lambda d, i: _barra_reparto(d, i, colores, con_valor)),
+                spacing="2",
+                align_items="center",
+                width="80%",
+            ),
+        ),
+        columns="20% 80%",
+    )
+
+
 def panel(titulo: str, contenido: rx.Component) -> rx.Component:
     return rx.card(
         rx.vstack(

@@ -443,6 +443,9 @@ def navbar_cerrado(id_evento) -> rx.Component:
 # --- barra lateral: panel de administración -----------------------------
 # (titulo, roles con acceso, [(texto, ruta, icono), ...])
 SECCIONES_STAFF = [
+    ("Sistema", {"superadmin"}, [
+        ("Auditoría", "/admin/dashboard/auditoria", "scroll_text"),
+    ]),
     ("Dashboards", {"admin", "superadmin"}, [
         ("Resumen", "/admin/dashboard", "layout_dashboard"),
         ("Eventos", "/admin/dashboard/eventos-cerrados", "calendar"),

@@ -34,6 +34,7 @@ from itdb_ctf.dashboards.evento_abierto_dashboard_states import EventoAbiertoDas
 from itdb_ctf.dashboards.eventos_cerrados_dashboard_states import EventosCerradosDashboardState
 from itdb_ctf.dashboards.retos_dashboard_states import RetosDashboardState
 from itdb_ctf.dashboards.usuarios_dashboard_states import UsuariosDashboardState
+from itdb_ctf.dashboards.auditoria_dashboard_states import AuditoriaDashboardState
 
 #pages abierto
 
@@ -66,6 +67,7 @@ from itdb_ctf.pages.evento_abierto_dashboard import evento_abierto_dashboard_pag
 from itdb_ctf.pages.eventos_cerrados_dashboard import eventos_cerrados_dashboard_page
 from itdb_ctf.pages.retos_dashboard import retos_dashboard_page
 from itdb_ctf.pages.usuarios_dashboard import usuarios_dashboard_page
+from itdb_ctf.pages.auditoria_dashboard import auditoria_dashboard_page
 
 app.add_middleware(ActorMiddleware())
 
@@ -94,3 +96,4 @@ app.add_page(evento_abierto_dashboard_page, route="/admin/dashboard", on_load=Ev
 app.add_page(eventos_cerrados_dashboard_page, route="/admin/dashboard/eventos-cerrados", on_load=EventosCerradosDashboardState.cargar_todo)
 app.add_page(retos_dashboard_page, route="/admin/dashboard/retos", on_load=RetosDashboardState.cargar_dashboard)
 app.add_page(usuarios_dashboard_page, route="/admin/dashboard/usuarios", on_load=UsuariosDashboardState.cargar_dashboard)
+app.add_page(auditoria_dashboard_page, route="/admin/dashboard/auditoria", on_load=AuditoriaDashboardState.cargar_dashboard)

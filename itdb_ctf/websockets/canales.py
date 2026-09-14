@@ -31,6 +31,8 @@ def ch_freeze(id_evento: int) -> str:
 CH_EVENTOS = "itdb:eventos"
 # cualquier cambio de reto / pista / asociación → listas de admin sin filtro por evento
 CH_RETOS = "itdb:retos"
+# cualquier escritura auditada (la publica utils/auditoria.py tras el commit)
+CH_AUDITORIA = "itdb:auditoria"
 
 
 # --- publicadores (sync, degradación silenciosa) ---
@@ -78,3 +80,8 @@ def publicar_reto_en_eventos(id_eventos) -> None:
     for id_ev in id_eventos:
         _pub(ch_evento(id_ev))
     _pub(CH_RETOS)
+
+
+def publicar_auditoria() -> None:
+    """Se acaba de confirmar una escritura sobre una tabla con trigger."""
+    _pub(CH_AUDITORIA)

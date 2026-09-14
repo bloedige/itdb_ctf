@@ -226,7 +226,7 @@ def perfil_contenido(
     # aviso de "no participás".
     return rx.cond(
         E.hay_datos,
-        rx.vstack(
+        rx.grid(
             rx.heading(titulo, size="5"),
             rx.grid(
                 rx.vstack(
@@ -252,11 +252,12 @@ def perfil_contenido(
                 width="100%",
             ),
             spacing="4",
+            justify_items="center",
             width="80%",
             padding="1.5em",
         ),
         rx.center(
-            rx.text(vacio, size="4", weight="light", color_scheme="gray"),
+            rx.text(vacio, size="4", weight="medium", color_scheme="gray"),
             height="50vh",
             width="100%",
         ),

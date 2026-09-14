@@ -47,6 +47,10 @@ class AuthState(rx.State):
     @rx.var
     def es_admin(self) -> bool:
         return self.codigo_rol in ROLES_ADMIN
+
+    @rx.var
+    def es_superadmin(self) -> bool:
+        return self.codigo_rol == "superadmin"
     
  # --- EVENT HANDLERS (sin @rx.var): HACEN acciones (redirigen, borran) ---
 
@@ -65,6 +69,13 @@ class AuthState(rx.State):
             return rx.redirect("/login")
         if not self.es_admin:
             return rx.redirect("/informacion")
+
+    def requiere_superadmin(self):
+        if not self.autenticado:
+            return rx.redirect("/login")
+        if not self.es_superadmin:
+            # un admin que llega por URL vuelve a su propio panel, no al de estudiante
+            return rx.redirect("/admin/dashboard" if self.es_admin else "/informacion")
         
     def logout(self):
         self.token = ""
