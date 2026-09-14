@@ -33,18 +33,17 @@ def edit_content() -> rx.Component:
         width="100%",
     )
 
+def edit_trigguer(item:dict) -> rx.Component:
+    return rx.button(
+        "Editar",
+        size="1",
+        variant="solid",
+        color_scheme="jade",
+        on_click=lambda: EditarAsociarState.open_edit(item['id_contine'], item['titulo']),
+    ),
 
-def dialog_edit(item: dict) -> rx.Component:
+def dialog_edit() -> rx.Component:
     return rx.dialog.root(
-        rx.dialog.trigger(
-            rx.button(
-                "Editar",
-                size="1",
-                variant="surface",
-                color_scheme="jade",
-                on_click=lambda: EditarAsociarState.open_edit(item['id_contine'], item['titulo']),
-            ),
-        ),
         rx.dialog.content(
             rx.grid(
                 edit_content(),
@@ -91,7 +90,7 @@ def alert_dialog(id_reto, titulo) -> rx.Component:
 
 def acciones_gestion(reto: dict) -> rx.Component:
     return rx.grid(
-        dialog_edit(reto),
+        edit_trigguer(reto),
         alert_dialog(reto['id_reto'], reto['titulo']),
         columns="2",
         place_items="center",
@@ -133,7 +132,7 @@ def filtros() -> rx.Component:
         rx.vstack(
             rx.heading("Gestionar retos de un evento", size="4"),
             rx.grid(
-                select_catalog("Eventos (en curso / futuro)", "Seleccionar...", GestionarRetoState.eventos_gest, GestionarRetoState.set_id_evento_gest),
+                select_catalog("Eventos (futuros)", "Seleccionar...", GestionarRetoState.eventos_gest, GestionarRetoState.set_id_evento_gest),
                 rx.grid(
                     input_box("Buscar por titulo", "Titutlo...", GestionarRetoState.busqueda_gest, GestionarRetoState.set_busqueda_gest, "text"),
                     select_catalog("Categorias", "Seleccionar...", GestionarRetoState.categorias, GestionarRetoState.set_id_categoria_gest_filtro, GestionarRetoState.id_categoria_gest_filtro),
@@ -174,6 +173,7 @@ def gestionar_asociar_reto_view() -> rx.Component:
     return rx.vstack(
         filtros(),
         contenido(),
+        dialog_edit(),
         spacing="4",
         width=rx.breakpoints(sm="95%", md="90%"),
     )

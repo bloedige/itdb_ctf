@@ -3,7 +3,7 @@ from itdb_ctf.asociar.asociar_state import AsociarRetoState
 from itdb_ctf.components.form import input_box, button, select_catalog, checked
 
 
-def override_content(modo, inicial, minimo) -> rx.Component:
+def override_content() -> rx.Component:
     return rx.vstack(
         rx.text(AsociarRetoState.titulo_dialog, size="3", weight="medium"),
         rx.text("Valores por defecto", size="2", weight="regular"),
@@ -19,9 +19,9 @@ def override_content(modo, inicial, minimo) -> rx.Component:
                 width="100%",
             ),
             rx.grid(
-                rx.text(modo, size="1", weight="light", style={"text_transform": "capitalize"}),
-                rx.text(inicial, size="1", weight="light"),
-                rx.text(rx.cond(minimo, minimo, "---"), size="1", weight="light"),
+                rx.text(AsociarRetoState.modo_nombre_def, size="1", weight="light", style={"text_transform": "capitalize"}),
+                rx.text(AsociarRetoState.inicial_def, size="1", weight="light"),
+                rx.text(rx.cond(AsociarRetoState.minimo_def, AsociarRetoState.minimo_def, "---"), size="1", weight="light"),
                 place_items="center",
                 columns="3",
                 width="100%",
@@ -70,21 +70,22 @@ def override_content(modo, inicial, minimo) -> rx.Component:
     )
 
 
-def dialog_override(reto: dict) -> rx.Component:
+def agregar_trigguer(reto: dict) -> rx.Component:
+    return rx.button(
+        rx.icon("plus", size=20),
+        "Agregar",
+        size="1",
+        variant="solid",
+        color_scheme="jade",
+        on_click=lambda: AsociarRetoState.open_dialog(reto['id_reto'], reto['titulo'], reto['id_modo_puntaje'].to_string(), reto['puntaje_inicial'], reto['puntaje_minimo']),
+    )
+
+
+def dialog_override() -> rx.Component:
     return rx.dialog.root(
-        rx.dialog.trigger(
-            rx.button(
-                rx.icon("plus", size=20),
-                "Agregar",
-                size="1",
-                variant="surface",
-                color_scheme="jade",
-                on_click=lambda: AsociarRetoState.open_dialog(reto['id_reto'], reto['titulo'], reto['id_modo_puntaje'].to_string(), reto['puntaje_inicial'], reto['puntaje_minimo'])
-            ),
-        ),
         rx.dialog.content(
             rx.grid(
-                override_content(reto['modo'], reto['puntaje_inicial'], reto['puntaje_minimo']),
+                override_content(),
                 rx.flex(
                     button("Confirmar", "jade", [AsociarRetoState.confirmar_agregar], size="2"),
                     button("Cancelar", "ruby", [AsociarRetoState.close_dialog], size="2"),
@@ -105,7 +106,7 @@ def accion_candidato(reto: dict) -> rx.Component:
     return rx.cond(
         AsociarRetoState.ids_in_carrito.contains(reto['id_reto']),
         rx.badge(rx.icon("check", size=20), "Agregado", color_scheme="gray", variant="surface"),
-        dialog_override(reto),
+        agregar_trigguer(reto),
     )
 
 
@@ -281,6 +282,7 @@ def asociar_reto_view() -> rx.Component:
             ),
             width="95%",
         ),
+        dialog_override(),
         justify_items="center",
         width="100%",
     )

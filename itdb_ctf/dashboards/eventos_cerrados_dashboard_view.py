@@ -2,6 +2,7 @@ import reflex as rx
 
 from itdb_ctf.dashboards.eventos_cerrados_dashboard_states import EventosCerradosDashboardState as S
 from itdb_ctf.components.form import select_catalog
+from itdb_ctf.components.pdf_viewer import documento, pagina
 from itdb_ctf.dashboards.dashboard_componentes import (
     NARANJA,
     VERDE,
@@ -58,9 +59,9 @@ def barra_estado() -> rx.Component:
                 rx.cond(
                     S.hay_seleccion,
                     rx.button(
-                        rx.icon("file-down", size=15),
+                        rx.icon("file-text", size=15),
                         "Reporte PDF",
-                        on_click=S.descargar_reporte,
+                        on_click=S.abrir_reporte,
                         variant="soft",
                         color_scheme="gray",
                         size="1",
@@ -190,6 +191,100 @@ def feed_view() -> rx.Component:
     )
 
 
+# ---------------------------------------------------------------- preview del PDF
+
+
+def _navegador_paginas() -> rx.Component:
+    """react-pdf pinta una página a la vez, así que la navegación va aparte."""
+    return rx.hstack(
+        rx.button(
+            rx.icon("chevron-left", size=16),
+            on_click=S.pagina_anterior,
+            disabled=S.reporte_pagina <= 1,
+            variant="soft", color_scheme="gray", size="2",
+        ),
+        rx.text(S.texto_paginas, size="2", weight="medium"),
+        rx.button(
+            rx.icon("chevron-right", size=16),
+            on_click=S.pagina_siguiente,
+            disabled=S.reporte_pagina >= S.reporte_paginas,
+            variant="soft", color_scheme="gray", size="2",
+        ),
+        align="center",
+        spacing="3",
+    )
+
+
+def dialog_reporte() -> rx.Component:
+    return rx.dialog.root(
+        rx.dialog.content(
+            rx.vstack(
+                rx.hstack(
+                    _navegador_paginas(),
+                    rx.spacer(),
+                    rx.button(
+                        rx.icon("x", size=16),
+                        on_click=S.cerrar_reporte,
+                        variant="soft", color_scheme="gray", size="2",
+                    ),
+                    width="100%",
+                    align="center",
+                    spacing="3",
+                ),
+                rx.box(
+                    # sin el `cond` el visor se monta siempre y pdf.js intentaría
+                    # renderizar en cada carga de la página
+                    rx.cond(
+                        S.reporte_abierto,
+                        rx.center(
+                            documento(
+                                pagina(page_number=S.reporte_pagina, width=740),
+                                file=S.reporte_uri,
+                                on_load_success=S.reporte_cargado,
+                            ),
+                            width="100%",
+                            padding="1em",
+                        ),
+                    ),
+                    rx.box(
+                        rx.button(
+                            rx.icon("download", size=18),
+                            "Descargar",
+                            on_click=S.descargar_reporte,
+                            color_scheme="amber",
+                            size="3",
+                            box_shadow="0 6px 20px rgba(0,0,0,.28)",
+                            pointer_events="auto",
+                        ),
+                        # sticky dentro del área con scroll: acompaña al documento
+                        # mientras se baja. El margen negativo evita que sume alto,
+                        # y `pointer_events` deja pasar el scroll al PDF de abajo.
+                        position="sticky",
+                        bottom="1.2em",
+                        margin_top="-3.6em",
+                        width="100%",
+                        display="flex",
+                        justify_content="flex-end",
+                        padding_right="1.2em",
+                        pointer_events="none",
+                        z_index="10",
+                    ),
+                    width="100%",
+                    height="72vh",
+                    overflow="auto",
+                    background="var(--gray-3)",
+                    border_radius="var(--radius-3)",
+                ),
+                width="100%",
+                spacing="3",
+            ),
+            width="95vw",
+            max_width="60em",
+        ),
+        open=S.reporte_abierto,
+    )
+
+
 # -------------------------------------------------------------------------- view
 
 
@@ -240,6 +335,7 @@ def eventos_cerrados_dashboard_view() -> rx.Component:
                         spacing="3",
                         width="100%",
                     ),
+                    dialog_reporte(),
                     spacing="4",
                     width="100%",
                 ),

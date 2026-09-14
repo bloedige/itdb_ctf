@@ -1,5 +1,4 @@
 import reflex as rx
-from itdb_ctf.components.navbar import logo
 from itdb_ctf.components.form import input_box
 from itdb_ctf.auth.local_auth_state import LocalAuthState
 
@@ -7,38 +6,41 @@ def logos() -> rx.Component:
     return rx.flex(
         rx.image(
             src="/itdb_logo.png",
-            width="6em",    
+            width="5em",    
             objet_fit="cover",
-            margin="1em",
         ),
         rx.flex(
             rx.flex(
-                rx.text("INSTITUTO TECNOLÓGICO", size="4", weight="regular"),
+                rx.text("INSTITUTO",weight="regular"),
+                rx.text("TECNOLÓGICO",weight="regular"),
+                font_size="1em",
                 justify_content="space-between",
             ),
             rx.flex(
-                rx.text("DON", size="8", weight="bold"),
-                rx.text("BOSCO", size="8", weight="bold"),
-                justify_content="space-between",
+                rx.text("DON BOSCO", weight="bold"),
+                width="100%",
+                font_size="2em",
             ),
             rx.flex(
-                rx.text("EL ALTO", size="3", weight="regular"),
-                rx.text("•", size="3", weight="regular"),
-                rx.text("LA PAZ", size="3", weight="regular"),
-                rx.text("•", size="3", weight="regular"),
-                rx.text("BOLIVIA", size="3", weight="regular"),
+                rx.text("EL ALTO", weight="regular"),
+                rx.text("•", weight="regular"),
+                rx.text("LA PAZ", weight="regular"),
+                rx.text("•", weight="regular"),
+                rx.text("BOLIVIA", weight="regular"),
                 color="#fab808",
-                gap=".5em",
-                justify_content="center",
+                width="100%",
+                font_size=".8em",
+                justify_content="space-between",
             ),
             height="100%",
             direction="column",
-            padding="2em 0em" ,
-            justify="between",      
+            justify="between", 
+            width="100%",     
         ),
         direction="row",
         width="100%",
         align="center",
+        gap="1em",
     )
 
 def login_institucional() -> rx.Component:
@@ -88,4 +90,7 @@ def login_card() -> rx.Component:
                 spacing="3",
                 width="100%",
             ),
+            bg="#0115417E",
+            padding="1em",
+            border_radius=".5em",
         )

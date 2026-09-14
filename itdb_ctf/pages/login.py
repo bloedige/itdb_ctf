@@ -34,10 +34,7 @@ def login_page() -> rx.Component:
         width="100%",
         height="100vh",
         justify_items="center",
-        
-        #bg="url('/fondo.png')",
-        #style={
-        #    "background-image":"url('/fondo.png')",
-        #    "apacity":".5",
-        #}
+        style={
+            "background-image": "linear-gradient(#01154180, #01154180), url('/fondo.png')"
+        }
     )

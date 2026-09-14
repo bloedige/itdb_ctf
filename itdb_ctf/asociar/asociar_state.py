@@ -31,6 +31,7 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
     puntaje_inicial: str = ""
     puntaje_minimo: str = ""
     modo_def: int = 0
+    modo_nombre_def: str = ""
     inicial_def: int = 0
     minimo_def: int = 0
 
@@ -110,6 +111,7 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
         self.candidatos = []
         self.carrito = []
         self.modo_def = 0
+        self.modo_nombre_def = ""
         self.inicial_def = 0
         self.minimo_def = 0
         self.id_modo_filtro = self.id_dificultad_filtro = self.id_categoria_filtro = ""
@@ -157,12 +159,13 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
         self.inicial_def = pi_def
         self.minimo_def = pm_def if pm_def is not None else 0
         self.modo_def = int(m_def)
+        self.modo_nombre_def = asociar.modo_puntaje(self.modo_def)
         self.dialog_bool = True
 
     def close_dialog(self):
         self.dialog_bool = self.override_bool = False
         self.id_dialog = 0
-        self.titulo_dialog = ""
+        self.titulo_dialog = self.modo_nombre_def = ""
         self.id_modo_puntaje = self.puntaje_inicial = self.puntaje_minimo = ""
         self.modo_def = self.inicial_def = self.minimo_def = 0
 
