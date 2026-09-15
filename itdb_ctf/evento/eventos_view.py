@@ -35,7 +35,7 @@ def form_evento() -> rx.Component:
 
 def form_crear_evento_view() -> rx.Component:
     return rx.dialog.root(
-        rx.dialog.trigger(rx.button(rx.icon("plus"),"Crear evento", on_click=CreaEventoState.open_close_dialog, variant="surface", color_scheme="jade")),
+        rx.dialog.trigger(rx.button(rx.icon("plus"),"Crear evento", on_click=CreaEventoState.open_close_dialog, variant="solid", color_scheme="jade")),
         rx.dialog.content(
             form_evento(),
             close_dialog_button(CreaEventoState.open_close_dialog),
@@ -86,7 +86,7 @@ def button_edit(id_evento) -> rx.Component:
         "Editar",
         on_click=EditarEventoState.cargar_evento(id_evento),
         size="1", 
-        variant="surface", 
+        variant="solid", 
         color_scheme="blue",
     ),
 
@@ -130,7 +130,7 @@ def fila_evento(evento:dict) -> rx.Component:
                         rx.cond(evento['activo'],"Desactivar","activar"),
                         on_click=lambda: ListarEventoState.arternar_activo(evento['id']),
                         color_scheme=rx.cond(evento['activo'],"ruby","jade"),
-                        size="1", variant="surface",
+                        size="1", variant="solid",
                     ),
                 ),
                 columns="2",
@@ -153,7 +153,7 @@ def fila_evento_movil(evento:dict) -> rx.Component:
                         rx.cond(evento['activo'],"Desactivar","activar"),
                         on_click=lambda: ListarEventoState.arternar_activo(evento['id']),
                         color_scheme=rx.cond(evento['activo'],"ruby","jade"),
-                        size="1", variant="surface",
+                        size="1", variant="solid",
                     ),
                 ),
                 columns="2",

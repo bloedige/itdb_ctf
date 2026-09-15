@@ -10,7 +10,7 @@ def archivo_up()->rx.Component:
                 rx.icon("file_check"),
                 rx.text(CrearRetosState.archivo_temp),
                 rx.spacer(),
-                rx.button("Cancelar", color_scheme="gray", on_click=[CrearRetosState.set_cancelar, rx.clear_selected_files("archivo_reto")], size="1", aling="right", variant="surface"),
+                rx.button("Cancelar", color_scheme="gray", on_click=[CrearRetosState.set_cancelar, rx.clear_selected_files("archivo_reto")], size="1", aling="right", variant="solid"),
                 color_scheme= "jade",
                 size="2",
                 width="100%",    
@@ -94,7 +94,7 @@ def form_pistas()->rx.Component:
 
 def form_crear_reto_view()->rx.Component:
     return rx.dialog.root(
-        rx.dialog.trigger(rx.button(rx.icon("plus"), "Crear reto", on_click=CrearRetosState.open_close_dialog, variant="surface", color_scheme="jade")),
+        rx.dialog.trigger(rx.button(rx.icon("plus"), "Crear reto", on_click=CrearRetosState.open_close_dialog, variant="solid", color_scheme="jade")),
         rx.dialog.content(
             rx.grid(
                 rx.grid(
@@ -292,7 +292,7 @@ def button_edit(id_reto) -> rx.Component:
         "Editar",
         on_click=EditarRetosState.cargar_reto(id_reto),
         size="1",
-        variant="surface",
+        variant="solid",
     ),
 
 def form_editar_reto_view() -> rx.Component:
@@ -357,7 +357,7 @@ def fila_reto(reto:dict) -> rx.Component:
                         on_click=lambda:ListarRetosState.alternar_activo(reto['id']),
                         color_scheme=rx.cond(reto['activo'],"ruby","jade"),
                         size="1",
-                        variant="surface",
+                        variant="solid",
                         ),
                         columns="2",
                         place_items="center",
@@ -381,7 +381,7 @@ def fila_reto_movil(reto:dict) -> rx.Component:
                         on_click=lambda:ListarRetosState.alternar_activo(reto['id']),
                         color_scheme=rx.cond(reto['activo'],"ruby","jade"),
                         size="1",
-                        variant="surface",
+                        variant="solid",
                     ),
                     columns="2",
                     place_items="center",

@@ -40,7 +40,7 @@ def editar_button(id_usuario):
     return rx.button(
         "Editar",
         size="1",
-        variant="surface",
+        variant="solid",
         color_scheme="blue",
         on_click=[EditarUsuarioState.cargar_usario(id_usuario), EditarUsuarioState.open_close_dialog],
     ),

@@ -59,7 +59,7 @@ def alert_reset_password(id_usuario, email, alias, rol) -> rx.Component:
                 "Restablecer",
                 color_scheme="amber",
                 size="1",
-                variant="surface",
+                variant="solid",
             ),
         ),
         rx.alert_dialog.content(

@@ -37,7 +37,7 @@ def form_crear_usuario_view() -> rx.Component:
                 rx.icon("plus"),
                 "Crear Usuario",
                 size="2",
-                variant="surface",
+                variant="solid",
                 color_scheme="jade",
                 on_click=CrearUsuarioState.open_close_dialog,
             )

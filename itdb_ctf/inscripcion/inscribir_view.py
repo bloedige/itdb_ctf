@@ -5,12 +5,12 @@ from itdb_ctf.inscripcion.inscripcion_state import InscribirState
 def accion_fila(u:dict) -> rx.Component:
     return rx.cond(
         InscribirState.ids_carrito.contains(u['id_usuario']),
-        rx.badge(rx.icon("check"), "Agregado", color_scheme="gray", variant="surface"),
+        rx.badge(rx.icon("check"), "Agregado", color_scheme="gray", variant="solid"),
         rx.button(
             rx.icon("plus"),
             "Agregar",
             size="1",
-            variant="surface",
+            variant="solid",
             color_scheme="jade",
             on_click=InscribirState.agregar_carrito(u['id_usuario'], u['nombre'], u['email_inst']),
         ),
@@ -256,7 +256,7 @@ def dialog_csv() -> rx.Component:
                 color_scheme="jade",
                 on_click=[InscribirState.open_close_dialog_csv],
                 width="100%",
-                variant="surface",
+                variant="solid",
             ),
         ),
         rx.dialog.content(
