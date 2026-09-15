@@ -1,6 +1,9 @@
+import os
 import reflex as rx 
 from itdb_ctf.catalogo.catalogo_states import CatalogoState, EnvioFlagState, listarPistaState
 from itdb_ctf.components.form import button
+
+BACKEND_URL = os.environ.get("PUBLIC_URL","http://localhost:8000")
 
 def chip(texto:str,valor:str,filtro_actual,on_click)->rx.Component:
     return rx.button(
@@ -168,7 +171,7 @@ def reto_content(reto:dict) -> rx.Component:
                 border_radius=".3em",
                 padding=".3em",
                 bg="#049BFF3E",
-                href=f"http://localhost:8000/api/reto/{reto['id_reto']}/descarga",text_decoration="none"
+                href=f"{BACKEND_URL}/api/reto/{reto['id_reto']}/descarga",text_decoration="none"
             ),
         ),
         rx.divider(),

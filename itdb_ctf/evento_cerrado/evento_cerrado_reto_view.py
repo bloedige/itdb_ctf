@@ -1,7 +1,10 @@
+import os
 import reflex as rx 
 from itdb_ctf.components.form import button
 from itdb_ctf.components.filtro_catalogo import filtros
 from itdb_ctf.evento_cerrado.evento_cerrado_reto_state import EventoCerradoRetoState, EventoCerradoEnvioFlagState, EventoCerradoListarPistaState
+
+BACKEND_URL = os.environ.get("PUBLIC_URL","http://localhost:8000")
 
 def pista_trigger(pista:dict) -> rx.Component:
     return rx.button(
@@ -85,6 +88,29 @@ def reto_content(reto: dict) -> rx.Component:
         rx.divider(),
         rx.text(reto['descripcion'], weight="regular", width="100%"),
         rx.foreach(EventoCerradoListarPistaState.pistas, dialog_pista),
+        rx.cond(
+            reto['original'] != None,
+            rx.link(
+                    rx.grid(
+                        rx.icon("file_down", stroke_width=1.5 , size=15),
+                        rx.text(reto['original'], size="2", weight="light", 
+                            style={
+                                "whiteSpace": "nowrap",
+                                "overflow": "hidden",
+                                "textOverflow": "ellipsis",
+                            },
+                        ),
+                        grid_template_columns="10% 1fr",
+                        spacing="2", 
+                    ),
+                max_width="30%",
+                border="1px solid",
+                border_radius=".3em",
+                padding=".3em",
+                bg="#049BFF3E",
+                href=f"{BACKEND_URL}/api/reto/{reto['id_reto']}/descarga",text_decoration="none"
+            ),
+        ),
         rx.divider(),
         rx.hstack(
             rx.input(

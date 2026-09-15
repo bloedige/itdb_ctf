@@ -1,11 +1,47 @@
-# Redis para el bus pub/sub y el cache del scoreboard (ver reddis.md).
-# Uso:  docker compose up -d redis
 services:
+app:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  restart: unless-stopped
+  environment:
+    API_URL=https://itdbctf.duckdns.org
+    PUBLIC_URL=https://itdbctf.duckdns.org
+    REDIS_URL=https://itdbctf.duckdns.org
+  volumes:
+    - archivos_retos:/app/FILES_ITDB_CTF/retos
+  dependes_on:
+    - redis
+  networks:
+    - dockploy-networks
+  labels:
+    - traefik.enable=true
+    - traefik.docker.network=dokploy-network
+    # ---- FRONTEND: 
+    - "traefik.http.routers.itdbctf-fe.rule=Host(`ctf.tudominio.com`)"
+    - traefik.http.routers.itdbctf-fe.entrypoints=websecure
+    - traefik.http.routers.itdbctf-fe.tls.certResolver=letsencrypt
+    - traefik.http.routers.itdbctf-fe.priority=1
+    - traefik.http.routers.itdbctf-fe.service=itdbctf-fe
+    - traefik.http.services.itdbctf-fe.loadbalancer.server.port=3000
+    # ---- BACKEND:
+    - "traefik.http.routers.itdbctf-be.rule=Host(`ctf.tudominio.com`) && (PathPrefix(`/_event`) || PathPrefix(`/_upload`) || PathPrefix(`/ping`) || PathPrefix(`/_health`) || PathPrefix(`/_all_routes`) || PathPrefix(`/auth`) || PathPrefix(`/api`))"
+    - traefik.http.routers.itdbctf-be.entrypoints=websecure
+    - traefik.http.routers.itdbctf-be.tls.certResolver=letsencrypt
+    - traefik.http.routers.itdbctf-be.priority=100
+    - traefik.http.routers.itdbctf-be.service=itdbctf-be
+    - traefik.http.services.itdbctf-be.loadbalancer.server.port=8000
+  
   redis:
     image: redis:7-alpine
-    container_name: itdb_ctf_redis
-    ports:
-      - "6379:6379"
-    # dev: sin persistencia (el freeze y el cache son estado efímero)
-    command: redis-server --save "" --appendonly no
     restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    networks: 
+      - dockploy-network
+
+volumes:
+  archivos_retos:
+
+networks:
+  dockploy-network:
+    external: true

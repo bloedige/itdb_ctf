@@ -13,8 +13,9 @@ from itdb_ctf.auth.oauth import url_de_autorizacion, canjear_codigo
 from itdb_ctf.auth.auth_logic import obtener_crear_usuario, DominiNoPermitido
 from itdb_ctf.auth.jwt_utils import emitir_jwt, validar_jwt
 
-fastapi_app = FastAPI()
+frontend_url = os.environ.get("PUBLIC_URL","http://localhost:3000")
 
+fastapi_app = FastAPI()
 
 @fastapi_app.get("/auth/login")
 async def login_oauth():
@@ -33,7 +34,7 @@ async def callback(request: Request, code: str, state: str):
     except DominiNoPermitido:
         return RedirectResponse("/login?error=dominio")
     token = emitir_jwt(usuario)
-    resp = RedirectResponse("http://localhost:3000/informacion")
+    resp = RedirectResponse(f"{frontend_url}/informacion")
 
     resp.set_cookie("token", token, max_age= 3600)
     resp.delete_cookie("oauth_state")

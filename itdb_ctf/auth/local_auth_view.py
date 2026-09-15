@@ -1,6 +1,9 @@
+import os
 import reflex as rx
 from itdb_ctf.components.form import input_box
 from itdb_ctf.auth.local_auth_state import LocalAuthState
+
+BACKEND_URL = os.environ.get("PUBLIC_URL","http://localhost:8000")
 
 def logos() -> rx.Component:
     return rx.flex(
@@ -52,7 +55,7 @@ def login_institucional() -> rx.Component:
             align="center",
             justify_content="space-evenly",
         ),
-        on_click=rx.redirect("http://localhost:8000/auth/login"),
+        on_click=rx.redirect(f"{BACKEND_URL}/auth/login"),
         width = "100%",
         height="auto",
         padding=".5em",
