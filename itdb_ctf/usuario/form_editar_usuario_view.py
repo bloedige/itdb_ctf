@@ -3,7 +3,7 @@ from itdb_ctf.components.form import input_box, select_catalog, badge_msg, butto
 from itdb_ctf.usuario.usuario_states import EditarUsuarioState
 
 
-def form_edit_content() -> rx.Componen:
+def form_edit_content() -> rx.Component:
     return rx.vstack(
         rx.heading("Editar cuenta usuario", size="3"),
         input_box("Nombre", "Nombre...", EditarUsuarioState.nombre, EditarUsuarioState.set_nombre, "text"),

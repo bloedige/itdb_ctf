@@ -10,6 +10,7 @@ config = rx.Config(
     # configuramos la url de la base de datos de la plataforma
     db_url=os.environ["DATABASE_URL"],
     # oculta el badge "Built with Reflex" (esquina inferior derecha)
+    api_url=os.environ["API_URL"],
     show_built_with_reflex=False,
     plugins=[
         rx.plugins.SitemapPlugin(),
