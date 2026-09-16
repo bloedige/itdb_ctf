@@ -18,14 +18,14 @@ app:
     - traefik.enable=true
     - traefik.docker.network=dokploy-network
     # ---- FRONTEND: 
-    - "traefik.http.routers.itdbctf-fe.rule=Host(`ctf.tudominio.com`)"
+    - "traefik.http.routers.itdbctf-fe.rule=Host(`itdbctf.duckdns.org`)"
     - traefik.http.routers.itdbctf-fe.entrypoints=websecure
     - traefik.http.routers.itdbctf-fe.tls.certResolver=letsencrypt
     - traefik.http.routers.itdbctf-fe.priority=1
     - traefik.http.routers.itdbctf-fe.service=itdbctf-fe
     - traefik.http.services.itdbctf-fe.loadbalancer.server.port=3000
     # ---- BACKEND:
-    - "traefik.http.routers.itdbctf-be.rule=Host(`ctf.tudominio.com`) && (PathPrefix(`/_event`) || PathPrefix(`/_upload`) || PathPrefix(`/ping`) || PathPrefix(`/_health`) || PathPrefix(`/_all_routes`) || PathPrefix(`/auth`) || PathPrefix(`/api`))"
+    - "traefik.http.routers.itdbctf-be.rule=Host(`itdbctf.duckdns.org`) && (PathPrefix(`/_event`) || PathPrefix(`/_upload`) || PathPrefix(`/ping`) || PathPrefix(`/_health`) || PathPrefix(`/_all_routes`) || PathPrefix(`/auth`) || PathPrefix(`/api`))"
     - traefik.http.routers.itdbctf-be.entrypoints=websecure
     - traefik.http.routers.itdbctf-be.tls.certResolver=letsencrypt
     - traefik.http.routers.itdbctf-be.priority=100
