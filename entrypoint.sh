@@ -22,4 +22,7 @@ print("auditoria_fn y triggers aplicados")
 PY
 
 echo "==> Reflex (produccion)"
-exec reflex run --env prod
+# --single-port: en prod el backend sirve API + frontend compilado juntos.
+# --backend-port 8000: sin esto Reflex usa :3000 por defecto y Traefik (que
+# apunta a :8000) devuelve Bad Gateway.
+exec reflex run --env prod --single-port --backend-port 8000
