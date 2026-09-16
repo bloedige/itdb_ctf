@@ -35,6 +35,6 @@ def login_page() -> rx.Component:
         height="100vh",
         justify_items="center",
         style={
-            "background-image": "linear-gradient(#01154180, #01154180), url('/fondo.png')"
+            "background-image": "linear-gradient(#01154180, #01154180), url('/fondo.webp')"
         }
     )

@@ -8,7 +8,7 @@ BACKEND_URL = os.environ.get("PUBLIC_URL","http://localhost:8000")
 def logos() -> rx.Component:
     return rx.flex(
         rx.image(
-            src="/itdb_logo.png",
+            src="/itdb_logo.webp",
             width="5em",    
             objet_fit="cover",
         ),
@@ -65,7 +65,7 @@ def login_institucional() -> rx.Component:
 def login_local() -> rx.Component:
     return rx.grid(
         input_box("Correo electronico", "usuario@itdonbosco.org",LocalAuthState.email, LocalAuthState.set_email, "email"),
-        input_box("Contraseña", "", LocalAuthState.email, LocalAuthState.set_password, "password"),
+        input_box("Contraseña", "", LocalAuthState.password, LocalAuthState.set_password, "password"),
         rx.button("Ingresar", on_click=LocalAuthState.entrar_local, width="100%", padding=".5em", color_scheme="amber"),
         width="100%",
         spacing="4",
