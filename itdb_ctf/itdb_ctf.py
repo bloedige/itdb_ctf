@@ -1,3 +1,4 @@
+import reflex as rx
 from itdb_ctf.api import app
 from itdb_ctf.utils.auditoria import ActorMiddleware
 from itdb_ctf.auth.auth_state import AuthState
@@ -71,7 +72,7 @@ from itdb_ctf.pages.auditoria_dashboard import auditoria_dashboard_page
 
 app.add_middleware(ActorMiddleware())
 
-app.add_page(login_page, route="/login")
+app.add_page(login_page, route="/")
 app.add_page(informacion_page, route="/informacion", on_load=InformacionState.cargar_info)
 app.add_page(catalogo_page, route="/retos", on_load=CatalogoState.cargar_retos)
 app.add_page(scoreboard_page, route="/scoreboard", on_load=ScoreboardState.cargar_ranking)

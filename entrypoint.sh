@@ -6,7 +6,10 @@ alembic upgrade head
 python -m scripts.seed
 
 python - <<'PY'
-import os, psycopg2
+import os
+from dotenv import load_dotenv
+load_dotenv("/app/.env")
+import psycopg2
 dns = os.environ["DATABASE_URL"].replace("+psycopg2", "")
 con = psycopg2.connect(dns)
 con.autocommit = True
@@ -15,4 +18,4 @@ con.close()
 print("auditoria_fn y triggers aplicados")
 PY
 
-exec reflex run --env prod --backed-host 0.0.0.0
+exec reflex run --env prod --backend-only --backend-host 0.0.0.0

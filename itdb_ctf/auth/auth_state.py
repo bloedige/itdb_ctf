@@ -56,29 +56,29 @@ class AuthState(rx.State):
 
     def requiere_login(self):
         if not self.autenticado:
-            return rx.redirect("/login")
+            return rx.redirect("/")
          
     def requiere_staff(self):
         if not self.autenticado:
-            return rx.redirect("/login")
+            return rx.redirect("/")
         if not self.es_staff:
             return rx.redirect("/informacion")
         
     def requiere_admin(self):
         if not self.autenticado:
-            return rx.redirect("/login")
+            return rx.redirect("/")
         if not self.es_admin:
             return rx.redirect("/informacion")
 
     def requiere_superadmin(self):
         if not self.autenticado:
-            return rx.redirect("/login")
+            return rx.redirect("/")
         if not self.es_superadmin:
             # un admin que llega por URL vuelve a su propio panel, no al de estudiante
             return rx.redirect("/admin/dashboard" if self.es_admin else "/informacion")
         
     def logout(self):
         self.token = ""
-        return rx.redirect("/login")
+        return rx.redirect("/")
 
 
