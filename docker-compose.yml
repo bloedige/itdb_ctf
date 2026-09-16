@@ -3,31 +3,33 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        API_URL: ${API_URL}
+        DATABASE_URL: ${DATABASE_URL}
+        JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+        ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN}
+        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+        GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
     restart: unless-stopped
     env_file:
       - .env
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - dokploy-network
+    expose:
+      - "8000"
     labels:
       - traefik.enable=true
       - traefik.docker.network=dokploy-network
-      - "traefik.http.routers.itdbctf-fe.rule=Host(`itdbctf.duckdns.org`)"
-      - traefik.http.routers.itdbctf-fe.entrypoints=websecure
-      - traefik.http.routers.itdbctf-fe.tls.certResolver=letsencrypt
-      - traefik.http.routers.itdbctf-fe.priority=1
-      - traefik.http.routers.itdbctf-fe.service=itdbctf-fe
-      - traefik.http.services.itdbctf-fe.loadbalancer.server.port=3000
-      - "traefik.http.routers.itdbctf-be.rule=Host(`itdbctf.duckdns.org`) && (PathPrefix(`/_event`) || PathPrefix(`/_upload`) || PathPrefix(`/ping`) || PathPrefix(`/_health`) || PathPrefix(`/_all_routes`) || PathPrefix(`/auth`) || PathPrefix(`/api`))"
-      - traefik.http.routers.itdbctf-be.entrypoints=websecure
-      - traefik.http.routers.itdbctf-be.tls.certResolver=letsencrypt
-      - traefik.http.routers.itdbctf-be.priority=100
-      - traefik.http.routers.itdbctf-be.service=itdbctf-be
-      - traefik.http.services.itdbctf-be.loadbalancer.server.port=8000
+      - "traefik.http.routers.itdbctf.rule=Host(`itdbctf.duckdns.org`)"
+      - traefik.http.routers.itdbctf.entrypoints=websecure
+      - traefik.http.routers.itdbctf.tls.certResolver=letsencrypt
+      - traefik.http.routers.itdbctf.priority=1
+      - traefik.http.routers.itdbctf.service=itdbctf
+      - traefik.http.services.itdbctf.loadbalancer.server.port=8000
     volumes:
       - archivos_retos:/app/FILES_ITDB_CTF/retos
 
@@ -35,26 +37,16 @@ services:
     image: redis:7-alpine
     restart: unless-stopped
     command: redis-server --save "" --appendonly no
-    networks:
-      - dokploy-network
-
-  postgres:
-    image: postgres:16
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    networks:
-      - dokploy-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - dokploy-network
 
 volumes:
   archivos_retos:
-  pgdata:
 
 networks:
   dokploy-network:
