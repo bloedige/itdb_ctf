@@ -67,7 +67,16 @@ def crear_evento(id_usuario,id_modalidad,id_modo_puntaje,titulo,descripcion=None
     return id_ev
 
 def editar_evento(id_evento, values:dict):
-    error = validar_evento(values.get("id_modalidad"), values.get("fec_inicio"), values.get("fec_fin"), id_evento)
+    # Los 5 argumentos, en orden: faltaba id_modo_puntaje y todo se corria un
+    # lugar (id_evento caia en fec_fin y excluir_id quedaba en None), asi que
+    # editar el evento abierto chocaba con su propia existencia.
+    error = validar_evento(
+        values.get("id_modalidad"),
+        values.get("id_modo_puntaje"),
+        values.get("fec_inicio"),
+        values.get("fec_fin"),
+        id_evento,
+    )
     if error:
         raise ValueError(error)
     with Session(engine) as s:
