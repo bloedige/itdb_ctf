@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         API_URL: ${API_URL}
+        PUBLIC_URL: ${PUBLIC_URL}
         DATABASE_URL: ${DATABASE_URL}
         JWT_SECRET_KEY: ${JWT_SECRET_KEY}
         ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN}
@@ -14,6 +15,13 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      # Pisan lo que venga del .env: dentro del contenedor el host de Redis y las
+      # rutas son otros. Sin REDIS_URL el cliente apunta a 127.0.0.1 (el propio
+      # contenedor de la app), el servicio redis de abajo queda sin usar y la app
+      # degrada a polling en silencio.
+      REDIS_URL: redis://redis:6379/0
+      RUTA_ARCHIVOS_RETO: /app/FILES_ITDB_CTF/retos
     depends_on:
       redis:
         condition: service_healthy
@@ -26,6 +34,14 @@ services:
       - traefik.docker.network=dokploy-network
       - "traefik.http.routers.itdbctf.rule=Host(`itdbctf.duckdns.org`)"
       - traefik.http.routers.itdbctf.entrypoints=websecure
+      # Router HTTP -> HTTPS. Sin esto cualquier URL http:// del dominio (p.ej.
+      # el redirect_uri de Google si quedó en http) no matchea ningún router y
+      # Traefik responde "404 page not found".
+      - "traefik.http.routers.itdbctf-http.rule=Host(`itdbctf.duckdns.org`)"
+      - traefik.http.routers.itdbctf-http.entrypoints=web
+      - traefik.http.routers.itdbctf-http.middlewares=itdbctf-https
+      - traefik.http.middlewares.itdbctf-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.itdbctf-https.redirectscheme.permanent=true
       - traefik.http.routers.itdbctf.tls.certResolver=letsencrypt
       - traefik.http.routers.itdbctf.priority=1
       - traefik.http.routers.itdbctf.service=itdbctf

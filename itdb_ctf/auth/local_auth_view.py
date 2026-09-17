@@ -3,7 +3,8 @@ import reflex as rx
 from itdb_ctf.components.form import input_box
 from itdb_ctf.auth.local_auth_state import LocalAuthState
 
-BACKEND_URL = os.environ.get("PUBLIC_URL","http://localhost:8000")
+# URL del backend (FastAPI). En prod single-port coincide con PUBLIC_URL.
+BACKEND_URL = os.environ.get("API_URL") or os.environ.get("PUBLIC_URL") or "http://localhost:8000"
 
 def logos() -> rx.Component:
     return rx.flex(
@@ -55,12 +56,17 @@ def login_institucional() -> rx.Component:
             align="center",
             justify_content="space-evenly",
         ),
-        on_click=rx.redirect(f"{BACKEND_URL}/auth/login"),
+        # window.location, NO rx.redirect: cuando la URL es del mismo origen
+        # -- el caso en produccion, donde frontend y backend comparten puerto --
+        # rx.redirect delega en el router de React, que busca /auth/login entre
+        # las rutas del SPA, no la encuentra y muestra su propio 404 sin llegar
+        # nunca al backend. Asi la navegacion la hace el navegador.
+        on_click=rx.call_script(f'window.location.href = "{BACKEND_URL}/auth/login"'),
         width = "100%",
         height="auto",
         padding=".5em",
         bg="#013269C0",
-    ),
+    )
    
 def login_local() -> rx.Component:
     return rx.grid(

@@ -4,7 +4,8 @@ from itdb_ctf.components.form import button
 from itdb_ctf.components.filtro_catalogo import filtros
 from itdb_ctf.evento_cerrado.evento_cerrado_reto_state import EventoCerradoRetoState, EventoCerradoEnvioFlagState, EventoCerradoListarPistaState
 
-BACKEND_URL = os.environ.get("PUBLIC_URL","http://localhost:8000")
+# URL del backend (FastAPI). En prod single-port coincide con PUBLIC_URL.
+BACKEND_URL = os.environ.get("API_URL") or os.environ.get("PUBLIC_URL") or "http://localhost:8000"
 
 def pista_trigger(pista:dict) -> rx.Component:
     return rx.button(
@@ -108,7 +109,12 @@ def reto_content(reto: dict) -> rx.Component:
                 border_radius=".3em",
                 padding=".3em",
                 bg="#049BFF3E",
-                href=f"{BACKEND_URL}/api/reto/{reto['id_reto']}/descarga",text_decoration="none"
+                # is_external => target="_blank": sin esto el router de React
+                # captura la URL (mismo origen en prod) y muestra su 404 en vez
+                # de pedirle el archivo al backend.
+                href=f"{BACKEND_URL}/api/reto/{reto['id_reto']}/descarga",
+                is_external=True,
+                text_decoration="none",
             ),
         ),
         rx.divider(),
