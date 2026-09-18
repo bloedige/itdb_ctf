@@ -27,7 +27,7 @@ def archivo_up()->rx.Component:
         ),
         ## subida de archivos
         rx.upload(
-            rx.text("Arrastra o haz click para subir el archivo del reto."),
+            rx.text("Arrastra o haz click para subir el archivo del reto. Unico archivo por reto más de un archivo convertir en .zip, .gzip o variante."),
             id="archivo_reto",
             max_files=1,
             on_drop=CrearRetosState.on_drop_file(rx.upload_files(upload_id="archivo_reto")),
