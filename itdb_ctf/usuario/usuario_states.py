@@ -92,7 +92,7 @@ class CrearUsuarioState(AuthState):
             if not v:
                 self.mensaje = msg
                 return False
-        if formato_email_valido(self.email):
+        if not formato_email_valido(self.email):
             self.mensaje = "Correo no valido"
             return False
         return True
