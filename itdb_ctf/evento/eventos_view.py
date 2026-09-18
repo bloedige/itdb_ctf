@@ -60,8 +60,6 @@ def form_evento_edit() -> rx.Component:
             columns={"base":"1","md":"2"},
             spacing="4",
             width="100%",
-            pointer_events=rx.cond(EditarEventoState.estado == "futuro", "auto", "none"),
-            opacity=rx.cond(EditarEventoState.estado == "futuro", None, ".6"), 
         ),
         rx.grid(
             rx.cond(EditarEventoState.mensaje != "", badge_msg(EditarEventoState.mensaje,"red"), rx.spacer()),
@@ -77,8 +75,7 @@ def form_evento_edit() -> rx.Component:
             width="100%",
         ),
         spacing="5",
-        width="100%",
-        pointer_events=rx.cond(EditarEventoState.estado == "concluido", "none", "auto"),       
+        width="100%",       
     )
 
 def button_edit(id_evento) -> rx.Component:
@@ -103,7 +100,6 @@ def form_editar_evento_view() -> rx.Component:
 
 def fila_evento(evento:dict) -> rx.Component:
     return rx.table.row(
-        rx.table.cell(evento['id']),
         rx.table.cell(evento['titulo'], style={"text-overflow":"ellipsis"}),
         rx.table.cell(evento['modalidad']),
         rx.table.cell(evento['modo_puntaje']),
@@ -115,12 +111,14 @@ def fila_evento(evento:dict) -> rx.Component:
             ),
         ),
         rx.table.cell(
-            rx.cond(
-                evento['activo'],
-                rx.text("Activo", color_scheme="jade",),
-                rx.text("Inactivo", color_scheme="gray",),
-            ),
+            rx.text(evento['estado']),
+            #rx.cond(
+            #    evento['activo'],
+            #    rx.text("Activo", color_scheme="jade",),
+            #    rx.text("Inactivo", color_scheme="gray",),
+            #),
         ),
+        
         rx.table.cell(
             rx.grid(
                 button_edit(evento['id']),
@@ -172,7 +170,6 @@ def tabla_eventos_view() -> rx.Component:
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        rx.table.column_header_cell("ID"),
                         rx.table.column_header_cell("Titulo"),
                         rx.table.column_header_cell("Modalidad"),
                         rx.table.column_header_cell("Modo puntaje"),

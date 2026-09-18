@@ -27,7 +27,7 @@ def archivo_up()->rx.Component:
         ),
         ## subida de archivos
         rx.upload(
-            rx.text("Arrastra o haz click para subir el archivo del reto."),
+            rx.text("Arrastra o haz click para subir el archivo del reto. Unico archivo por reto más de un archivo convertir en .zip, .gzip o variante."),
             id="archivo_reto",
             max_files=1,
             on_drop=CrearRetosState.on_drop_file(rx.upload_files(upload_id="archivo_reto")),
@@ -43,9 +43,9 @@ def form_reto()->rx.Component:
         rx.heading("Crear Reto", size="5"),
         input_box("Titulo", "Titulo...", CrearRetosState.titulo, CrearRetosState.set_titulo, "text"),
         text_area("Descripción","Descripción...",CrearRetosState.descripcion,CrearRetosState.set_descripcion),
-        input_box("Flag", "flag{...}",CrearRetosState.flag,CrearRetosState.set_flag,"text"),
+        input_box("Flag", "ITDB{flag_texto_plano...}",CrearRetosState.flag,CrearRetosState.set_flag,"text"),
         rx.grid(
-            input_box("Punataje inicial", "Pts...",CrearRetosState.puntaje_inicial,CrearRetosState.set_puntaje_inicial,"number"),
+            input_box("Puntaje inicial", "Pts...",CrearRetosState.puntaje_inicial,CrearRetosState.set_puntaje_inicial,"number"),
             input_box("Puntaje minimo", "Pts... (opcional)",CrearRetosState.puntaje_minimo,CrearRetosState.set_puntaje_minimo,"number"),
             select_catalog("Categoria", "Seleccionar...", CrearRetosState.categorias, CrearRetosState.set_id_categoria),
             select_catalog("Dificultad", "Seleccionar...", CrearRetosState.dificultades, CrearRetosState.set_id_dificultad),
@@ -207,7 +207,7 @@ def form_reto_edit() -> rx.Component:
         input_box("Titulo", "Titulo...", EditarRetosState.titulo, EditarRetosState.set_titulo, "text"),
         text_area("Descripción", "Descripción...", EditarRetosState.descripcion, EditarRetosState.set_descripcion),
         rx.grid(    
-            input_box("Flag", "Flag{...} nueva (vacia no cambia)", EditarRetosState.flag, EditarRetosState.set_flag, "text"),
+            input_box("Flag", "ITDB{...} nueva (vacia no cambia)", EditarRetosState.flag, EditarRetosState.set_flag, "text"),
             input_box("Puntaje inicial", "Pts...", EditarRetosState.puntaje_inicial, EditarRetosState.set_puntaje_inicial, "number"),
             input_box("Puntaje minimo", "Pts... (opcional)", EditarRetosState.puntaje_minimo, EditarRetosState.set_puntaje_minimo, "number"),
             select_catalog("Categoria", "Seleccionar...", EditarRetosState.categorias, EditarRetosState.set_id_categoria,EditarRetosState.id_categoria),
@@ -332,7 +332,6 @@ def form_editar_reto_view() -> rx.Component:
 
 def fila_reto(reto:dict) -> rx.Component:
     return rx.table.row(
-        rx.table.cell(reto['id']),
         rx.table.cell(reto['titulo']),
         rx.table.cell(reto['categoria']),
         rx.table.cell(reto['dificultad']),
@@ -400,7 +399,6 @@ def tabla_retos_view()->rx.Component:
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        rx.table.column_header_cell("ID"),
                         rx.table.column_header_cell("Titulo"),
                         rx.table.column_header_cell("Categoria"),
                         rx.table.column_header_cell("Dificultad"),

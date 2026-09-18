@@ -35,7 +35,7 @@ METODOS_AUTH = ["google", "local"]
 MODOS_PUNTAJE = ["estatico", "dinamico"]
 MODALIDADES = ["abierto", "cerrado"]
 DIFICULTADES = ["Fácil", "Media", "Difícil"]
-CATEGORIAS = ["Web", "Forensics", "Crypto", "Reversing", "Pwn", "OSINT", "Misc"]
+CATEGORIAS = ["Web", "Forensics", "Crypto", "Reversing", "Pwn", "OSINT", "Misc", "Stego"]
 ESTADOS_INSCR = ["inscrito", "descalificado"]
 
 

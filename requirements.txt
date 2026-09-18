@@ -11,3 +11,4 @@ pyJWT
 google-auth
 google-auth-oauthlib
 alembic
+tzdata

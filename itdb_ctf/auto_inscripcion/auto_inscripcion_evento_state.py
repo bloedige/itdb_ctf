@@ -1,6 +1,7 @@
 import reflex as rx
 from datetime import datetime, timezone
 from itdb_ctf.auth.auth_state import AuthState
+from itdb_ctf.utils.fechas import a_local
 from itdb_ctf.auto_inscripcion.auto_inscripcion_evento_logic import auto_inscripcion, eventos
 from itdb_ctf.websockets import canales, suscriptor
 from itdb_ctf.websockets.suscriptor import SuscriptorMixin
@@ -57,9 +58,8 @@ class AutoInscripcionState(SuscriptorMixin, AuthState):
                     fi = datetime.fromisoformat(fi)
                 if isinstance(ff, str):
                     ff = datetime.fromisoformat(ff)
-                tz_local= datetime.now().astimezone().tzinfo
-                item["fi_str"] = fi.astimezone(tz_local).strftime("%d-%m-%y %H:%M")if fi else "" 
-                item["ff_str"] = ff.astimezone(tz_local).strftime("%d-%m-%y %H:%M")if ff else "" 
+                item["fi_str"] = a_local(fi).strftime("%d-%m-%y %H:%M")if fi else "" 
+                item["ff_str"] = a_local(ff).strftime("%d-%m-%y %H:%M")if ff else "" 
                 hh, rt = divmod(int((ff - fi).total_seconds()), 3600)
                 item["duracion"] = f"{hh} Hrs."
                 if self.ahora < fi:

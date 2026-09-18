@@ -335,11 +335,9 @@ class EditarRetosState(AuthState):
         self.archivo_ruta = fisico
 
     def cargar_reto(self, id_reto:int):
-        print(id_reto)
         guard = self.requiere_staff()
         if guard: return guard
         reto = obtener_reto(id_reto)
-        print(reto)
         if not reto:
             return rx.toast.error("Reto inexistente")
         if not puede_editar(reto, self.id_usuario,self.codigo_rol):

@@ -4,9 +4,6 @@ from itdb_ctf.models import Reto, Contiene, Pista, ModoPuntaje, Dificultad, Cate
 from itdb_ctf.utils.security import flag_hasher
 from itdb_ctf.websockets import canales
 
-ROLES_STAFF ={"superadmin","admin","autor"}
-
-
 def eventos_de_reto(id_reto:int) -> list[int]:
     with Session(engine) as s:
         return list(s.exec(select(Contiene.id_evento).where(Contiene.id_reto == id_reto)).all())

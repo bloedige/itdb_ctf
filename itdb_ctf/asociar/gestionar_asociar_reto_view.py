@@ -132,7 +132,7 @@ def filtros() -> rx.Component:
         rx.vstack(
             rx.heading("Gestionar retos de un evento", size="4"),
             rx.grid(
-                select_catalog("Eventos (futuros)", "Seleccionar...", GestionarRetoState.eventos_gest, GestionarRetoState.set_id_evento_gest),
+                select_catalog("Eventos (futuros, activos)", "Seleccionar...", GestionarRetoState.eventos_gest, GestionarRetoState.set_id_evento_gest),
                 rx.grid(
                     input_box("Buscar por titulo", "Titutlo...", GestionarRetoState.busqueda_gest, GestionarRetoState.set_busqueda_gest, "text"),
                     select_catalog("Categorias", "Seleccionar...", GestionarRetoState.categorias, GestionarRetoState.set_id_categoria_gest_filtro, GestionarRetoState.id_categoria_gest_filtro),

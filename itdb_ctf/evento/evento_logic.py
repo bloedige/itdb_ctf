@@ -79,6 +79,9 @@ def editar_evento(id_evento, values:dict):
     )
     if error:
         raise ValueError(error)
+    ev_a = obtener_evento(id_evento)
+    if ev_a and estado_evento(ev_a) == "concluido":
+        raise ValueError("Evento concluido edicion restringida")
     with Session(engine) as s:
         ev = s.get(Evento, id_evento)
         if not ev:

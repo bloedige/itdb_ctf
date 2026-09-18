@@ -50,7 +50,7 @@ def listar_eventos_cerrados() -> list[tuple[str, str]]:
         if not modalidad:
             return []
         eventos = s.exec(
-            select(Evento).where(Evento.id_modalidad == modalidad.id_modalidad)
+            select(Evento).where(Evento.id_modalidad == modalidad.id_modalidad, Evento.activo == True)
         ).all()
 
     eventos.sort(

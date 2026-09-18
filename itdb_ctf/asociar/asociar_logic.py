@@ -9,9 +9,9 @@ def cargar_catalogos():
         dest, gest = [], []
         for ev in s.exec(select(Evento)).all():
             est = estado_evento(ev)
-            if est in ("abierto","futuro"):
+            if est in ("abierto","futuro","activo"):
                 dest.append((str(ev.id_evento),ev.titulo))
-            if est == "futuro":
+            if est in ("futuro","activo"):
                 gest.append((str(ev.id_evento),ev.titulo))
         return{
             "categorias":[("","Todos")] + [(str(c.id_categoria),c.etiqueta)for c in s.exec(select(Categoria)).all()],
@@ -59,7 +59,7 @@ def estado_evento(ev) -> str:
 def listar_eventos_validos() -> list[tuple[str,str]]:
     with Session(engine) as s:
         eventos = s.exec(select(Evento).where(Evento.activo == True).order_by(Evento.id_evento).order_by(Evento.fec_fin.desc())).all()
-        return [(str(ev.id_evento),ev.titulo) for ev in eventos if estado_evento(ev) in ("abierto","futuro")]
+        return [(str(ev.id_evento),ev.titulo) for ev in eventos if estado_evento(ev) in ("abierto","futuro","activo")]
 
 
 def validar_asociar_reto(id_reto:int, id_evento:int, id_modo_puntaje:int, inicial:int, minimo:int | None=None) -> tuple[bool,str]:

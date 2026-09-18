@@ -1,6 +1,7 @@
 import reflex as rx
 from datetime import datetime
 from itdb_ctf.auth.auth_state import AuthState
+from itdb_ctf.utils.fechas import desde_input, a_local
 from itdb_ctf.evento.evento_logic import crear_evento, editar_evento, obtener_evento, activar_desactivar_evento, listar_evento, catalogos
 from itdb_ctf.asociar.asociar_logic import estado_evento
 from itdb_ctf.websockets import canales, suscriptor
@@ -60,8 +61,8 @@ class CreaEventoState(AuthState):
         self.modos = cats["modos"]
 
     async def guardar_evento(self) -> bool:
-        fi = datetime.fromisoformat(self.fec_inicio) if self.fec_inicio else None
-        ff = datetime.fromisoformat(self.fec_fin) if self.fec_fin else None
+        fi = desde_input(self.fec_inicio)
+        ff = desde_input(self.fec_fin)
         try:
             crear_evento(
                 id_usuario=self.id_usuario,
@@ -215,16 +216,16 @@ class EditarEventoState(AuthState):
         self.descripcion = ev.descripcion or ""
         self.id_modalidad = str(ev.id_modalidad)
         self.id_modo_puntaje = str(ev.id_modo_puntaje)
-        self.fec_inicio = ev.fec_inicio.strftime("%Y-%m-%dT%H:%M") if ev.fec_inicio else ""
-        self.fec_fin = ev.fec_fin.strftime("%Y-%m-%dT%H:%M") if ev.fec_fin else ""
+        self.fec_inicio = a_local(ev.fec_inicio).strftime("%Y-%m-%dT%H:%M") if ev.fec_inicio else ""
+        self.fec_fin = a_local(ev.fec_fin).strftime("%Y-%m-%dT%H:%M") if ev.fec_fin else ""
         self.auto_inscripcion = bool(ev.auto_inscripcion)
         self.estado = estado_evento(ev)
         self.mensaje = ""
         self.open_close_dialog()
 
     async def guardar(self):
-        fi = datetime.fromisoformat(self.fec_inicio) if self.fec_inicio else None
-        ff = datetime.fromisoformat(self.fec_fin) if self.fec_fin else None
+        fi = desde_input(self.fec_inicio)
+        ff = desde_input(self.fec_fin)
         values = {
             "titulo":self.titulo,
             "descripcion":self.descripcion,
