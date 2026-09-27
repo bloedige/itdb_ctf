@@ -276,8 +276,8 @@ def editar_contiene(id_contiene:int, id_modo_puntaje:int, inicial:int, minimo:in
         ev = s.get(Evento, c.id_evento)
         if not ev:
             raise ValueError("Evento inexistente.")
-        if estado_evento(ev) != "futuro":
-            raise ValueError("Solo editable en eventos futuros.")
+        if estado_evento(ev) in ("concluido", "abierto"):
+            raise ValueError("Solo editable en eventos futuros, activos.")
         modo_ev = s.get(ModoPuntaje, ev.id_modo_puntaje)
         modo_ct = s.get(ModoPuntaje, id_modo_puntaje)
         if not modo_ct:
