@@ -87,7 +87,7 @@ def reto_content(reto: dict) -> rx.Component:
             place_items="center", width="100%",
         ),
         rx.divider(),
-        rx.text(reto['descripcion'], weight="regular", width="100%"),
+        rx.markdown(reto['descripcion'], weight="regular", width="100%"),
         rx.foreach(EventoCerradoListarPistaState.pistas, dialog_pista),
         rx.cond(
             reto['original'] != None,

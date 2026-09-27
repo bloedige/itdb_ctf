@@ -145,7 +145,7 @@ def reto_content(reto:dict) -> rx.Component:
             width="100%",
         ),
         rx.divider(),
-        rx.text(reto['descripcion'],weight="regular", width="100%",),
+        rx.markdown(reto['descripcion'],weight="regular", width="100%",),
         rx.flex(
             rx.text(f"by: {reto['creador']}", size="1", color="gray"),
             justify="end",
