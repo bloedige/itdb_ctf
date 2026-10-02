@@ -7,3 +7,6 @@ assets/external/
 *.db
 reflex.lock/
 CLAUDE.md
+# pruebas (pytest / cobertura)
+.pytest_cache/
+.coverage

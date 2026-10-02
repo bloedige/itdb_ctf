@@ -1,0 +1,4 @@
+# Solo para desarrollo (pruebas). NO se instala en el Dockerfile de producción.
+pytest
+pytest-cov
+fakeredis
