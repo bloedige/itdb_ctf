@@ -94,7 +94,7 @@ class PerfilEventoCerradoState(PerfilBaseState):
 
 class PerfilPublicoBaseState(PerfilBaseState):
     """Perfil de OTRO usuario, visto desde el link del scoreboard. Reusa
-    `perfil_contenido` (con `mostrar_email=False`) cargando por el `id_usuario`
+    `perfil_contenido` cargando por el `id_usuario`
     de la URL en vez de `self.id_usuario`."""
 
     def _id_objetivo(self) -> int:

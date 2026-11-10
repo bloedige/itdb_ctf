@@ -99,6 +99,7 @@ def tabla_ranking() -> rx.Component:
     return panel_ranking(
         EventoAbiertoDashboardState.hay_ranking,
         EventoAbiertoDashboardState.ranking,
+        con_nombre_completo=True,
     )
 
 def fila_reto(fila: dict) -> rx.Component:

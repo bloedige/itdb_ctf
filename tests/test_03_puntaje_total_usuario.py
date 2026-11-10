@@ -1,6 +1,5 @@
-"""Caja blanca — core/puntaje_logic.puntaje_total_usuario  (V(G) = 10, 7 caminos factibles).
+"""Caja blanca — core/puntaje_logic.puntaje_total_usuario  (V(G) = 6, todos factibles).
 
-Análisis completo en tests/docs/caja_blanca_03_puntaje_total_usuario.md.
 `corte` es el instante del freeze: solo cuenta lo ocurrido hasta ese momento.
 """
 
@@ -28,12 +27,12 @@ def base(modo="estatico"):
     return admin, est, ev
 
 
-def test_C1_evento_inexistente():
+def test_C3_evento_inexistente():
     _, est, _ = base()
     assert puntaje(est, 9999) == 0
 
 
-def test_C2_estatico_en_vivo():
+def test_C1_estatico_en_vivo():
     admin, est, ev = base()
     reto = crear_reto(admin)
     asociar(reto, ev, puntaje=100)
@@ -43,7 +42,7 @@ def test_C2_estatico_en_vivo():
     assert puntaje(est, ev) == 70                     # 100 − 30
 
 
-def test_C3_estatico_congelado():
+def test_C1_estatico_congelado():
     admin, est, ev = base()
     corte = ahora() - timedelta(hours=1)
     reto_a, reto_b = crear_reto(admin), crear_reto(admin)
@@ -88,7 +87,7 @@ def test_C6_dinamico_congelado_sin_resoluciones():
     assert puntaje(est, ev, corte) == 0
 
 
-def test_C7_piso_cero():
+def test_C2_piso_cero():
     admin, est, ev = base()
     reto = crear_reto(admin)
     asociar(reto, ev, puntaje=100)

@@ -27,6 +27,9 @@ config = rx.Config(
     plugins=[
         rx.plugins.SitemapPlugin(),
         rx.plugins.TailwindV4Plugin(),
-        rx.plugins.RadixThemesPlugin(),
+        # tema global: modo claro fijo ("dark" = oscuro, "inherit" = segun el sistema)
+        rx.plugins.RadixThemesPlugin(
+            theme=rx.theme(appearance="light", accent_color="blue"),
+        ),
     ]
 )

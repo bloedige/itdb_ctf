@@ -130,9 +130,11 @@ class CrearRetosState(AuthState):
 
     def agregar_pista(self):
         if not self.pista_desc:
-            self.mensaje = "la pista una descripcion."
+            self.mensaje = "la pista necesita de una descripcion."
             return
-        
+        if self.pista_costo < 0:
+            self.mensaje = "el costo de la pista deber mayor o igual que 0"
+            return
         self.pistas = self.pistas + [{
             "costo":self.pista_costo or "0",
             "descripcion":self.pista_desc,

@@ -213,6 +213,41 @@ def _accion_perfil(icono: str, texto: str, accion, color: str = NAV_INK) -> rx.C
     )
 
 
+def _icono_modo(size: int) -> rx.Component:
+    """Luna en modo claro y sol en modo oscuro: indica el modo al que se cambia."""
+    return rx.color_mode_cond(rx.icon("moon", size=size), rx.icon("sun", size=size))
+
+
+def _boton_modo() -> rx.Component:
+    """Botón compacto para la barra superior del jugador."""
+    return rx.center(
+        _icono_modo(18),
+        on_click=rx.toggle_color_mode,
+        title="Cambiar modo claro/oscuro",
+        color=NAV_INK,
+        cursor="pointer",
+        flex_shrink="0",
+        _hover={"color": ORO},
+    )
+
+
+def _accion_modo(color: str = NAV_INK) -> rx.Component:
+    """Ítem con texto para el sidebar de staff y los drawers de móvil."""
+    return rx.hstack(
+        _icono_modo(16),
+        rx.text(rx.color_mode_cond("Modo oscuro", "Modo claro"), size="2"),
+        on_click=rx.toggle_color_mode,
+        align="center",
+        spacing="2",
+        width="100%",
+        padding="0.5rem 0.6rem",
+        border_radius="8px",
+        color=color,
+        cursor="pointer",
+        _hover={"background": "rgba(255,255,255,.05)"},
+    )
+
+
 def _drawer(cuerpo, staff: bool = False) -> rx.Component:
     """Panel deslizante para móvil. `cuerpo` es una lista de componentes."""
     envolver = _solo_movil if staff else rx.mobile_only
@@ -302,6 +337,7 @@ def navbar() -> rx.Component:
             rx.spacer(),
             rx.tablet_and_desktop(
                 rx.hstack(
+                    _boton_modo(),
                     *[_nav_link(t, u) for t, u, _ in _LINKS_ABIERTO],
                     spacing="5",
                     align="center",
@@ -321,6 +357,7 @@ def navbar() -> rx.Component:
         _drawer(
             [
                 *[_link_drawer(t, u, ic) for t, u, ic in _LINKS_ABIERTO],
+                _accion_modo("white"),
                 rx.cond(
                     AuthState.autenticado,
                     rx.vstack(
@@ -405,6 +442,7 @@ def navbar_cerrado(id_evento) -> rx.Component:
             rx.spacer(),
             rx.tablet_and_desktop(
                 rx.hstack(
+                    _boton_modo(),
                     *[_nav_link(t, u) for t, u, _ in links],
                     spacing="5",
                     align="center",
@@ -428,6 +466,7 @@ def navbar_cerrado(id_evento) -> rx.Component:
         _drawer(
             [
                 *[_link_drawer(t, u, ic) for t, u, ic in links],
+                _accion_modo("white"),
                 rx.divider(margin_block="0.5em"),
                 _drawer_accion("Volver a eventos", "arrow_left", [NavState.cerrar_menu, rx.redirect("/eventos")]),
             ]
@@ -550,6 +589,7 @@ def _tarjeta_perfil_staff() -> rx.Component:
             AuthState.codigo_rol == "autor",
             _accion_perfil("pencil", "Editar perfil", [NavState.cerrar_menu, PerfilGestionState.abrir]),
         ),
+        _accion_modo(),
         _accion_perfil("log_out", "Cerrar sesión", [NavState.cerrar_menu, AuthState.logout], PELIGRO),
         spacing="1",
         align="stretch",

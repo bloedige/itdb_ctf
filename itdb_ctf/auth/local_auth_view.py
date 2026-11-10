@@ -9,9 +9,11 @@ BACKEND_URL = os.environ.get("API_URL") or os.environ.get("PUBLIC_URL") or "http
 def logos() -> rx.Component:
     return rx.flex(
         rx.image(
-            src="/itdb_logo.webp",
+            src="/LOGO_SISTEMAS.svg",
             width="5em",    
             objet_fit="cover",
+            bg="#ffffff",
+            border_radius="50%",
         ),
         rx.flex(
             rx.flex(
@@ -19,11 +21,13 @@ def logos() -> rx.Component:
                 rx.text("TECNOLÓGICO",weight="regular"),
                 font_size="1em",
                 justify_content="space-between",
+                color="#ffffff",
             ),
             rx.flex(
                 rx.text("DON BOSCO", weight="bold"),
                 width="100%",
                 font_size="2em",
+                color="#ffffff",
             ),
             rx.flex(
                 rx.text("EL ALTO", weight="regular"),
@@ -75,6 +79,7 @@ def login_local() -> rx.Component:
         rx.button("Ingresar", on_click=LocalAuthState.entrar_local, width="100%", padding=".5em", color_scheme="amber"),
         width="100%",
         spacing="4",
+        color="#ffffff",
     )  
 
 def separator(value:str) -> rx.Component:
@@ -86,6 +91,7 @@ def separator(value:str) -> rx.Component:
                 rx.divider(),
                 align="center",
                 width="100%",
+                color="#ffffff",
             ),  
     
 def login_card() -> rx.Component:

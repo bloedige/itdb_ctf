@@ -243,7 +243,7 @@ que se completan cuando el estudiante inicia sesion.""",
             rx.divider(),
             prev_csv("Omitidos", InscribirState.prev_omitidos, "ruby", True),
             width="100%",
-            max_height="60vh",
+            max_height="100%",
             overflow_y="auto",
         ),
     )

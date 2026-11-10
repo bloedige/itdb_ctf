@@ -1,8 +1,6 @@
 """Caja blanca — core/envio_logic.enviar_flag  (V(G) = 11).
 
-Un test por camino independiente. Análisis completo en
-tests/docs/caja_blanca_01_enviar_flag.md. El camino C5 (evento inexistente)
-no es factible: lo impide la clave foránea Contiene.id_evento → evento.
+Un test por camino independiente; los 11 caminos son factibles.
 """
 
 import pytest
@@ -64,6 +62,12 @@ def test_C4_reto_no_pertenece_al_evento(escenario):
     e = escenario
     reto = crear_reto(e["admin"], FLAG_OK)                      # sin asociar
     assert enviar_flag(e["est"], reto, e["ev"], FLAG_OK) == (False, "El reto no pertenece a este evento.")
+
+
+def test_C5_evento_inexistente(escenario):
+    e = escenario
+    assert enviar_flag(e["est"], e["reto"], 9999, FLAG_OK) == (False, "Evento no disponible.")
+    assert envios(e["est"], e["reto"], 9999) == []
 
 
 def test_C6_evento_futuro(escenario):

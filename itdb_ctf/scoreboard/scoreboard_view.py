@@ -27,12 +27,22 @@ def fila_ranking(fila:dict) -> rx.Component:
                     weight="medium",
                     size="4",
             ),
-            rx.text(
-                fila['nombre'], 
-                weight="medium", 
-                size="3",
-                on_click=rx.redirect(f"{ScoreboardState.perfil_base}/{fila['id_usuario']}"),
-                cursor="pointer",
+            rx.vstack(
+                rx.text(
+                    fila['nombre'],
+                    weight="medium",
+                    size="3",
+                    on_click=rx.redirect(f"{ScoreboardState.perfil_base}/{fila['id_usuario']}"),
+                    cursor="pointer",
+                ),
+                rx.text(
+                    fila['nombre_completo'],
+                    weight="light",
+                    font_size=".8em",
+                    color="#818181",
+                ),
+                spacing="0",
+                align="center",
             ),
             rx.text(f"{fila['puntaje']} pts.",weight="medium", size="3"),
             place_items="center",

@@ -23,7 +23,8 @@ def scoreboard(id_evento: int, corte: datetime | None = None) -> list[dict]:
     """Ranking del evento. `corte` (freeze): solo cuenta aciertos con
     `fec_envio <= corte` y recalcula puntajes a ese instante."""
     with Session(engine) as s:
-        q_filas = (select(Resuelve.id_usuario, Usuario.alias, Usuario.nombre)
+        q_filas = (select(Resuelve.id_usuario, Usuario.alias, Usuario.nombre,
+                          Usuario.paterno, Usuario.materno)
                    .join(Usuario, Resuelve.id_usuario == Usuario.id_usuario)
                    .where(Resuelve.id_evento == id_evento, Resuelve.flag_correcta == True))  # noqa: E712
         if corte is not None:
@@ -38,10 +39,12 @@ def scoreboard(id_evento: int, corte: datetime | None = None) -> list[dict]:
                    EstadoInscripcion.etiqueta == "descalificado")
         ).all())
         vistos = {}
-        for id_u, ali, nom in filas:
+        completos = {}
+        for id_u, ali, nom, pat, mat in filas:
             if id_u in descal or id_u in vistos:
                 continue
             vistos[id_u] = ali if ali else nom
+            completos[id_u] = " ".join(p for p in (nom, pat, mat) if p)
         ultimas = {}
         for id_u in vistos:
             q_ult = (select(Resuelve.fec_envio).where(
@@ -56,6 +59,7 @@ def scoreboard(id_evento: int, corte: datetime | None = None) -> list[dict]:
             {
                 "id_usuario": id_usuario,
                 "nombre": nombre,
+                "nombre_completo": completos[id_usuario],
                 "puntaje": puntaje_total_usuario(s, id_usuario, id_evento, corte),
                 "ultima": ultimas[id_usuario],
             }

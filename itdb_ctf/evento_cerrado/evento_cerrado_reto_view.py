@@ -15,7 +15,8 @@ def pista_trigger(pista:dict) -> rx.Component:
             width="100%",
         ),
         width="100%",
-        bg=rx.cond(pista['adquirido'], "#fab80850", "#B3B3B350"),
+        color_scheme=rx.cond(pista['adquirido'], "amber", "gray"),
+        #bg=rx.cond(pista['adquirido'], "#fab80850", "#B3B3B350"),
     )
 
 def pista_content(pista:dict) -> rx.Component:
@@ -58,14 +59,21 @@ def dialog_pista(pista:dict) -> rx.Component:
 def reto_trigger(reto: dict) -> rx.Component:
     return rx.card(
         rx.flex(
-            rx.text(reto['titulo'], size="3", weight="medium",
-                color=rx.cond(reto['resuelto'], "#fab808FF", "")),
-            rx.text(f"{reto['puntaje']} pts.", size="2", weight="regular",
-                color=rx.cond(reto['resuelto'], "#fab808FF", "")),
+            rx.text(
+                reto['titulo'], size="3", weight="medium",
+                #color=rx.cond(reto['resuelto'], "#fab808FF", ""),
+                color_scheme=rx.cond(reto['resuelto'],"amber",None),
+            ),
+            rx.text(
+                f"{reto['puntaje']} pts.", size="2", weight="regular",
+                #color=rx.cond(reto['resuelto'], "#fab808FF", ""),
+                color_scheme=rx.cond(reto['resuelto'],"amber",None),
+            ),
             align="center", justify="center", direction="column", height="12vh", width="100%",
         ),
         rx.text(f"by. {reto['creador']}", size="1", weight="light",
-            color=rx.cond(reto['resuelto'], "#fab808FF", ""),
+            #color=rx.cond(reto['resuelto'], "#fab808FF", ""),
+            color_scheme=rx.cond(reto['resuelto'],"amber",None),
             position="absolute", right="1em", bottom="1em",
         ),
         width="100%",
@@ -120,9 +128,10 @@ def reto_content(reto: dict) -> rx.Component:
         rx.divider(),
         rx.hstack(
             rx.input(
-                placeholder="flag{...}",
+                placeholder="ITDB{...}",
                 on_change=EventoCerradoEnvioFlagState.set_flag,
-                width="100%", auto_focus=True,
+                width="100%", 
+                #auto_focus=True,
             ),
             rx.button(
                 "Enviar",

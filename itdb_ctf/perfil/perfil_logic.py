@@ -69,6 +69,7 @@ def perfil_datos(id_usuario: int | None, id_evento: int | None) -> dict:
 
         alias = u.alias
         nombre = f"{u.nombre} {u.paterno}".strip()
+        nombre_completo = " ".join(p for p in (u.nombre, u.paterno, u.materno) if p)
         iniciales = _iniciales(u.nombre, u.paterno)
         email = u.email_inst
 
@@ -84,6 +85,7 @@ def perfil_datos(id_usuario: int | None, id_evento: int | None) -> dict:
         "inscrito": True,
         "alias": alias or nombre,
         "nombre": nombre,
+        "nombre_completo": nombre_completo,
         "iniciales": iniciales,
         "email": email,
         "puntaje": puntaje,

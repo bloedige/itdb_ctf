@@ -60,7 +60,8 @@ def pista_trigger(pista:dict) -> rx.Component:
             width="100%",
         ),
         width="100%",
-        bg=rx.cond(pista['adquirido'], "#00FFC350", "#B3B3B350"),
+        color_scheme=rx.cond(pista['adquirido'], "jade", "gray"),
+        #bg=rx.cond(pista['adquirido'], "#00FFC350", "#B3B3B350"),
     )
 
 def pista_content(pista:dict) -> rx.Component:
@@ -106,10 +107,12 @@ def reto_trigger(reto:dict) -> rx.Component:
     return rx.card(
         rx.flex(
             rx.text(reto['titulo'],size="3", weight="medium",
-            color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
+            #color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
+            color_scheme=rx.cond(reto['resuelto'],"jade",None),
             ),
             rx.text(f"{reto['puntaje']} pts.",size="2", weight="regular",
-            color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
+            #color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
+            color_scheme=rx.cond(reto['resuelto'],"jade",None),
             ),
             align="center",
             justify="center",
@@ -118,7 +121,8 @@ def reto_trigger(reto:dict) -> rx.Component:
             width="100%",
         ),
         rx.text(f"by. {reto['creador']}",size="1", weight="light",
-            color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
+            #color=rx.cond(reto['resuelto'],"#00FFC3FF",""),
+            color_scheme=rx.cond(reto['resuelto'],"jade",None),
             position="absolute",
             right="1em",
             bottom="1em",
@@ -183,10 +187,10 @@ def reto_content(reto:dict) -> rx.Component:
         rx.divider(),
         rx.hstack(
             rx.input(
-                placeholder="flag{...}",
+                placeholder="ITDB{...}",
                 on_change=EnvioFlagState.set_flag,
                 width="100%",
-                auto_focus=True,
+                #auto_focus=True,
             ),
             rx.button(
                 "Enviar",

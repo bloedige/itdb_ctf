@@ -24,7 +24,10 @@ def _card(titulo, contenido) -> rx.Component:
 
 def card_identidad(E, mostrar_email: bool = True) -> rx.Component:
     d = E.datos
-    identidad = [rx.heading(d["alias"], size="3")]
+    identidad = [
+        rx.heading(d["alias"], size="3"),
+        rx.text(d["nombre_completo"], size="1", color_scheme="gray"),
+    ]
     if mostrar_email:
         identidad.append(rx.text(d["email"], size="1", color_scheme="gray"))
     return rx.card(
@@ -41,6 +44,7 @@ def card_identidad(E, mostrar_email: bool = True) -> rx.Component:
                 justify="start",
                 direction="row",
                 gap="1em",
+                min_width=rx.breakpoints(initial="auto", lg="18em"),
             ),
             rx.vstack(
                 rx.hstack(

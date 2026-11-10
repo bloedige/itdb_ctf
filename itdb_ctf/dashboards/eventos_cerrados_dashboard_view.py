@@ -225,7 +225,7 @@ def dialog_reporte() -> rx.Component:
                     rx.button(
                         rx.icon("x", size=16),
                         on_click=S.cerrar_reporte,
-                        variant="soft", color_scheme="gray", size="2",
+                        variant="ghost", color_scheme="gray", size="2",
                     ),
                     width="100%",
                     align="center",
@@ -316,7 +316,7 @@ def eventos_cerrados_dashboard_view() -> rx.Component:
                     fila_kpis(),
                     rx.grid(
                         _grafica_evolucion(S.evol_opcion),
-                        panel_ranking(S.hay_ranking, S.ranking),
+                        panel_ranking(S.hay_ranking, S.ranking, con_nombre_completo=True),
                         columns={"base": "1", "md": "60% 1fr"},
                         spacing="3",
                         width="100%",

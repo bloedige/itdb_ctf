@@ -15,12 +15,12 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str) ->
         reto = s.get(Reto,id_reto)
         if not reto or not reto.activo:
             return False, "Reto no disponible."
-        cont = s.exec(select(Contiene).where(Contiene.id_reto==id_reto,Contiene.id_evento==id_evento)).first()
-        if not cont:
-            return False, "El reto no pertenece a este evento."
         ev = s.get(Evento, id_evento)
         if not ev:
             return False, "Evento no disponible."
+        cont = s.exec(select(Contiene).where(Contiene.id_reto==id_reto,Contiene.id_evento==id_evento)).first()
+        if not cont:
+            return False, "El reto no pertenece a este evento."
         est_evento = estado_evento(ev)
         if est_evento == "futuro":
             return False, "El evento aún no ha iniciado."

@@ -295,7 +295,21 @@ def _fila_ranking(fila: dict) -> rx.Component:
     )
 
 
-def panel_ranking(hay, ranking, titulo: str = "Ranking · top 10") -> rx.Component:
+def _fila_ranking_detalle(fila: dict) -> rx.Component:
+    return rx.table.row(
+        rx.table.cell(fila["posicion"]),
+        rx.table.cell(
+            rx.vstack(
+                rx.text(fila["nombre"]),
+                rx.text(fila["nombre_completo"], weight="light", font_size=".8em", color="#818181"),
+                spacing="0",
+            ),
+        ),
+        rx.table.cell(f"{fila['puntaje']} pts"),
+    )
+
+
+def panel_ranking(hay, ranking, titulo: str = "Ranking · top 10", con_nombre_completo: bool = False) -> rx.Component:
     return panel(
         titulo,
         rx.cond(
@@ -308,7 +322,7 @@ def panel_ranking(hay, ranking, titulo: str = "Ranking · top 10") -> rx.Compone
                         rx.table.column_header_cell("Puntaje"),
                     ),
                 ),
-                rx.table.body(rx.foreach(ranking, _fila_ranking)),
+                rx.table.body(rx.foreach(ranking, _fila_ranking_detalle if con_nombre_completo else _fila_ranking)),
                 width="100%",
                 height="35vh",
                 overflow_y="auto",

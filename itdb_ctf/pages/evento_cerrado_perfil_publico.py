@@ -11,14 +11,14 @@ def evento_cerrado_perfil_publico_page() -> rx.Component:
     # `EventoCerradoAccesoState`/`con_acceso` (esos exigen inscripción del
     # VISITANTE en Retos/Perfil propio; acá solo importa que el usuario del
     # link haya participado, lo que valida `PerfilPublicoCerradoState`).
-    return rx.vstack(
+    return rx.grid(
         navbar_cerrado(EventoCerradoInfromacionState.id_cerrado),
         perfil_contenido(
             PerfilPublicoCerradoState,
             titulo="Perfil",
             vacio="Ese usuario no participó en este evento.",
-            mostrar_email=False,
         ),
         width="100%",
+        justify_items="center",
         spacing="0",
     )

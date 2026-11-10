@@ -12,7 +12,6 @@ def perfil_publico_page() -> rx.Component:
             PerfilPublicoAbiertoState,
             titulo="Perfil",
             vacio="Ese usuario no participa en el evento abierto.",
-            mostrar_email=False,
         ),
         justify_items="center",
         width="100%",

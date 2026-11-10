@@ -14,92 +14,304 @@
 ## 1. Código fuente con nodos numerados
 
 ```python
- 54  def puntaje_total_usuario(session, id_usuario, id_evento, corte=None):
- 58-61   q_gastados = select(sum(Compra.puntos_usados))...           # N1
- 62      if corte is not None:                                      # P1
- 63          q_gastados = q_gastados.where(fec_compra <= corte)     # N2
- 64-66   gastados = ...; ev = session.get(Evento, id_evento)        # N3
- 67      mod_ev = session.get(ModoPuntaje, ...) if ev else None     # P2 → N4 (get) / N5 (None)
- 68      estatico = (mod_ev is None) or (mod_ev.etiqueta == "estatico")  # P3 / P4
- 70      if estatico:                                               #   (decide con P3/P4)
- 71-76       q = select(sum(Contiene.puntaje_inicial))...           # N6
- 77          if corte is not None:                                  # P5
- 78              q = q.where(Resuelve.fec_envio <= corte)           # N7
- 79          total = session.exec(q).one()                          # N8
- 80      elif corte is None:                                        # P6
- 82-88       total = select(sum(Contiene.puntaje_actual))...        # N9
- 89      else:
- 91-98       retos = [retos resueltos hasta el corte]               # N10
- 99          total = sum(calcular_puntaje(...) for id_reto in retos)# P7 (bucle) / N11 (cuerpo)
-101      score = total - gastados                                   # N12
-102      return score if score > 0 else 0                           # P8 → N13 (score) / N14 (0)
-                                                                    # F (fin)
+ 54  def _hasta_corte(q, columna, corte):
+ 56      return q if corte is None else q.where(columna <= corte)   # (ver nota)
+
+ 58  def puntaje_total_usuario(session, id_usuario, id_evento, corte=None):
+ 62      ev = session.get(Evento, id_evento)                        # 1
+ 63      if not ev:                                                 # 2
+ 64          return 0                                               # 3
+ 65-70   gastados = exec(_hasta_corte(sum(Compra...), fec_compra, corte))  # 4
+ 72      mod_ev = session.get(ModoPuntaje, ev.id_modo_puntaje)      # 4
+ 73      if mod_ev.etiqueta == "estatico":                          # 5
+ 74-80       total = exec(_hasta_corte(sum(puntaje_inicial), fec_envio, corte))  # 6
+ 81      elif corte is None:                                        # 7
+ 83-89       total = select(sum(Contiene.puntaje_actual))...        # 8
+ 90      else:
+ 92-99       retos = [retos resueltos hasta el corte]               # 9
+100          total = sum(calcular_puntaje(...) for id_reto in retos)# 10 (bucle) / 11 (cuerpo)
+102      score = total - gastados                                   # 12
+103      return score if score > 0 else 0                           # 13 → 14 (score) / 15 (0)
+                                                                    # 16 (fin)
 ```
 
 Notas de modelado:
-- La línea 68 es una condición compuesta (`A or B`); se separa en P3 y P4. La
-  línea 70 solo pregunta por el resultado de la 68, así que P3/P4 deciden
-  directamente si se va por la rama estática o la dinámica.
-- El generador de la línea 99 es un **bucle**, y McCabe cuenta cada bucle como un
-  nodo predicado (P7: ¿queda otro reto por sumar?).
+- El generador de la línea 100 es un **bucle**, y McCabe cuenta cada bucle como un
+  nodo predicado (10: ¿queda otro reto por sumar?).
+- `_hasta_corte` es una función auxiliar con su propio grafo (un solo predicado,
+  `corte is None`, V(G) = 2). Dentro de `puntaje_total_usuario` cada llamada es
+  una sentencia más de 4 o 6. Sus dos caminos se cubren con el par de pruebas C1:
+  `test_C1_estatico_en_vivo` (sin corte → devuelve la consulta tal cual) y
+  `test_C1_estatico_congelado` (con corte → agrega el filtro de fecha).
+
+**Ajuste del código (McCabe y Watson, 1996, §5.1).** La versión anterior tenía
+V(G) = 9 y dos caminos que ninguna entrada podía recorrer:
+- `mod_ev is None` con un evento existente era imposible por la clave foránea
+  `evento.id_modo_puntaje → modo_puntaje`.
+- `corte` se preguntaba tres veces (filtro de compras, filtro de la rama estática
+  y `elif` de la rama dinámica); las combinaciones contradictorias ("no hay corte"
+  en un punto y "sí hay corte" en otro) formaban caminos imposibles.
+
+Se reestructuró la función para quitar esas dependencias: si el evento no existe
+se devuelve 0 de inmediato, se eliminó la condición `mod_ev is None` y los
+filtros por `corte` se movieron a `_hasta_corte`. La firma y el resultado de la
+función no cambian; ahora todos los caminos son factibles.
 
 ## 2. Grafo de flujo
 
 ```mermaid
-flowchart TD
-    N1 --> P1
-    P1 -- sí --> N2 --> N3
-    P1 -- no --> N3
-    N3 --> P2
-    P2 -- sí --> N4 --> P3
-    P2 -- no --> N5 --> P3
-    P3 -- sí --> N6
-    P3 -- no --> P4
-    P4 -- sí --> N6
-    P4 -- no --> P6
-    N6 --> P5
-    P5 -- sí --> N7 --> N8
-    P5 -- no --> N8
-    N8 --> N12
-    P6 -- sí --> N9 --> N12
-    P6 -- no --> N10 --> P7
-    P7 -- sí --> N11 --> P7
-    P7 -- no --> N12
-    N12 --> P8
-    P8 -- sí --> N13 --> F
-    P8 -- no --> N14 --> F
+graph TD
+    n1((1)) --- n2((2))
+    n2 --- n3((3))
+    n3 --- n16((16))
+    n2 --- n4((4))
+    n4 --- n5((5))
+    n5 --- n6((6))
+    n6 --- n12((12))
+    n5 --- n7((7))
+    n7 --- n8((8))
+    n8 --- n12
+    n7 --- n9((9))
+    n9 --- n10((10))
+    n10 --- n11((11))
+    n11 --- n10
+    n10 --- n12
+    n12 --- n13((13))
+    n13 --- n14((14))
+    n14 --- n16
+    n13 --- n15((15))
+    n15 --- n16
 ```
+
+**Convención del grafo:** las aristas no llevan flecha ni etiqueta; el flujo va de arriba hacia abajo y converge en los nodos de unión y en el nodo final (16). De cada nodo predicado salen dos aristas: la de la **izquierda** corresponde a la condición verdadera (**sí**) y la de la **derecha** a la falsa (**no**).
 
 ## 3. Complejidad ciclomática V(G)
 
 | Método | Cálculo | Resultado |
 |---|---|---|
-| Nodos predicado | P = 8 (P1…P8) → V(G) = P + 1 | **9** |
-| Aristas y nodos | E = 30, N = 23 → V(G) = 30 − 23 + 2 | **9** |
-| Regiones | 8 cerradas + 1 exterior | **9** |
+| Nodos predicado | P = 5 (nodos 2, 5, 7, 10, 13) → V(G) = P + 1 | **6** |
+| Aristas y nodos | E = 20, N = 16 → V(G) = 20 − 16 + 2 | **6** |
+| Regiones | 5 cerradas + 1 exterior | **6** |
 
 ## 4. Caminos independientes
 
-| Camino | Recorrido (decisiones) | Descripción | ¿Factible? |
-|---|---|---|---|
-| C1 | P1 no · P2 no · P3 sí · P5 no · P8 no | Evento inexistente → 0 | Sí |
-| C2 | P1 no · P2 sí · P3 no · P4 sí · P5 no · P8 sí | Estático, en vivo | Sí |
-| C3 | P1 sí · P2 sí · P3 no · P4 sí · P5 sí · P8 sí | Estático, congelado (freeze) | Sí |
-| C4 | P1 no · P2 sí · P3 no · P4 no · P6 sí · P8 sí | Dinámico, en vivo | Sí |
-| C5 | P1 sí · … · P4 no · P6 no · P7 sí (itera) · P8 sí | Dinámico congelado con retos resueltos | Sí |
-| C6 | P1 sí · … · P4 no · P6 no · P7 no (0 vueltas) · P8 no | Dinámico congelado sin retos antes del corte | Sí |
-| C7 | igual que C2 pero P8 no | Gastó más de lo que ganó → piso 0 | Sí |
-| C8 | P2 sí · P3 sí | El evento existe pero su modo de puntaje no | **No** |
-| C9 | P1 no · P5 sí (o P1 sí · P6 sí) | `corte` vacío y con valor a la vez | **No** |
+| Camino | Recorrido | Descripción |
+|---|---|---|
+| C1 | 1 → 2(no) → 4 → 5(sí) → 6 → 12 → 13(sí) → 14 → 16 | Estático, saldo positivo (en vivo y congelado) |
+| C2 | … → 5(sí) → 6 → 12 → 13(no) → 15 → 16 | Estático, gastó más de lo que ganó → piso 0 |
+| C3 | 1 → 2(sí) → 3 → 16 | Evento inexistente → 0 |
+| C4 | … → 5(no) → 7(sí) → 8 → 12 → 13(sí) → 14 → 16 | Dinámico, en vivo |
+| C5 | … → 7(no) → 9 → 10(sí) → 11 → 10(no) → 12 → 13(sí) → 14 → 16 | Dinámico congelado con retos resueltos (el bucle itera) |
+| C6 | … → 7(no) → 9 → 10(no) → 12 → 13(no) → 15 → 16 | Dinámico congelado sin retos antes del corte (0 vueltas) |
 
-**Caminos no factibles:**
-- **C8:** `evento.id_modo_puntaje` es clave foránea a `modo_puntaje`; si el
-  evento existe, su modo también, así que `mod_ev` nunca es `None` con `ev` existente.
-- **C9:** P1, P5 y P6 preguntan por la **misma** variable (`corte`). Si P1 dijo
-  "no hay corte", P5 no puede decir "sí hay corte" (y al revés). Son predicados
-  correlacionados.
+Todos los caminos son factibles: **6 caminos, uno o más tests por camino**.
 
-Resultado: **7 caminos factibles**, uno por test.
+### 4.1 Grafo de cada camino
+
+En cada grafo se resalta en naranja el recorrido del camino (nodos y
+aristas); el resto del grafo queda en gris como referencia. Cada nodo
+(círculo) es una sentencia o grupo de sentencias, numerado según el código
+de la sección 1; el nodo 16 es el nodo final. Se usa la misma convención de la
+sección 2 (izquierda = sí, derecha = no); en el recorrido escrito bajo cada
+grafo, `(sí)`/`(no)` indica la salida que toma cada nodo predicado.
+
+**C1 — Estático, saldo positivo (en vivo y congelado)**
+
+`1 → 2(no) → 4 → 5(sí) → 6 → 12 → 13(sí) → 14 → 16`
+
+```mermaid
+graph TD
+    n1((1)) --- n2((2))
+    n2 --- n3((3))
+    n3 --- n16((16))
+    n2 --- n4((4))
+    n4 --- n5((5))
+    n5 --- n6((6))
+    n6 --- n12((12))
+    n5 --- n7((7))
+    n7 --- n8((8))
+    n8 --- n12
+    n7 --- n9((9))
+    n9 --- n10((10))
+    n10 --- n11((11))
+    n11 --- n10
+    n10 --- n12
+    n12 --- n13((13))
+    n13 --- n14((14))
+    n14 --- n16
+    n13 --- n15((15))
+    n15 --- n16
+    classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
+    classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
+    class n1,n2,n4,n5,n6,n12,n13,n14,n16 camino
+    linkStyle default stroke:#bdbdbd,stroke-width:1px
+    linkStyle 0,3,4,5,6,15,16,17 stroke:#e65100,stroke-width:3px
+```
+
+**C2 — Estático, gastó más de lo que ganó → piso 0**
+
+`1 → 2(no) → 4 → 5(sí) → 6 → 12 → 13(no) → 15 → 16`
+
+```mermaid
+graph TD
+    n1((1)) --- n2((2))
+    n2 --- n3((3))
+    n3 --- n16((16))
+    n2 --- n4((4))
+    n4 --- n5((5))
+    n5 --- n6((6))
+    n6 --- n12((12))
+    n5 --- n7((7))
+    n7 --- n8((8))
+    n8 --- n12
+    n7 --- n9((9))
+    n9 --- n10((10))
+    n10 --- n11((11))
+    n11 --- n10
+    n10 --- n12
+    n12 --- n13((13))
+    n13 --- n14((14))
+    n14 --- n16
+    n13 --- n15((15))
+    n15 --- n16
+    classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
+    classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
+    class n1,n2,n4,n5,n6,n12,n13,n15,n16 camino
+    linkStyle default stroke:#bdbdbd,stroke-width:1px
+    linkStyle 0,3,4,5,6,15,18,19 stroke:#e65100,stroke-width:3px
+```
+
+**C3 — Evento inexistente → 0**
+
+`1 → 2(sí) → 3 → 16`
+
+```mermaid
+graph TD
+    n1((1)) --- n2((2))
+    n2 --- n3((3))
+    n3 --- n16((16))
+    n2 --- n4((4))
+    n4 --- n5((5))
+    n5 --- n6((6))
+    n6 --- n12((12))
+    n5 --- n7((7))
+    n7 --- n8((8))
+    n8 --- n12
+    n7 --- n9((9))
+    n9 --- n10((10))
+    n10 --- n11((11))
+    n11 --- n10
+    n10 --- n12
+    n12 --- n13((13))
+    n13 --- n14((14))
+    n14 --- n16
+    n13 --- n15((15))
+    n15 --- n16
+    classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
+    classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
+    class n1,n2,n3,n16 camino
+    linkStyle default stroke:#bdbdbd,stroke-width:1px
+    linkStyle 0,1,2 stroke:#e65100,stroke-width:3px
+```
+
+**C4 — Dinámico, en vivo**
+
+`1 → 2(no) → 4 → 5(no) → 7(sí) → 8 → 12 → 13(sí) → 14 → 16`
+
+```mermaid
+graph TD
+    n1((1)) --- n2((2))
+    n2 --- n3((3))
+    n3 --- n16((16))
+    n2 --- n4((4))
+    n4 --- n5((5))
+    n5 --- n6((6))
+    n6 --- n12((12))
+    n5 --- n7((7))
+    n7 --- n8((8))
+    n8 --- n12
+    n7 --- n9((9))
+    n9 --- n10((10))
+    n10 --- n11((11))
+    n11 --- n10
+    n10 --- n12
+    n12 --- n13((13))
+    n13 --- n14((14))
+    n14 --- n16
+    n13 --- n15((15))
+    n15 --- n16
+    classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
+    classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
+    class n1,n2,n4,n5,n7,n8,n12,n13,n14,n16 camino
+    linkStyle default stroke:#bdbdbd,stroke-width:1px
+    linkStyle 0,3,4,7,8,9,15,16,17 stroke:#e65100,stroke-width:3px
+```
+
+**C5 — Dinámico congelado con retos resueltos (el bucle itera)**
+
+`1 → 2(no) → 4 → 5(no) → 7(no) → 9 → 10(sí) → 11 → 10(no) → 12 → 13(sí) → 14 → 16`
+
+```mermaid
+graph TD
+    n1((1)) --- n2((2))
+    n2 --- n3((3))
+    n3 --- n16((16))
+    n2 --- n4((4))
+    n4 --- n5((5))
+    n5 --- n6((6))
+    n6 --- n12((12))
+    n5 --- n7((7))
+    n7 --- n8((8))
+    n8 --- n12
+    n7 --- n9((9))
+    n9 --- n10((10))
+    n10 --- n11((11))
+    n11 --- n10
+    n10 --- n12
+    n12 --- n13((13))
+    n13 --- n14((14))
+    n14 --- n16
+    n13 --- n15((15))
+    n15 --- n16
+    classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
+    classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
+    class n1,n2,n4,n5,n7,n9,n10,n11,n12,n13,n14,n16 camino
+    linkStyle default stroke:#bdbdbd,stroke-width:1px
+    linkStyle 0,3,4,7,10,11,12,13,14,15,16,17 stroke:#e65100,stroke-width:3px
+```
+
+**C6 — Dinámico congelado sin retos antes del corte (0 vueltas)**
+
+`1 → 2(no) → 4 → 5(no) → 7(no) → 9 → 10(no) → 12 → 13(no) → 15 → 16`
+
+```mermaid
+graph TD
+    n1((1)) --- n2((2))
+    n2 --- n3((3))
+    n3 --- n16((16))
+    n2 --- n4((4))
+    n4 --- n5((5))
+    n5 --- n6((6))
+    n6 --- n12((12))
+    n5 --- n7((7))
+    n7 --- n8((8))
+    n8 --- n12
+    n7 --- n9((9))
+    n9 --- n10((10))
+    n10 --- n11((11))
+    n11 --- n10
+    n10 --- n12
+    n12 --- n13((13))
+    n13 --- n14((14))
+    n14 --- n16
+    n13 --- n15((15))
+    n15 --- n16
+    classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
+    classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
+    class n1,n2,n4,n5,n7,n9,n10,n12,n13,n15,n16 camino
+    linkStyle default stroke:#bdbdbd,stroke-width:1px
+    linkStyle 0,3,4,7,10,11,14,15,18,19 stroke:#e65100,stroke-width:3px
+```
 
 ## 5. Casos de prueba
 
@@ -107,27 +319,84 @@ Base común: evento activo (estático o dinámico según el caso) con un estudia
 inscrito. Para el freeze se usa `corte = ahora − 1 hora`, y los envíos y compras
 se insertan con fechas antes o después de ese corte.
 
-| Caso | Test | Precondición | Entrada | Esperado | Obtenido |
-|---|---|---|---|---|---|
-| C1 | `test_C1_evento_inexistente` | — | `id_evento = 9999` | `0` | Aprobado |
-| C2 | `test_C2_estatico_en_vivo` | Reto de 100 resuelto (+1 intento fallido), pista de 30 comprada | sin corte | `70` (100 − 30; el fallido no suma) | Aprobado |
-| C3 | `test_C3_estatico_congelado` | Reto A resuelto antes del corte; reto B y compra de 30 después | con corte | `100` (y `170` sin corte) | Aprobado |
-| C4 | `test_C4_dinamico_en_vivo` | Reto dinámico 500/100 con `puntaje_actual = 480`, resuelto | sin corte | `480` | Aprobado |
-| C5 | `test_C5_dinamico_congelado_recalcula_decay` | Reto dinámico 500/100; 2 resoluciones antes del corte y 1 después | con corte | `499` = `formula_dinamic(500, 100, 1)` | Aprobado |
-| C6 | `test_C6_dinamico_congelado_sin_resoluciones` | Solo resolvió después del corte | con corte | `0` | Aprobado |
-| C7 | `test_C7_piso_cero` | Reto de 100 resuelto, compra de 150 | sin corte | `0` (no −50) | Aprobado |
+| Caso | Test | Recorrido | Precondición | Entrada | Esperado | Obtenido |
+|---|---|---|---|---|---|---|
+| C1a | `test_C1_estatico_en_vivo` | 1 → 2 → 4 → 5 → 6 → 12 → 13 → 14 → 16 | Reto de 100 resuelto (+1 intento fallido), pista de 30 comprada | sin corte | `70` (100 − 30; el fallido no suma) | Aprobado |
+| C1b | `test_C1_estatico_congelado` | 1 → 2 → 4 → 5 → 6 → 12 → 13 → 14 → 16 | Reto A resuelto antes del corte; reto B y compra de 30 después | con corte | `100` (y `170` sin corte) | Aprobado |
+| C2 | `test_C2_piso_cero` | 1 → 2 → 4 → 5 → 6 → 12 → 13 → 15 → 16 | Reto de 100 resuelto, compra de 150 | sin corte | `0` (no −50) | Aprobado |
+| C3 | `test_C3_evento_inexistente` | 1 → 2 → 3 → 16 | — | `id_evento = 9999` | `0` | Aprobado |
+| C4 | `test_C4_dinamico_en_vivo` | 1 → 2 → 4 → 5 → 7 → 8 → 12 → 13 → 14 → 16 | Reto dinámico 500/100 con `puntaje_actual = 480`, resuelto | sin corte | `480` | Aprobado |
+| C5 | `test_C5_dinamico_congelado_recalcula_decay` | 1 → 2 → 4 → 5 → 7 → 9 → 10 → 11 → 10 → 12 → 13 → 14 → 16 | Reto dinámico 500/100; 2 resoluciones antes del corte y 1 después | con corte | `499` = `formula_dinamic(500, 100, 1)` | Aprobado |
+| C6 | `test_C6_dinamico_congelado_sin_resoluciones` | 1 → 2 → 4 → 5 → 7 → 9 → 10 → 12 → 13 → 15 → 16 | Solo resolvió después del corte | con corte | `0` | Aprobado |
 
 ## 6. Resultados y cobertura
 
 Ejecución: `pytest tests/test_03_puntaje_total_usuario.py --cov=itdb_ctf.core.puntaje_logic --cov-branch --cov-report=term-missing`
-(2026-10-02, Python 3.14.5, pytest 9.1.1, BD `ctf_itdb_test`).
+(2026-11-07, Python 3.14.5, pytest 9.1.1, BD `ctf_itdb_test`).
 
 **7 de 7 casos aprobados.**
 
 | Función | Sentencias cubiertas | Ramas parciales | Cobertura |
 |---|---|---|---|
-| `puntaje_total_usuario` (líneas 54–102) | 19 / 19 | 0 | **100 %** |
+| `puntaje_total_usuario` (líneas 58–103) | 14 / 14 | 0 | **100 %** |
+| `_hasta_corte` (líneas 54–56) | 1 / 1 | 0 | **100 %** |
 
-El reporte de `pytest-cov` muestra el archivo completo al 86 %: las líneas sin
-cubrir (21, 28, 47, 50-51…) pertenecen a `calcular_puntaje` y `refrescar_puntaje`,
+`pytest-cov` mide ramas entre líneas y no las dos salidas del operador ternario de
+la línea 56; que ambas se ejecutan lo demuestran los casos C1a (sin corte) y C1b
+(con corte), cuyos resultados (`70` y `100`) solo son posibles si el filtro de
+fecha se aplica únicamente cuando hay corte.
+
+El reporte de `pytest-cov` muestra el archivo completo al 85 %: las líneas sin
+cubrir (21, 28, 47, 50-51) pertenecen a `calcular_puntaje` y `refrescar_puntaje`,
 que no forman parte de esta prueba.
+
+## 7. Resumen de caminos
+
+Un caso por camino independiente (V(G) = 6). Escenario base: usuario 2 inscrito en el evento 1 (en curso).
+
+| Camino | Precondición | Entrada | Resultado esperado |
+|---|---|---|---|
+| C1 | Evento 1 estático; reto 1 (100 pts) resuelto, con 1 intento fallido; pista de 30 comprada | `id_usuario = 2`, `id_evento = 1`, `corte = None` | `70` |
+| C2 | Evento 1 estático; reto 1 (100 pts) resuelto; pista de 150 comprada | `id_usuario = 2`, `id_evento = 1`, `corte = None` | `0` |
+| C3 | Escenario base; no existe el evento 9999 | `id_usuario = 2`, `id_evento = 9999`, `corte = None` | `0` |
+| C4 | Evento 1 dinámico; reto 1 (500/100, `puntaje_actual = 480`) resuelto | `id_usuario = 2`, `id_evento = 1`, `corte = None` | `480` |
+| C5 | Evento 1 dinámico; reto 1 (500/100) resuelto por el usuario 2 y por otro usuario antes del corte, y por un tercero después | `id_usuario = 2`, `id_evento = 1`, `corte = ahora − 1 h` | `499` |
+| C6 | Evento 1 dinámico; reto 1 (500/100) resuelto por el usuario 2 solo después del corte | `id_usuario = 2`, `id_evento = 1`, `corte = ahora − 1 h` | `0` |
+
+## 8. Recorrido de cada camino
+
+Caminos independientes del conjunto base (V(G) = 6).
+
+| Camino | Recorrido |
+|---|---|
+| C1 | 1 - 2 - 4 - 5 - 6 - 12 - 13 - 14 - 16 |
+| C2 | 1 - 2 - 4 - 5 - 6 - 12 - 13 - 15 - 16 |
+| C3 | 1 - 2 - 3 - 16 |
+| C4 | 1 - 2 - 4 - 5 - 7 - 8 - 12 - 13 - 14 - 16 |
+| C5 | 1 - 2 - 4 - 5 - 7 - 9 - 10 - 11 - 10 - 12 - 13 - 14 - 16 |
+| C6 | 1 - 2 - 4 - 5 - 7 - 9 - 10 - 12 - 13 - 15 - 16 |
+
+## 9. Código numerado por nodos
+
+Renglones numerados de forma correlativa desde 1; el comentario indica el nodo del grafo de flujo que ocupa cada renglón (`# nodo # nodo` cuando hay más de uno). El último nodo `(fin)` no ocupa renglón: es la salida común de todos los `return`.
+
+```python
+1   def puntaje_total_usuario(session, id_usuario, id_evento, corte=None):
+2       ev = session.get(Evento, id_evento)                        # 1
+3       if not ev:                                                 # 2
+4           return 0                                               # 3
+5       gastados = exec(_hasta_corte(sum(Compra...), fec_compra, corte))  # 4
+6       mod_ev = session.get(ModoPuntaje, ev.id_modo_puntaje)      # 4
+7       if mod_ev.etiqueta == "estatico":                          # 5
+8           total = exec(_hasta_corte(sum(puntaje_inicial), fec_envio, corte))  # 6
+9       elif corte is None:                                        # 7
+10          total = select(sum(Contiene.puntaje_actual))...        # 8
+11      else:
+12          retos = [retos resueltos hasta el corte]               # 9
+13          total = sum(calcular_puntaje(...) for id_reto in retos)# 10 # 11
+14      score = total - gastados                                   # 12
+15      return score if score > 0 else 0                           # 13 # 14 # 15
+                                                                   # 16 (fin)
+```
+
+El renglón 11 (`else:`) no tiene nodo: es la salida «no» del nodo 7.

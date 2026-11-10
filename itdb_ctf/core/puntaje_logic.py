@@ -51,32 +51,33 @@ def refrescar_puntaje(session:Session, id_reto:int, id_evento:int) -> int:
         session.add(contiene)
     return valor
 
+def _hasta_corte(q, columna, corte: datetime | None):
+    # `corte` (freeze): limita la consulta a lo ocurrido hasta ese instante.
+    return q if corte is None else q.where(columna <= corte)
+
 def puntaje_total_usuario(session:Session, id_usuario:int, id_evento:int,
                           corte: datetime | None = None) -> int:
     # `corte` (freeze): solo cuenta aciertos/compras con fecha <= corte y, en
     #   eventos dinámicos, recalcula el puntaje de cada reto a ese instante.
-    q_gastados = select(func.coalesce(func.sum(Compra.puntos_usados), 0)).where(
-        Compra.id_usuario == id_usuario,
-        Compra.id_evento == id_evento,
-    )
-    if corte is not None:
-        q_gastados = q_gastados.where(Compra.fec_compra <= corte)
-    gastados = session.exec(q_gastados).one()
-
     ev = session.get(Evento, id_evento)
-    mod_ev = session.get(ModoPuntaje, ev.id_modo_puntaje) if ev else None
-    estatico = (mod_ev is None) or (mod_ev.etiqueta == "estatico")
+    if not ev:
+        return 0
+    gastados = session.exec(_hasta_corte(
+        select(func.coalesce(func.sum(Compra.puntos_usados), 0)).where(
+            Compra.id_usuario == id_usuario,
+            Compra.id_evento == id_evento,
+        ),
+        Compra.fec_compra, corte)).one()
 
-    if estatico:
+    mod_ev = session.get(ModoPuntaje, ev.id_modo_puntaje)
+    if mod_ev.etiqueta == "estatico":
         q = (select(func.coalesce(func.sum(Contiene.puntaje_inicial), 0))
              .join(Resuelve, (Contiene.id_reto == Resuelve.id_reto) & (Contiene.id_evento == Resuelve.id_evento))
              .where(
                  Resuelve.id_usuario == id_usuario,
                  Resuelve.id_evento == id_evento,
                  Resuelve.flag_correcta == True))  # noqa: E712
-        if corte is not None:
-            q = q.where(Resuelve.fec_envio <= corte)
-        total = session.exec(q).one()
+        total = session.exec(_hasta_corte(q, Resuelve.fec_envio, corte)).one()
     elif corte is None:
         # dinámico en vivo: usa el puntaje_actual ya recalculado
         total = session.exec(
