@@ -121,7 +121,7 @@ class listarPistaState(SuscriptorMixin, AuthState):
         if guard: return guard
         id_evento = id_evento_abierto()
         if not id_evento:
-            return toast_msg("Evento inexistenete.")
+            return toast_msg("Evento inexistente.")
         ok, msg = adquirir_pista(self.id_usuario, id_evento, id_reto, id_pista)
         if not ok:
             return toast_msg(msg)

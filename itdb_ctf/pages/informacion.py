@@ -8,6 +8,7 @@ def informacion_page() -> rx.Component:
         navbar(),
         informacion_view(),
         width="100%",
+        spacing="4",
         justify_items="center",
         on_mount=InformacionState.escuchar_info,
         on_unmount=InformacionState.parar_info,

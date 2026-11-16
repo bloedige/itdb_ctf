@@ -130,8 +130,14 @@ def _aware(dt) -> datetime | None:
 
 def _latin(texto: str) -> str:
     """Helvetica es una fuente core latin-1: los acentos salen bien, pero un
-    caracter fuera del juego (—, →, emoji) reventaría el `output()`."""
-    return str(texto).encode("latin-1", "replace").decode("latin-1")
+    caracter fuera del juego (—, →, emoji) reventaría el `output()`. Las rayas y
+    comillas tipográficas se pasan a su equivalente latin-1 antes de descartar el resto."""
+    texto = str(texto).translate(_TIPOGRAFICOS)
+    return texto.encode("latin-1", "replace").decode("latin-1")
+
+
+_TIPOGRAFICOS = str.maketrans({"—": "-", "–": "-", "‘": "'", "’": "'",
+                               "“": '"', "”": '"', "…": "..."})
 
 
 def _recortar(pdf: FPDF, texto: str, ancho: float) -> str:

@@ -13,9 +13,9 @@ def estado_inscripcion(id_usuario:int, id_evento:int) -> tuple[bool,str]:
                 Participa.id_evento == id_evento,
         )).first()
         if not et_part:
-            return False, "No estas inscrito en este evento."
+            return False, "No estás inscrito en este evento."
         if et_part == "descalificado":
-            return False, "Has sido desacalificado de el evento."
+            return False, "Has sido descalificado del evento."
         return True, ""
 
 def acceso_evento_cerrado(id_evento:int, id_usuario:int) -> tuple[bool,str]:

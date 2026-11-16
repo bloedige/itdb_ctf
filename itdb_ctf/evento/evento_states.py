@@ -105,10 +105,10 @@ class CreaEventoState(AuthState):
             self.mensaje = "Se requiere llenar campos."
             return False
         if not self.titulo:
-            self.mensaje = "Se requiere un titulo."
+            self.mensaje = "Se requiere un título."
             return False
         if not self.id_modalidad:
-            self.mensaje = "Se require una modalidad."
+            self.mensaje = "Se requiere una modalidad."
             return False
         if not self.id_modo_puntaje:
             self.mensaje = "Se requiere un modo de puntaje."
@@ -254,16 +254,16 @@ class EditarEventoState(AuthState):
             self.open_close_dialog()
             self.limpiar()
             self.set_drop_mensaje()
-            return rx.toast.success("Datos de evento Actualizado")
+            return rx.toast.success("Datos del evento actualizados.")
 
     def validar_campos(self) -> bool:
         if not (self.titulo and self.id_modalidad):
             self.mensaje = "Se requiere llenar campos."
         if not self.titulo:
-            self.mensaje = "Se requiere un titulo."
+            self.mensaje = "Se requiere un título."
             return False
         if not self.id_modalidad:
-            self.mensaje = " Se require una modalidad."
+            self.mensaje = "Se requiere una modalidad."
             return False
         if not self.id_modo_puntaje:
             self.mensaje = " Se requiere un modo de puntaje."

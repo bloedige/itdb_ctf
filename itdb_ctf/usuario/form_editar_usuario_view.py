@@ -5,19 +5,19 @@ from itdb_ctf.usuario.usuario_states import EditarUsuarioState
 
 def form_edit_content() -> rx.Component:
     return rx.vstack(
-        rx.heading("Editar cuenta usuario", size="3"),
+        rx.heading("Editar cuenta de usuario", size="3"),
         input_box("Nombre", "Nombre...", EditarUsuarioState.nombre, EditarUsuarioState.set_nombre, "text"),
         input_box("Paterno","Paterno...",EditarUsuarioState.paterno, EditarUsuarioState.set_paterno, "text"),
         input_box("Materno","Materno...",EditarUsuarioState.materno, EditarUsuarioState.set_materno, "text"),
         input_box("Alias","Alias...",EditarUsuarioState.alias, EditarUsuarioState.set_alias, "text"),
-        input_box("Correo electronico","itdb@itdonbosco.org..." ,EditarUsuarioState.email, EditarUsuarioState.set_email, "email"),
+        input_box("Correo electrónico","itdb@itdonbosco.org..." ,EditarUsuarioState.email, EditarUsuarioState.set_email, "email"),
         rx.cond(
             EditarUsuarioState.no_user,
             select_catalog("Rol", "Seleccionar...", EditarUsuarioState.roles, EditarUsuarioState.set_id_rol, EditarUsuarioState.id_rol),
             None
         ),
         rx.center(
-            rx.text("!!!Reseter password desde el panel¡¡¡", color_scheme="gray", weight="light", size="1"),
+            rx.text("La contraseña se restablece desde el panel.", color_scheme="gray", weight="light", size="1"),
             width="100%",
         ),
         rx.cond(

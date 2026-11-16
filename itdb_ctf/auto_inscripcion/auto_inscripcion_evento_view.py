@@ -9,7 +9,7 @@ def alert_incripcion(id_evento:int, titulo:str) -> rx.Component:
         ),
         rx.alert_dialog.content(
             rx.vstack(
-                rx.text("¿ Deseas inscribirte a: ?", weight="light", size="2"),
+                rx.text("¿Deseas inscribirte en este evento?", weight="light", size="2"),
                 rx.grid(
                     rx.text(titulo, weight="regular", size="3"),
                     width="100%",
@@ -132,12 +132,12 @@ def actions(ev:dict) -> rx.Component:
             rx.link(button("Scoreboard", "blue", []), href=f"/evento/{ev['id_evento_cerrado']}/scoreboard"),  
         ),
         rx.cond(
-            ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido") & (ev['estado_evento'] != "activo"),  
+            ev['auto_inscripcion'] & ~ev['inscrito'] & (ev['estado_evento'] != "concluido") & (ev['estado_evento'] != "activo"),  
             alert_incripcion(ev['id_evento_cerrado'], ev['titulo']),
             rx.cond(
                 ~ev['auto_inscripcion'] & (ev['estado_evento'] != "concluido"),
                 rx.text(
-                    "Inscripción mediante cordinador",
+                    "Inscripción mediante coordinador",
                     font_size=".8em",
                     color="#818181",
                 ),

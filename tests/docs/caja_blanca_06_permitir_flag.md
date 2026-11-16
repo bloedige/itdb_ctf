@@ -13,17 +13,17 @@
 ## 1. Código fuente con nodos numerados
 
 ```python
-177  def permitir_flag(id_usuario, id_reto):
-178      clave = _clave_flag(id_usuario, id_reto)        # 1
-179      limite, ventana = FLAG                          # 1   (15, 60)
-180      n = _redis_incr(clave, ventana)                 # 1   suma 1 y devuelve el total
-181      if n is None:                                   # 2   ¿Redis no disponible?
-182          return True, 0                              # 3   fail-open
-183      if n > limite:                                  # 4   ¿superó 15?
-184          r = _redis_peek(clave)                      # 5   consulta cuánto falta
-185          return False, (r[1] if r else ventana)      # 6 → 7 (r[1]) / 8 (ventana)
-186      return True, 0                                  # 9
-                                                         # 10 (fin)
+177  def permitir_flag(id_usuario: int, id_reto: int) -> "tuple[bool, int]":
+178      clave = _clave_flag(id_usuario, id_reto)                              # 1
+179      limite, ventana = FLAG                                                # 1
+180      n = _redis_incr(clave, ventana)                                       # 1
+181      if n is None:                                                         # 2
+182          return True, 0   # fail-open                                      # 3
+183      if n > limite:                                                        # 4
+184          r = _redis_peek(clave)                                            # 5
+185          return False, (r[1] if r else ventana)                            # 6 # 7 # 8
+186      return True, 0                                                        # 9
+                                                                               # 10 (fin)
 ```
 
 La línea 185 contiene un `if` en una sola línea (operador ternario); McCabe lo
@@ -34,20 +34,20 @@ cuenta como un nodo predicado más (6).
 ```mermaid
 graph TD
     n1((1)) --- n2((2))
-    n2 --- n3((3))
-    n3 --- n10((10))
     n2 --- n4((4))
+    n4 --- n9((9))
+    n9 --- n10((10))
     n4 --- n5((5))
     n5 --- n6((6))
-    n4 --- n9((9))
-    n9 --- n10
-    n6 --- n7((7))
-    n7 --- n10
     n6 --- n8((8))
     n8 --- n10
+    n6 --- n7((7))
+    n7 --- n10
+    n2 --- n3((3))
+    n3 --- n10
 ```
 
-**Convención del grafo:** las aristas no llevan flecha ni etiqueta; el flujo va de arriba hacia abajo y converge en los nodos de unión y en el nodo final (10). De cada nodo predicado salen dos aristas: la de la **izquierda** corresponde a la condición verdadera (**sí**) y la de la **derecha** a la falsa (**no**).
+**Convención del grafo:** las aristas no llevan flecha ni etiqueta; el flujo va de arriba hacia abajo y converge en los nodos de unión y en el nodo final (10). De cada nodo predicado salen dos aristas: la de la **derecha** corresponde a la condición **verdadera** y la de la **izquierda** a la **falsa**.
 
 ## 3. Complejidad ciclomática V(G)
 
@@ -61,10 +61,10 @@ graph TD
 
 | Camino | Recorrido | Descripción |
 |---|---|---|
-| C1 | 1 → 2(sí) → 3 → 10 | Redis caído → se permite (fail-open) |
-| C2 | 1 → 2(no) → 4(no) → 9 → 10 | Dentro del límite → se permite |
-| C3 | … → 4(sí) → 5 → 6(sí) → 7 → 10 | Superó el límite → bloquea con el tiempo restante real |
-| C4 | … → 4(sí) → 5 → 6(no) → 8 → 10 | Superó el límite y Redis falla al consultar el tiempo → bloquea 60 s |
+| C1 | 1 → 2(verdadero) → 3 → 10 | Redis caído → se permite (fail-open) |
+| C2 | 1 → 2(falso) → 4(falso) → 9 → 10 | Dentro del límite → se permite |
+| C3 | … → 4(verdadero) → 5 → 6(verdadero) → 7 → 10 | Superó el límite → bloquea con el tiempo restante real |
+| C4 | … → 4(verdadero) → 5 → 6(falso) → 8 → 10 | Superó el límite y Redis falla al consultar el tiempo → bloquea 60 s |
 
 Todos los caminos son factibles. C4 ocurre si Redis se cae justo entre el
 conteo y la consulta del tiempo; en la prueba se simula reemplazando
@@ -76,107 +76,107 @@ En cada grafo se resalta en naranja el recorrido del camino (nodos y
 aristas); el resto del grafo queda en gris como referencia. Cada nodo
 (círculo) es una sentencia o grupo de sentencias, numerado según el código
 de la sección 1; el nodo 10 es el nodo final. Se usa la misma convención de la
-sección 2 (izquierda = sí, derecha = no); en el recorrido escrito bajo cada
-grafo, `(sí)`/`(no)` indica la salida que toma cada nodo predicado.
+sección 2 (derecha = verdadero, izquierda = falso); en el recorrido escrito bajo cada
+grafo, `(verdadero)`/`(falso)` indica la salida que toma cada nodo predicado.
 
 **C1 — Redis caído → se permite (fail-open)**
 
-`1 → 2(sí) → 3 → 10`
+`1 → 2(verdadero) → 3 → 10`
 
 ```mermaid
 graph TD
     n1((1)) --- n2((2))
-    n2 --- n3((3))
-    n3 --- n10((10))
     n2 --- n4((4))
+    n4 --- n9((9))
+    n9 --- n10((10))
     n4 --- n5((5))
     n5 --- n6((6))
-    n4 --- n9((9))
-    n9 --- n10
-    n6 --- n7((7))
-    n7 --- n10
     n6 --- n8((8))
     n8 --- n10
+    n6 --- n7((7))
+    n7 --- n10
+    n2 --- n3((3))
+    n3 --- n10
     classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
     classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
     class n1,n2,n3,n10 camino
     linkStyle default stroke:#bdbdbd,stroke-width:1px
-    linkStyle 0,1,2 stroke:#e65100,stroke-width:3px
+    linkStyle 0,10,11 stroke:#e65100,stroke-width:3px
 ```
 
 **C2 — Dentro del límite → se permite**
 
-`1 → 2(no) → 4(no) → 9 → 10`
+`1 → 2(falso) → 4(falso) → 9 → 10`
 
 ```mermaid
 graph TD
     n1((1)) --- n2((2))
-    n2 --- n3((3))
-    n3 --- n10((10))
     n2 --- n4((4))
+    n4 --- n9((9))
+    n9 --- n10((10))
     n4 --- n5((5))
     n5 --- n6((6))
-    n4 --- n9((9))
-    n9 --- n10
-    n6 --- n7((7))
-    n7 --- n10
     n6 --- n8((8))
     n8 --- n10
+    n6 --- n7((7))
+    n7 --- n10
+    n2 --- n3((3))
+    n3 --- n10
     classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
     classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
     class n1,n2,n4,n9,n10 camino
     linkStyle default stroke:#bdbdbd,stroke-width:1px
-    linkStyle 0,3,6,7 stroke:#e65100,stroke-width:3px
+    linkStyle 0,1,2,3 stroke:#e65100,stroke-width:3px
 ```
 
 **C3 — Superó el límite → bloquea con el tiempo restante real**
 
-`1 → 2(no) → 4(sí) → 5 → 6(sí) → 7 → 10`
+`1 → 2(falso) → 4(verdadero) → 5 → 6(verdadero) → 7 → 10`
 
 ```mermaid
 graph TD
     n1((1)) --- n2((2))
-    n2 --- n3((3))
-    n3 --- n10((10))
     n2 --- n4((4))
+    n4 --- n9((9))
+    n9 --- n10((10))
     n4 --- n5((5))
     n5 --- n6((6))
-    n4 --- n9((9))
-    n9 --- n10
-    n6 --- n7((7))
-    n7 --- n10
     n6 --- n8((8))
     n8 --- n10
+    n6 --- n7((7))
+    n7 --- n10
+    n2 --- n3((3))
+    n3 --- n10
     classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
     classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
     class n1,n2,n4,n5,n6,n7,n10 camino
     linkStyle default stroke:#bdbdbd,stroke-width:1px
-    linkStyle 0,3,4,5,8,9 stroke:#e65100,stroke-width:3px
+    linkStyle 0,1,4,5,8,9 stroke:#e65100,stroke-width:3px
 ```
 
 **C4 — Superó el límite y falla la consulta del tiempo → bloquea 60 s**
 
-`1 → 2(no) → 4(sí) → 5 → 6(no) → 8 → 10`
+`1 → 2(falso) → 4(verdadero) → 5 → 6(falso) → 8 → 10`
 
 ```mermaid
 graph TD
     n1((1)) --- n2((2))
-    n2 --- n3((3))
-    n3 --- n10((10))
     n2 --- n4((4))
+    n4 --- n9((9))
+    n9 --- n10((10))
     n4 --- n5((5))
     n5 --- n6((6))
-    n4 --- n9((9))
-    n9 --- n10
-    n6 --- n7((7))
-    n7 --- n10
     n6 --- n8((8))
     n8 --- n10
+    n6 --- n7((7))
+    n7 --- n10
+    n2 --- n3((3))
+    n3 --- n10
     classDef default fill:#f5f5f5,stroke:#9e9e9e,color:#757575
     classDef camino fill:#ffe082,stroke:#e65100,stroke-width:2px,color:#000
     class n1,n2,n4,n5,n6,n8,n10 camino
     linkStyle default stroke:#bdbdbd,stroke-width:1px
-    linkStyle 0,3,4,5,10,11 stroke:#e65100,stroke-width:3px
+    linkStyle 0,1,4,5,6,7 stroke:#e65100,stroke-width:3px
 ```
 
 ## 5. Casos de prueba
@@ -187,6 +187,8 @@ cada caso. Para C1 se marca Redis como caído.
 C2 aplica **valor límite**: el 1.er intento y el 15.º (el último permitido).
 C3 prueba el 16.º (el primero bloqueado) y además que otro reto tiene su propio
 contador.
+
+**Casos con letra.** El criterio de McCabe exige probar V(G) caminos, no V(G) tests: *"no set of 4 paths will suffice for testing, even if […] there are 39 distinct tests that concentrate on the 4 paths"* (Watson y McCabe, 1996, §5.1, p. 31). Los casos con letra (a, b, c) **no son caminos nuevos**: recorren el mismo camino con otros datos de entrada, como recomienda la misma fuente: *"develop and execute several input data sets for each of the paths in the basis"* (§5.7). Por eso `pytest` cuenta más tests que caminos.
 
 | Caso | Test | Recorrido | Precondición | Entrada | Esperado | Obtenido |
 |---|---|---|---|---|---|---|
@@ -201,7 +203,7 @@ contador.
 Ejecución: `pytest tests/test_06_permitir_flag.py --cov=itdb_ctf.core.rate_limit --cov-branch --cov-report=term-missing`
 (2026-10-02, Python 3.14.5, pytest 9.1.1).
 
-**5 de 5 casos aprobados.**
+**5 de 5 casos aprobados** para **4 caminos** (V(G) = 4): un caso por camino más 1 entrada adicional (C2b) que recorre un camino ya probado.
 
 | Función | Sentencias cubiertas | Ramas parciales | Cobertura |
 |---|---|---|---|
@@ -235,18 +237,18 @@ Caminos independientes del conjunto base (V(G) = 4).
 
 ## 9. Código numerado por nodos
 
-Renglones numerados de forma correlativa desde 1; el comentario indica el nodo del grafo de flujo que ocupa cada renglón (`# nodo # nodo` cuando hay más de uno). El último nodo `(fin)` no ocupa renglón: es la salida común de todos los `return`.
+Código completo de la función, renglón por renglón tal como está en el archivo (sin abreviar ni unir renglones), numerado de forma correlativa desde 1. El comentario de la derecha indica el nodo del grafo de flujo al que pertenece cada renglón (`# nodo # nodo` cuando un mismo renglón contiene más de un nodo); una sentencia que ocupa varios renglones pertenece toda al mismo nodo, y una condición compuesta (`or` / `and`) es un solo nodo. Los renglones sin nodo (la firma `def`, comentarios, docstring, líneas en blanco y `else:`) no son sentencias ejecutables. El último nodo `(fin)` no ocupa renglón: es la salida común de todos los `return`.
 
 ```python
-1   def permitir_flag(id_usuario, id_reto):
-2       clave = _clave_flag(id_usuario, id_reto)        # 1
-3       limite, ventana = FLAG                          # 1
-4       n = _redis_incr(clave, ventana)                 # 1
-5       if n is None:                                   # 2
-6           return True, 0                              # 3
-7       if n > limite:                                  # 4
-8           r = _redis_peek(clave)                      # 5
-9           return False, (r[1] if r else ventana)      # 6 # 7 # 8
-10      return True, 0                                  # 9
-                                                        # 10 (fin)
+1    def permitir_flag(id_usuario: int, id_reto: int) -> "tuple[bool, int]":
+2        clave = _clave_flag(id_usuario, id_reto)                              # 1
+3        limite, ventana = FLAG                                                # 1
+4        n = _redis_incr(clave, ventana)                                       # 1
+5        if n is None:                                                         # 2
+6            return True, 0   # fail-open                                      # 3
+7        if n > limite:                                                        # 4
+8            r = _redis_peek(clave)                                            # 5
+9            return False, (r[1] if r else ventana)                            # 6 # 7 # 8
+10       return True, 0                                                        # 9
+                                                                               # 10 (fin)
 ```

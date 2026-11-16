@@ -8,6 +8,7 @@ def scoreboard_page() -> rx.Component:
         navbar(),
         scoreboard_view(),
         width="100%",
+        spacing="4",
         justify_items="center",
         on_mount=ScoreboardState.escuchar_scoreboard,
         on_unmount=ScoreboardState.stop_refresh,

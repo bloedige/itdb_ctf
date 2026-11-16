@@ -14,7 +14,7 @@ def auto_inscripcion( id_evento:int, id_usuario:int) -> tuple[bool,str]:
     with Session(engine) as s:
         ev = s.get(Evento, id_evento)
         if not ev or not ev.auto_inscripcion:
-            return False, "Evento inexistente o no válido para incripción."
+            return False, "Evento inexistente o no válido para inscripción."
         est = estado_evento(ev)
         if est == "concluido":
             return False, "Evento finalizado."
@@ -34,7 +34,7 @@ def auto_inscripcion( id_evento:int, id_usuario:int) -> tuple[bool,str]:
             ))
         s.commit()
     canales.publicar_inscripcion(id_evento)
-    return True, "Inscrito con exito."
+    return True, "Inscrito con éxito."
 
 def eventos(id_usuario:int) -> list[dict]:
     with Session(engine) as s:

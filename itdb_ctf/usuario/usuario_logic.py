@@ -3,7 +3,7 @@ from sqlmodel import select, Session
 from itdb_ctf.db import engine
 from itdb_ctf.models import Rol, Usuario, MetodoAuth
 from itdb_ctf.utils.security import hasher
-from itdb_ctf.auth.auth_logic import auto_incripcion_evento_abierto
+from itdb_ctf.auth.auth_logic import auto_incripcion_evento_abierto, DOMINIO
 
 RANGO={"superadmin":3, "admin":2, "autor":1, "user":0}
 
@@ -47,7 +47,7 @@ def puede_gestionar(id_target:int, id_actor:int, cod_actor:str, accion:str) -> t
      if id_target == id_actor:
         if accion == "datos":
             return True, ""
-        return False, "Acción no valida"
+        return False, "Acción no válida"
      with Session(engine)  as s:
          target = s.get(Usuario, id_target)
          if not target:
@@ -55,20 +55,22 @@ def puede_gestionar(id_target:int, id_actor:int, cod_actor:str, accion:str) -> t
          cod_target = id_rol_cod(id_target)
          if RANGO.get(cod_actor, -1) > RANGO.get(cod_target, -1):
              return True, ""
-         return False, "Acción no valida"
+         return False, "Acción no válida"
 
 # ---------- CREAR ----------
 
 def validar_crear_cuenta(email:str, id_rol:int, cod_rol:str) -> tuple[bool,str]:
     if existe_email(email):
         return False, "Ya existe una cuenta vinculada a este correo"
+    if email.lower().endswith("@" + DOMINIO.lower()):
+        return False, "El correo institucional es solo para estudiantes con cuenta Google."
     codigo = id_rol_cod(id_rol)
     if not codigo:
         return False, "Rol no existente"
     
 
     if cod_rol != "superadmin" and RANGO.get(codigo) >= RANGO.get(cod_rol, -1):
-        return False, f"Creacion invalida para {codigo}"
+        return False, f"Creación inválida para {codigo}"
     return True, ""
 
 def crear_cuenta(nombre:str, paterno:str, materno:str, alias:str, email:str, id_rol:int, cod_rol:str) -> str:
@@ -78,7 +80,7 @@ def crear_cuenta(nombre:str, paterno:str, materno:str, alias:str, email:str, id_
     with Session(engine) as s:
         metodo = s.exec(select(MetodoAuth).where(MetodoAuth.etiqueta == "local")).first()
         if not metodo:
-            raise ValueError("metodo de autenticacio no configuarado")
+            raise ValueError("Método de autenticación no configurado.")
         password = generar_password()
         user = Usuario(
             id_rol=id_rol,
@@ -109,7 +111,7 @@ def validar_editar_usuario(id_usuario:int, email:str, id_actor:int, cod_actor:st
             return False, "Usuario inexistente"
         metodo = s.get(MetodoAuth, user.id_metodo_auth)
         if not metodo or metodo.etiqueta != "local":
-            return False, "Solo se puede editar cunetas locales"
+            return False, "Solo se pueden editar cuentas locales."
         if existe_email(email, id_usuario):
             return False , "Correo vinculado a otra cuenta"
         return True, ""
@@ -207,7 +209,7 @@ def validar_reset_password(id_usuario:int, id_actor:int, cod_actor:str) -> tuple
             return False, "Usuario inexistente"
         metodo = s.get(MetodoAuth, user.id_metodo_auth)
         if not metodo or metodo.etiqueta != "local":
-            return False, "Solo se restablece contraseñas de cuentas locales"
+            return False, "Solo se restablecen contraseñas de cuentas locales."
         return True , ""
     
 def reset_password(id_usuario:int, id_actor:int, cod_actor:str) -> str:

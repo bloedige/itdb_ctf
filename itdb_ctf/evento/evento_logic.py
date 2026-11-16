@@ -14,12 +14,12 @@ def validar_evento(id_modadlidad, id_modo_puntaje, fec_inicio, fec_fin, id_event
         if fec_inicio or fec_fin:
             return "El evento abierto no requiere fechas inicio / fin."
         if mp == "dinamico":
-            return "El evento abierto debe ser de modo de puntaje estatico."
+            return "El evento abierto debe ser de modo de puntaje estático."
     elif etiqueta == "cerrado":
         if not (fec_inicio and fec_fin):
-            return "EL evento cerrado requiere de fecha inicio y fin."
+            return "El evento cerrado requiere fecha de inicio y de fin."
         if fec_fin <= fec_inicio:
-            return "la fecha de fin deve ser posterior a la de inicio."
+            return "La fecha de fin debe ser posterior a la de inicio."
     return None
 
 def etiqueta_modalidad(id_modalidad: int) -> str:
@@ -81,7 +81,7 @@ def editar_evento(id_evento, values:dict):
         raise ValueError(error)
     ev_a = obtener_evento(id_evento)
     if ev_a and estado_evento(ev_a) == "concluido":
-        raise ValueError("Evento concluido edicion restringida")
+        raise ValueError("Evento concluido: edición restringida.")
     with Session(engine) as s:
         ev = s.get(Evento, id_evento)
         if not ev:

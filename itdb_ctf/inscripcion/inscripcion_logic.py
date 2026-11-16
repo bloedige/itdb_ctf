@@ -104,20 +104,20 @@ def validar_incribir(id_usuario:int, id_evento:int) -> tuple[bool, str]:
             return False , "Evento inexistente."
         est_ev = estado_evento(ev)
         if est_ev == "abierto":
-            return False , "Evento abierto usa auto_incripción."
+            return False , "El evento abierto usa autoinscripción."
         if est_ev == "concluido":
             return False , "Evento concluido."
         u = s.get(Usuario, id_usuario)
         if not u:
-            return False , "cuenta inexistente."
+            return False , "Cuenta inexistente."
         if not u.activo:
             return False , "Cuenta desactivada."
         rol = s.get(Rol, u.id_rol)
         if not rol or rol.codigo != "user":
-            return False , "Rol invalido para participación."
+            return False , "Rol inválido para participación."
         part = s.exec(select(Participa).where(Participa.id_usuario == id_usuario, Participa.id_evento == id_evento)).first()
         if part:
-            return False , "La cuenta ya ah sido inscrita." 
+            return False , "La cuenta ya ha sido inscrita." 
         return True, ""
     
 def inscribir(id_susario:int, id_evento:int): 
@@ -159,7 +159,7 @@ def validar_quitar(id_participa:int) ->tuple[bool, str]:
         if not ev:
             return False, "Evento inexistente."
         if estado_evento(ev) != "futuro":
-            return False, "Acción no valida use desacalificar." 
+            return False, "Acción no válida: use descalificar." 
         return True, ""
 
 def quitar_incripcion(id_participa:int):
@@ -216,7 +216,7 @@ def analizar_correos(correos:list[str], id_evento:int) -> dict:
                 continue
             vistos.add(correo)
             if not formato_email_valido(correo):
-                omitidos.append({"email": correo, "motivo": "Formato de correo invalido"})
+                omitidos.append({"email": correo, "motivo": "Formato de correo inválido."})
                 continue
             try:
                 validar_dominio(correo)

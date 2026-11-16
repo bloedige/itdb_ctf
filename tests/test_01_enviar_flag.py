@@ -1,6 +1,7 @@
-"""Caja blanca — core/envio_logic.enviar_flag  (V(G) = 11).
+"""Caja blanca — core/envio_logic.enviar_flag  (V(G) = 10).
 
-Un test por camino independiente; los 11 caminos son factibles.
+Los 10 caminos son factibles. La condición compuesta `not reto or not reto.activo`
+es un solo nodo: su camino (C2) se prueba con test_C2a y test_C2b.
 """
 
 import pytest
@@ -46,31 +47,31 @@ def test_C1_supera_rate_limit(escenario):
     assert len(envios(e["est"], e["reto"], e["ev"])) == 15   # el 16º no se registró
 
 
-def test_C2_reto_inexistente(escenario):
+def test_C2a_reto_inexistente(escenario):
     e = escenario
     assert enviar_flag(e["est"], 9999, e["ev"], FLAG_OK) == (False, "Reto no disponible.")
 
 
-def test_C3_reto_inactivo(escenario):
+def test_C2b_reto_inactivo(escenario):
     e = escenario
     reto = crear_reto(e["admin"], FLAG_OK, activo=False)
     asociar(reto, e["ev"])
     assert enviar_flag(e["est"], reto, e["ev"], FLAG_OK) == (False, "Reto no disponible.")
 
 
-def test_C4_reto_no_pertenece_al_evento(escenario):
+def test_C3_reto_no_pertenece_al_evento(escenario):
     e = escenario
     reto = crear_reto(e["admin"], FLAG_OK)                      # sin asociar
     assert enviar_flag(e["est"], reto, e["ev"], FLAG_OK) == (False, "El reto no pertenece a este evento.")
 
 
-def test_C5_evento_inexistente(escenario):
+def test_C4_evento_inexistente(escenario):
     e = escenario
     assert enviar_flag(e["est"], e["reto"], 9999, FLAG_OK) == (False, "Evento no disponible.")
     assert envios(e["est"], e["reto"], 9999) == []
 
 
-def test_C6_evento_futuro(escenario):
+def test_C5_evento_futuro(escenario):
     e = escenario
     ev = crear_evento(e["admin"], "futuro")
     asociar(e["reto"], ev)
@@ -78,7 +79,7 @@ def test_C6_evento_futuro(escenario):
     assert enviar_flag(e["est"], e["reto"], ev, FLAG_OK) == (False, "El evento aún no ha iniciado.")
 
 
-def test_C7_evento_concluido(escenario):
+def test_C6_evento_concluido(escenario):
     e = escenario
     ev = crear_evento(e["admin"], "concluido")
     asociar(e["reto"], ev)
@@ -87,7 +88,7 @@ def test_C7_evento_concluido(escenario):
 
 
 @pytest.mark.parametrize("estado", [None, "descalificado"], ids=["sin_inscripcion", "descalificado"])
-def test_C8_usuario_no_inscrito(escenario, estado):
+def test_C7_usuario_no_inscrito(escenario, estado):
     e = escenario
     otro = crear_usuario("otro@itdonbosco.org")
     if estado:
@@ -95,21 +96,21 @@ def test_C8_usuario_no_inscrito(escenario, estado):
     assert enviar_flag(otro, e["reto"], e["ev"], FLAG_OK) == (False, "No estás inscrito en este evento.")
 
 
-def test_C9_reto_ya_resuelto(escenario):
+def test_C8_reto_ya_resuelto(escenario):
     e = escenario
     assert enviar_flag(e["est"], e["reto"], e["ev"], FLAG_OK)[0] is True
-    assert enviar_flag(e["est"], e["reto"], e["ev"], FLAG_OK) == (False, "El reto ah sido resuelto.")
+    assert enviar_flag(e["est"], e["reto"], e["ev"], FLAG_OK) == (False, "El reto ya ha sido resuelto.")
     assert len(envios(e["est"], e["reto"], e["ev"])) == 1      # no se duplicó
 
 
-def test_C10_flag_correcta(escenario):
+def test_C9_flag_correcta(escenario):
     e = escenario
     assert enviar_flag(e["est"], e["reto"], e["ev"], FLAG_OK) == (True, "¡Flag correcta!")
     filas = envios(e["est"], e["reto"], e["ev"])
     assert len(filas) == 1 and filas[0].flag_correcta is True
 
 
-def test_C11_flag_incorrecta(escenario):
+def test_C10_flag_incorrecta(escenario):
     e = escenario
     assert enviar_flag(e["est"], e["reto"], e["ev"], "ITDB{mala}") == (False, "Flag incorrecta.")
     filas = envios(e["est"], e["reto"], e["ev"])

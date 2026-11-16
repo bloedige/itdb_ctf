@@ -27,68 +27,100 @@ def archivo_up()->rx.Component:
         ),
         ## subida de archivos
         rx.upload(
-            rx.text("Arrastra o haz click para subir el archivo del reto. Unico archivo por reto más de un archivo convertir en .zip, .gzip o variante."),
+            rx.text("Arrastra o haz clic para subir el archivo del reto. Un único archivo por reto; si son varios, comprímelos en .zip, .gz o similar.", size="1"),
             id="archivo_reto",
             max_files=1,
             on_drop=CrearRetosState.on_drop_file(rx.upload_files(upload_id="archivo_reto")),
             border="1px dashed #888", padding="1em",
             width="100%",
+            
         ), 
         width="100%", 
         spacing="3",
     )
 
 def form_reto()->rx.Component:
+    # Columna 1: los mismos campos de antes (sin la descripción) y el archivo al final.
     return rx.vstack(
-        rx.heading("Crear Reto", size="5"),
-        input_box("Titulo", "Titulo...", CrearRetosState.titulo, CrearRetosState.set_titulo, "text"),
-        text_area("Descripción","Descripción...",CrearRetosState.descripcion,CrearRetosState.set_descripcion),
+        input_box("Título", "Título...", CrearRetosState.titulo, CrearRetosState.set_titulo, "text"),
         input_box("Flag", "ITDB{flag_texto_plano...}",CrearRetosState.flag,CrearRetosState.set_flag,"text"),
         rx.grid(
             input_box("Puntaje inicial", "Pts...",CrearRetosState.puntaje_inicial,CrearRetosState.set_puntaje_inicial,"number"),
-            input_box("Puntaje minimo", "Pts... (opcional)",CrearRetosState.puntaje_minimo,CrearRetosState.set_puntaje_minimo,"number"),
-            select_catalog("Categoria", "Seleccionar...", CrearRetosState.categorias, CrearRetosState.set_id_categoria),
+            input_box("Puntaje mínimo", "Pts... (opcional)",CrearRetosState.puntaje_minimo,CrearRetosState.set_puntaje_minimo,"number"),
+            select_catalog("Categoría", "Seleccionar...", CrearRetosState.categorias, CrearRetosState.set_id_categoria),
             select_catalog("Dificultad", "Seleccionar...", CrearRetosState.dificultades, CrearRetosState.set_id_dificultad),
             select_catalog("Modo de puntaje", "Seleccionar...", CrearRetosState.modos, CrearRetosState.set_id_modo_puntaje),
             columns={"base":"1","md":"2"},
             spacing="2",
-            width="100%" 
+            width="100%"
         ),
-        select_catalog("Evento", "Seleccionar...", CrearRetosState.eventos, CrearRetosState.set_id_evento),              
+        select_catalog("Evento", "Seleccionar...", CrearRetosState.eventos, CrearRetosState.set_id_evento),
+        archivo_up(),
         width="100%",
         spacing="2",
     ),
 
+def form_descripcion()->rx.Component:
+    # Columna 2: solo la descripción, a todo el alto; el texto largo se desplaza dentro del campo.
+    return rx.flex(
+        rx.text("Descripción", size="1", weight="light"),
+        rx.text_area(
+            placeholder="Descripción...",
+            value=CrearRetosState.descripcion,
+            on_change=CrearRetosState.set_descripcion,
+            width="100%",
+            flex=rx.breakpoints(initial="none", md="1"),
+            height=rx.breakpoints(initial="24.5vh", md="auto"),
+            min_height="120px",
+            resize="none",
+        ),
+        direction="column",
+        flex=rx.breakpoints(initial="none", md="1"),
+        height=rx.breakpoints(initial="auto", md="100%"),
+        min_height=rx.breakpoints(initial="auto", md="0"),
+        width="100%",
+    )
+
 def form_pistas()->rx.Component:
-    return rx.vstack(
-        rx.heading("Pistas (Opcional)", size="5"),
-        rx.foreach(
-            CrearRetosState.pistas,
-            lambda p, i: rx.hstack(
-                card_text("Descripción de pista", f"{p['descripcion']}"),
-                card_text("Costo de pista", f"{p['costo']}, pts."),
-                rx.spacer(),
-                rx.button(
-                    "Quitar",
-                    on_click=lambda: CrearRetosState.quitar_pista(i),
-                    color_scheme="red", size="1", variant="soft",  
-                ),
-            width="100%"
+    # Columna 3: la lista de pistas se desplaza dentro de su caja; abajo, el cuadro para agregar.
+    return rx.flex(
+        rx.text("Pistas (Opcional)", size="1", weight="light"),
+        rx.box(
+            rx.foreach(
+                CrearRetosState.pistas,
+                lambda p, i: rx.card(rx.grid(
+                    card_text("Descripción", f"{p['descripcion']}"),
+                    card_text("Costo", f"{p['costo']} pts."),
+                    rx.center(
+                        rx.button(
+                            "Quitar",
+                            on_click=lambda: CrearRetosState.quitar_pista(i),
+                            color_scheme="red", size="1", variant="soft",
+                        )
+                    ),
+                width="100%",
+                grid_template_columns="70% 15% 15%",
+                )),
             ),
+            flex=rx.breakpoints(initial="none", md="1"),
+            min_height=rx.breakpoints(initial="auto", md="0"),
+            overflow_y="auto",
+            overflow_wrap="anywhere",
+            width="100%",
         ),
+        text_area("Descripción de pista", "Descripción...", CrearRetosState.pista_desc, CrearRetosState.set_pista_desc),
         rx.grid(
-            text_area("Descripción de pista", "Descripción...", CrearRetosState.pista_desc, CrearRetosState.set_pista_desc),
-            rx.grid(
-                input_box("Costo de pista", "Pts...", CrearRetosState.pista_costo, CrearRetosState.set_pista_costo, "number"),
-                button("Agregar pista","cyan",[CrearRetosState.agregar_pista]),
-                spacing="2",
-                columns={"base":"2","md":"1"},
-                rows={"base":"2","md":"1"},
-            ),
-            columns={"base":"1","md":"2"},
-            spacing="2", 
-            width="100%", 
+            input_box("Costo de pista", "Pts...", CrearRetosState.pista_costo, CrearRetosState.set_pista_costo, "number"),
+            button("Agregar pista","cyan",[CrearRetosState.agregar_pista]),
+            columns="2",
+            spacing="2",
+            align_items="end",
+            width="100%",
         ),
+        direction="column",
+        spacing="2",
+        height=rx.breakpoints(initial="auto", md="100%"),
+        min_height=rx.breakpoints(initial="auto", md="0"),
         width="100%",
     )
 
@@ -97,33 +129,44 @@ def form_crear_reto_view()->rx.Component:
         rx.dialog.trigger(rx.button(rx.icon("plus"), "Crear reto", on_click=CrearRetosState.open_close_dialog, variant="solid", color_scheme="jade")),
         rx.dialog.content(
             rx.grid(
+                rx.heading("Crear reto", size="5"),
+                # cuerpo: tres columnas de alto fijo
                 rx.grid(
                     form_reto(),
-                    archivo_up(),
-                    rows="auto",
-                    spacing="2",
-                ),
-                form_pistas(),
-                columns={"base":"1", "md":"2"},
-                spacing="5",
-                whidth="100%",
-            ),
-            rx.grid(
-                rx.cond(CrearRetosState.mensaje != "", badge_msg(CrearRetosState.mensaje, "red"),rx.spacer()),
-                rx.hstack(
-                    rx.spacer(),
-                    button("Guardar", "green", [CrearRetosState.guardar_reto_completo]),
-                    button("Cancelar", "red", [CrearRetosState.limpiar, CrearRetosState.open_close_dialog]),
-                    spacing="2",
+                    form_descripcion(),
+                    form_pistas(),
+                    grid_template_columns=rx.breakpoints(initial="minmax(0, 1fr)", md="minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr)"),
+                    spacing="5",
+                    flex="1",
+                    min_height="0",
+                    overflow_y=rx.breakpoints(initial="auto", md="hidden"),
                     width="100%",
                 ),
-                rows="2",
-                spacing="5",
-                width="100%",
+                # pie: mensaje y botones, siempre visibles
+                rx.grid(
+                    rx.cond(CrearRetosState.mensaje != "", badge_msg(CrearRetosState.mensaje, "red"),rx.spacer()),
+                    rx.hstack(
+                        rx.spacer(),
+                        button("Guardar", "green", [CrearRetosState.guardar_reto_completo]),
+                        button("Cancelar", "red", [CrearRetosState.limpiar, CrearRetosState.open_close_dialog]),
+                        spacing="2",
+                        width="100%",
+                    ),
+                    rows="2",
+                    spacing="1",
+                    width="100%",
+                ),
+                direction="column",
+                spacing="4",
+                height="100%",
             ),
-            close_dialog_button(CrearRetosState.open_close_dialog),     
-            width="100%",
-            max_width="900px",
+            close_dialog_button(CrearRetosState.open_close_dialog),
+            width="70vw",
+            max_width="70vw",
+            height="70vh",
+            max_height="70vh",
+            colums="3",
+           
         ),
         on_open_change=CrearRetosState.set_drop_mensaje,
         open=CrearRetosState.dialog_bool,
@@ -152,7 +195,7 @@ def archivo_edit() -> rx.Component:
                     rx.badge( 
                         rx.spacer(),   
                         rx.icon("file_up"),
-                        rx.text("Sin archivo / Subir arcivo", color="gray", size="1"),
+                        rx.text("Sin archivo / Subir archivo", color="gray", size="1"),
                         rx.spacer(),
                         color_scheme= "gray",
                         size="3",
@@ -190,7 +233,7 @@ def archivo_edit() -> rx.Component:
             ),
             ),
         rx.upload(
-            rx.text("Arrastra o haz click para (subir / remplzar) el archivo del reto.", size="1"),
+            rx.text("Arrastra o haz clic para subir o reemplazar el archivo del reto.", size="1"),
             id="archivo_edit",
             max_files=1,
             on_drop=EditarRetosState.on_drop_file(rx.upload_files(upload_id="archivo_edit")),
@@ -202,88 +245,119 @@ def archivo_edit() -> rx.Component:
     )
 
 def form_reto_edit() -> rx.Component:
+    # Columna 1: los mismos campos de antes (sin la descripción) y el archivo al final.
     return rx.vstack(
-        rx.heading("Editar reto", size="5"),
-        input_box("Titulo", "Titulo...", EditarRetosState.titulo, EditarRetosState.set_titulo, "text"),
-        text_area("Descripción", "Descripción...", EditarRetosState.descripcion, EditarRetosState.set_descripcion),
-        rx.grid(    
-            input_box("Flag", "ITDB{...} nueva (vacia no cambia)", EditarRetosState.flag, EditarRetosState.set_flag, "text"),
+        input_box("Título", "Título...", EditarRetosState.titulo, EditarRetosState.set_titulo, "text"),
+        rx.grid(
+            input_box("Flag", "ITDB{...} nueva (vacía no cambia)", EditarRetosState.flag, EditarRetosState.set_flag, "text"),
             input_box("Puntaje inicial", "Pts...", EditarRetosState.puntaje_inicial, EditarRetosState.set_puntaje_inicial, "number"),
-            input_box("Puntaje minimo", "Pts... (opcional)", EditarRetosState.puntaje_minimo, EditarRetosState.set_puntaje_minimo, "number"),
-            select_catalog("Categoria", "Seleccionar...", EditarRetosState.categorias, EditarRetosState.set_id_categoria,EditarRetosState.id_categoria),
+            input_box("Puntaje mínimo", "Pts... (opcional)", EditarRetosState.puntaje_minimo, EditarRetosState.set_puntaje_minimo, "number"),
+            select_catalog("Categoría", "Seleccionar...", EditarRetosState.categorias, EditarRetosState.set_id_categoria,EditarRetosState.id_categoria),
             select_catalog("Dificultad", "Seleccionar...", EditarRetosState.dificultades, EditarRetosState.set_id_dificultad, EditarRetosState.id_dificultad),
-            select_catalog("Modo", "Seleccionar...", EditarRetosState.modos, EditarRetosState.set_id_modo_puntaje, EditarRetosState.id_modo_puntaje),    
+            select_catalog("Modo", "Seleccionar...", EditarRetosState.modos, EditarRetosState.set_id_modo_puntaje, EditarRetosState.id_modo_puntaje),
             columns={"base":"1", "md":"2"},
             spacing="2",
             width="100%",
         ),
+        archivo_edit(),
         spacing="2",
         width="100%",
     )
 
+def form_descripcion_edit() -> rx.Component:
+    # Columna 2: solo la descripción, a todo el alto; el texto largo se desplaza dentro del campo.
+    return rx.flex(
+        rx.text("Descripción", size="1", weight="light"),
+        rx.text_area(
+            placeholder="Descripción...",
+            value=EditarRetosState.descripcion,
+            on_change=EditarRetosState.set_descripcion,
+            width="100%",
+            flex=rx.breakpoints(initial="none", md="1"),
+            height=rx.breakpoints(initial="24.5vh", md="auto"),
+            min_height="120px",
+            resize="none",
+        ),
+        direction="column",
+        flex=rx.breakpoints(initial="none", md="1"),
+        height=rx.breakpoints(initial="auto", md="100%"),
+        min_height=rx.breakpoints(initial="auto", md="0"),
+        width="100%",
+    )
+
 def form_pistas_edit() -> rx.Component:
-    return rx.vstack(
-        rx.heading("Pistas", size="5"),
-        
-        rx.foreach(
-            EditarRetosState.pistas_existentes,
-            lambda p, i: rx.hstack(
-                text_area(
-                    legend="Descripcion Pista",
-                    placeholder="Descripción...",
-                    value=p['descripcion'],
-                    on_change= lambda v:EditarRetosState.set_pista_existente_desc(i, v),
-                ),
-                input_box(
-                    legend="Costo pts.",
-                    placeholder="Pts...",
-                    value= p['costo'].to(str),
-                    on_change=lambda v:EditarRetosState.set_pista_existente_costo(i, v), 
-                    type="number",               
-                ),
-                rx.button(
-                    rx.cond(p['activo'], "Desactivar","Activar"),
-                    on_click=lambda: EditarRetosState.toggle_pista(p['id_pista']),
-                    color_scheme=rx.cond(p['activo'],"red","green"),
-                    size="1",
-                    variant="soft",            
-                ),
-                spacing="2"  
-            ),   
-        ),
-        rx.divider(),
-        rx.text(
-            rx.cond(
-                EditarRetosState.pistas_nuevas.length() > 0,
-                "Pistas nuevas",
-                ""
-            ),
-        ),
-        rx.foreach(
-            EditarRetosState.pistas_nuevas,
-            lambda p, i: rx.hstack(  
-                    rx.text(f"{p['costo']} pts.", weight="bold", size="2"),
-                    rx.text(f"{p['descripcion']}", weight="medium", size="1"),
-                    rx.button(
-                        "Quitar", 
-                        on_click=lambda: EditarRetosState.quitar_pistas_nuevas(i),
-                        color_scheme="red",
-                        variant="soft",
+    # Columna 3: pistas existentes y nuevas en una caja con scroll; abajo, el cuadro para agregar.
+    return rx.flex(
+        rx.text("Pistas", size="1", weight="light"),
+        rx.box(
+            rx.foreach(
+                EditarRetosState.pistas_existentes,
+                lambda p, i: rx.grid(
+                    text_area(
+                        legend="Descripción",
+                        placeholder="Descripción...",
+                        value=p['descripcion'],
+                        on_change= lambda v:EditarRetosState.set_pista_existente_desc(i, v),
                     ),
+                    input_box(
+                        legend="Costo",
+                        placeholder="Pts...",
+                        value= p['costo'].to(str),
+                        on_change=lambda v:EditarRetosState.set_pista_existente_costo(i, v),
+                        type="number",
+                    ),
+                    rx.center(
+                        rx.button(
+                            rx.cond(p['activo'], "Desactivar","Activar"),
+                            on_click=lambda: EditarRetosState.toggle_pista(p['id_pista']),
+                            color_scheme=rx.cond(p['activo'],"red","green"),
+                            size="1",
+                            variant="soft",
+                        ),
+                    ),
+                    spacing="1",
+                    grid_template_columns="60% 20% 20%",
+                ),
             ),
-        ),
-        rx.grid(
-            text_area("Descripcion de pista", "Descripción...", EditarRetosState.pista_desc, EditarRetosState.set_pista_desc),
-            rx.grid(
-                input_box("Costo de pista","Pts...", EditarRetosState.pista_costo, EditarRetosState.set_pista_costo, "number"),
-                button("Agregar pista", "cyan", EditarRetosState.agregar_pista),
-                spacing="2",
-                rows="2",
+            rx.text(
+                rx.cond(
+                    EditarRetosState.pistas_nuevas.length() > 0,
+                    "Pistas nuevas",
+                    ""
+                ),
             ),
-            spacing="2",
-            columns={"base":"1","md":"2"},
+            rx.foreach(
+                EditarRetosState.pistas_nuevas,
+                lambda p, i: rx.hstack(
+                        rx.text(f"{p['costo']} pts.", weight="bold", size="2"),
+                        rx.text(f"{p['descripcion']}", weight="medium", size="1"),
+                        rx.button(
+                            "Quitar",
+                            on_click=lambda: EditarRetosState.quitar_pistas_nuevas(i),
+                            color_scheme="red",
+                            variant="soft",
+                        ),
+                ),
+            ),
+            flex=rx.breakpoints(initial="none", md="1"),
+            min_height=rx.breakpoints(initial="auto", md="0"),
+            overflow_y="auto",
+            overflow_wrap="anywhere",
             width="100%",
         ),
+        text_area("Descripción de pista", "Descripción...", EditarRetosState.pista_desc, EditarRetosState.set_pista_desc),
+        rx.grid(
+            input_box("Costo de pista","Pts...", EditarRetosState.pista_costo, EditarRetosState.set_pista_costo, "number"),
+            button("Agregar pista", "cyan", EditarRetosState.agregar_pista),
+            columns="2",
+            spacing="2",
+            align_items="end",
+            width="100%",
+        ),
+        direction="column",
+        spacing="2",
+        height=rx.breakpoints(initial="auto", md="100%"),
+        min_height=rx.breakpoints(initial="auto", md="0"),
         width="100%",
     )
 
@@ -299,33 +373,42 @@ def form_editar_reto_view() -> rx.Component:
     return rx.dialog.root(
         rx.dialog.content(
             rx.grid(
+                rx.heading("Editar reto", size="5"),
+                # cuerpo: tres columnas de alto y ancho fijos
                 rx.grid(
                     form_reto_edit(),
-                    archivo_edit(),
-                    rows="auto",
+                    form_descripcion_edit(),
+                    form_pistas_edit(),
+                    grid_template_columns=rx.breakpoints(initial="minmax(0, 1fr)", md="minmax(0, 1fr) minmax(0, 1.3fr) minmax(0, 1fr)"),
+                    spacing="5",
+                    flex="1",
+                    min_height="0",
+                    overflow_y=rx.breakpoints(initial="auto", md="hidden"),
+                    width="100%",
                 ),
-                form_pistas_edit(),
-                columns={"base":"1","md":"2"},
-                spacing="5",
-                width="100%",
-            ),
-
-            rx.grid(
-                rx.cond(EditarRetosState.mensaje != "", badge_msg(EditarRetosState.mensaje, "red"),rx.spacer()),
-                rx.hstack(
-                    rx.spacer(),
-                    button("Guardar", "green", EditarRetosState.guardar_edit_completo),
-                    button("Cancelar", "red", EditarRetosState.open_close_dialog),
-                    spacing="2",
-                    width="100%",             
+                # pie: mensaje y botones, siempre visibles
+                rx.grid(
+                    rx.cond(EditarRetosState.mensaje != "", badge_msg(EditarRetosState.mensaje, "red"),rx.spacer()),
+                    rx.hstack(
+                        rx.spacer(),
+                        button("Guardar", "green", EditarRetosState.guardar_edit_completo),
+                        button("Cancelar", "red", EditarRetosState.open_close_dialog),
+                        spacing="2",
+                        width="100%",
+                    ),
+                    rows="2",
+                    spacing="1",
+                    width="100%",
                 ),
-                rows="2",
-                spacing="5",
-                width="100%",
+                direction="column",
+                spacing="4",
+                height="100%",
             ),
             close_dialog_button(EditarRetosState.open_close_dialog),
-            width="100%",
-            max_width="900px",
+            width="70vw",
+            max_width="70vw",
+            height="70vh",
+            max_height="70vh",
         ),
         open=EditarRetosState.dialog_bool,
     )
@@ -399,12 +482,12 @@ def tabla_retos_view()->rx.Component:
             rx.table.root(
                 rx.table.header(
                     rx.table.row(
-                        rx.table.column_header_cell("Titulo"),
-                        rx.table.column_header_cell("Categoria"),
+                        rx.table.column_header_cell("Título"),
+                        rx.table.column_header_cell("Categoría"),
                         rx.table.column_header_cell("Dificultad"),
                         rx.table.column_header_cell("Modo"),
                         rx.table.column_header_cell("Puntaje"),
-                        rx.table.column_header_cell("Minimo"),
+                        rx.table.column_header_cell("Mínimo"),
                         rx.table.column_header_cell("Estado"),
                         rx.table.column_header_cell("Acciones"),
                     ),
@@ -419,7 +502,7 @@ def tabla_retos_view()->rx.Component:
         rx.mobile_only(
             rx.vstack(
                 rx.grid(
-                    rx.text("Titulo", size="1", weight="medium"),
+                    rx.text("Título", size="1", weight="medium"),
                     rx.text("Acciones", size="1", weight="medium"),
                     grid_template_columns="1fr 30%",
                     width="100%",
@@ -439,9 +522,9 @@ def retos_view() -> rx.Component:
     return rx.flex(
         rx.card(
             rx.flex(
-                rx.heading("Gestion — Retos", size="4"),
+                rx.heading("Gestión — Retos", size="4"),
                 rx.grid(
-                    input_box("Buscar", "Buscar por titulo...", ListarRetosState.busqueda, ListarRetosState.set_busqueda, "text"),
+                    input_box("Buscar", "Buscar por título...", ListarRetosState.busqueda, ListarRetosState.set_busqueda, "text"),
                     form_crear_reto_view(),
                     width="100%",
                     grid_auto_flow="column",

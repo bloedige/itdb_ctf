@@ -31,10 +31,10 @@ def pista_content(pista:dict) -> rx.Component:
         ),
         rx.grid(
             rx.text(f"Pista {pista['costo']} pts.", weight="bold", size="3"),
-            rx.text("¿Desea adquirir la pista?", weight="regular", width="100%", size="2"),
+            rx.text("¿Deseas adquirir la pista?", weight="regular", width="100%", size="2"),
             rx.flex(
                 rx.dialog.close(button("Cancelar", "gray", [], size="2")),
-                button("confirmar", "jade", [lambda: EventoCerradoListarPistaState.comprar_pista(pista['id_reto'], pista['id_pista'])], size="2"),
+                button("Confirmar", "jade", [lambda: EventoCerradoListarPistaState.comprar_pista(pista['id_reto'], pista['id_pista'])], size="2"),
                 width="100%",
                 spacing="3",
                 justify="end",
@@ -159,7 +159,7 @@ def evento_cerrado_retos_view() -> rx.Component:
         EventoCerradoRetoState.acceso,
         rx.vstack(
             rx.grid(
-                 rx.heading("Catalogo de retos", size="5"),
+                 rx.heading("Catálogo de retos", size="5"),
                 filtros(
                     EventoCerradoRetoState.categorias,
                     EventoCerradoRetoState.id_categoria_filtro,

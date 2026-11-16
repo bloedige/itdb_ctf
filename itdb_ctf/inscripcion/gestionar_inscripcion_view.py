@@ -20,7 +20,7 @@ def alert_descalificar(id_participa, descalificado, nombre, email) -> rx.Compone
                     size="2",
                     weight="medium",
                 ),
-                rx.text("Desea rehabilitar o descalificar la cuenta del evento.", size="1", weight="light"),
+                rx.text("¿Deseas cambiar el estado de la cuenta en el evento?", size="1", weight="light"),
                 rx.center(
                     rx.text(f"{nombre}", size="1", weight="regular"),
                     width="100%",
@@ -62,7 +62,7 @@ def alert_quitar(id_participa, nombre, email) -> rx.Component:
         rx.alert_dialog.content(
             rx.vstack(
                 rx.text("Quitar", size="2", weight="medium"),
-                rx.text("Desea realizar la acción para quitar la cuenta de el evento.", size="1", weight="light"),
+                rx.text("¿Deseas quitar la cuenta del evento?", size="1", weight="light"),
                 rx.center(
                     rx.text(f"{nombre}", size="1", weight="regular"),
                     width="100%",
@@ -180,7 +180,7 @@ def contenido() -> rx.Component:
                             rx.text("Correo", size="1", weight="medium"),
                             rx.text("Fecha inscripción", size="1", weight="medium"),
                             rx.text("Estado", size="1", weight="medium"),
-                            rx.text("acciones", size="1", weight="medium"),
+                            rx.text("Acciones", size="1", weight="medium"),
                             columns="5",
                             place_items="center",
                             width="100%",
@@ -199,7 +199,7 @@ def contenido() -> rx.Component:
                     rx.foreach(GestionarInscripcionState.participantes, fila_participante),
                     width="100%", spacing="3",
                 ),
-                rx.text("seleccione evento a gestionar", color_scheme="gray", size="2"),
+                rx.text("Seleccione el evento a gestionar", color_scheme="gray", size="2"),
             ),
             width="100%", 
         ),

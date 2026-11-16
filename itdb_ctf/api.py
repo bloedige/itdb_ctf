@@ -10,7 +10,7 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import RedirectResponse, FileResponse
 
 from itdb_ctf.auth.oauth import url_de_autorizacion, canjear_codigo
-from itdb_ctf.auth.auth_logic import obtener_crear_usuario, DominiNoPermitido
+from itdb_ctf.auth.auth_logic import obtener_crear_usuario, DominiNoPermitido, CuentaNoPermitida
 from itdb_ctf.auth.jwt_utils import emitir_jwt, validar_jwt
 
 frontend_url = os.environ.get("PUBLIC_URL","http://localhost:3000")
@@ -33,6 +33,8 @@ async def callback(request: Request, code: str, state: str):
         usuario = obtener_crear_usuario(info)
     except DominiNoPermitido:
         return RedirectResponse("/login?error=dominio")
+    except CuentaNoPermitida:
+        return RedirectResponse("/login?error=cuenta")
     token = emitir_jwt(usuario)
     resp = RedirectResponse(f"{frontend_url}/informacion")
 

@@ -76,7 +76,7 @@ def validar_asociar_reto(id_reto:int, id_evento:int, id_modo_puntaje:int, inicia
             if estado in ("abierto", "concluido"):
                 reutilizable = True
             if futuro_activo and not reutilizable:
-                return False, f"El reto se encuantra en un evento cerrado {ev.titulo} (no terminado)."
+                return False, f"El reto se encuentra en un evento cerrado {ev.titulo} (no terminado)."
 
         ev_dest = s.get(Evento, id_evento)
         if not ev_dest:
@@ -86,15 +86,15 @@ def validar_asociar_reto(id_reto:int, id_evento:int, id_modo_puntaje:int, inicia
         modo_ct = s.get(ModoPuntaje, id_modo_puntaje)
         dinamico = bool(modo_ct and modo_ct.etiqueta == "dinamico")
         if modo_ev and modo_ev.etiqueta == "estatico" and dinamico:
-            return False, "Evento estatico solo admite puntaje unico"
+            return False, "Evento estático solo admite puntaje único."
         
         if inicial is None or inicial <= 0:
-                return False, "El puntaje inicial obligatorio mayor 0."
+                return False, "Puntaje inicial obligatorio mayor a 0."
         if dinamico:
             if minimo is None or minimo <= 0:
-                return False, "Puntaje minimo obligatorio mayor a 0 en modo dinamico."
+                return False, "Puntaje mínimo obligatorio mayor a 0 en modo dinámico."
             if minimo >= inicial:
-                return False, "Puntaje minimo debe ser menor a el inicial."
+                return False, "Puntaje mínimo debe ser menor al inicial."
             
         return True, ""
 
@@ -124,7 +124,7 @@ def validar_quitar_reto(id_evento:int) -> tuple[bool,str]:
             return False, "El evento no existe."
         est = estado_evento(ev)
         if est == "abierto":
-            return False, "En el evento abieto los retos son permanentes."
+            return False, "En el evento abierto los retos son permanentes."
         if est == "futuro":
             return True, ""
         return False, f"No se puede quitar retos de un evento {est.replace('_', ' ')}." 
@@ -281,17 +281,17 @@ def editar_contiene(id_contiene:int, id_modo_puntaje:int, inicial:int, minimo:in
         modo_ev = s.get(ModoPuntaje, ev.id_modo_puntaje)
         modo_ct = s.get(ModoPuntaje, id_modo_puntaje)
         if not modo_ct:
-            raise ValueError("Modo de puntaje invalido")
+            raise ValueError("Modo de puntaje inválido.")
         dinamico = bool(modo_ct and modo_ct.etiqueta == "dinamico")
         if modo_ev and modo_ev.etiqueta == "estatico" and dinamico:
-            raise ValueError("Evento estatico solo admite puntaje único.")
+            raise ValueError("Evento estático solo admite puntaje único.")
         if inicial is None or inicial <= 0:
             raise ValueError("Puntaje inicial obligatorio mayor a 0.")
         if dinamico:
             if minimo is None or minimo <= 0:
-                raise ValueError("Puntaje minimo obligatorio mayor a 0.")
+                raise ValueError("Puntaje mínimo obligatorio mayor a 0.")
             if minimo >= inicial:
-                raise ValueError("Puntaje minimo de ser menor a el inicial.")
+                raise ValueError("Puntaje mínimo debe ser menor al inicial.")
 
         c.id_modo_puntaje = id_modo_puntaje
         c.puntaje_inicial = inicial

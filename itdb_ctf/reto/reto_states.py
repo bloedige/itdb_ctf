@@ -130,10 +130,10 @@ class CrearRetosState(AuthState):
 
     def agregar_pista(self):
         if not self.pista_desc:
-            self.mensaje = "la pista necesita de una descripcion."
+            self.mensaje = "La pista necesita una descripción."
             return
-        if self.pista_costo < 0:
-            self.mensaje = "el costo de la pista deber mayor o igual que 0"
+        if int(self.pista_costo) < 0:
+            self.mensaje = "El costo de la pista debe ser mayor o igual a 0."
             return
         self.pistas = self.pistas + [{
             "costo":self.pista_costo or "0",
@@ -291,7 +291,7 @@ class EditarRetosState(AuthState):
 
     def agregar_pista(self):
         if not self.pista_desc:
-            self.mensaje = "La pista necesita descripcion"
+            self.mensaje = "La pista necesita una descripción."
             return
         self.pistas_nuevas = self.pistas_nuevas +[{
             "costo": int(self.pista_costo) if self.pista_costo else 0,
@@ -375,7 +375,7 @@ class EditarRetosState(AuthState):
             self.mensaje="El reto no existe"
             return
         if not puede_editar(reto, self.id_usuario, self.codigo_rol):
-            self.mensaje="No cuentas con permiso de edicion de retos"
+            self.mensaje="No cuentas con permiso de edición de retos."
             return
         values = {
             "titulo": self.titulo,            

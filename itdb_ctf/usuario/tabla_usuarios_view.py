@@ -121,7 +121,7 @@ def filtros() -> rx.Component:
         rx.grid(
             input_box("Buscar por correo", "example@example.com", ListarUsuarioState.busqueda, ListarUsuarioState.set_busqueda, "email"),
             select_catalog("Filtrar por rol","Todos...", ListarUsuarioState.roles, ListarUsuarioState.set_id_rol_filtro, ListarUsuarioState.id_rol_filtro),
-            select_catalog("Filtrar por metodo auth","Todos...", ListarUsuarioState.metodos , ListarUsuarioState.set_id_metodo_filtro, ListarUsuarioState.id_metodo_filtro),
+            select_catalog("Filtrar por método de acceso","Todos...", ListarUsuarioState.metodos , ListarUsuarioState.set_id_metodo_filtro, ListarUsuarioState.id_metodo_filtro),
             select_catalog("Filtrar por estado", "todos..", ListarUsuarioState.estados, ListarUsuarioState.set_activo_filtro, ListarUsuarioState.activo_filtro),
             form_crear_usuario_view(),
             grid_template_columns="30% 1fr 1fr 1fr 1fr",
@@ -152,7 +152,7 @@ def tabla_usuario_view() -> rx.Component:
                             rx.table.column_header_cell("Alias"),
                             rx.table.column_header_cell("Correo"),
                             rx.table.column_header_cell("Rol"),
-                            rx.table.column_header_cell("Metodo"),
+                            rx.table.column_header_cell("Método"),
                             rx.table.column_header_cell("Estado"),
                             rx.table.column_header_cell("Acciones"),
                         ),

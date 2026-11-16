@@ -10,7 +10,7 @@ from itdb_ctf.core.rate_limit import permitir_flag
 def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str) -> tuple[bool,str]:
     ok, faltan = permitir_flag(id_usuario, id_reto)
     if not ok:
-        return False, f"Demasiados intentos. Esperá {faltan} s."
+        return False, f"Demasiados intentos. Espera {faltan} s."
     with Session(engine) as s :
         reto = s.get(Reto,id_reto)
         if not reto or not reto.activo:
@@ -43,7 +43,7 @@ def enviar_flag(id_usuario:int, id_reto:int, id_evento:int, flag_enviada:str) ->
             Resuelve.flag_correcta==True,
         )).first()
         if resuelto:
-            return False, "El reto ah sido resuelto."
+            return False, "El reto ya ha sido resuelto."
         correcta=flag_hasher.verificar(flag_enviada,reto.flag)
         s.add(Resuelve(
             id_usuario=id_usuario,

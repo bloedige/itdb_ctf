@@ -7,6 +7,7 @@ def eventos_page() -> rx.Component:
     return rx.grid(
         navbar(),
         auto_inscripcion_eventos_view(),
+        spacing="4",
         justify_items="center",
         on_mount=AutoInscripcionState.escuchar_eventos,
         on_unmount=AutoInscripcionState.parar_eventos,

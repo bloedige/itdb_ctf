@@ -231,7 +231,7 @@ def perfil_contenido(
     return rx.cond(
         E.hay_datos,
         rx.grid(
-            rx.heading(titulo, size="5"),
+            rx.heading(titulo, size="5", justify_self="start"),
             rx.grid(
                 rx.vstack(
                     rx.hstack(

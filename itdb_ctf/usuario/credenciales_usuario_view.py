@@ -10,7 +10,7 @@ def credenciales_dialog() -> rx.Component:
                 rx.card(
                     rx.grid(
                         rx.icon("key"),
-                        card_text("Correo electronico", CredencialesUsuarioState.cred_email),
+                        card_text("Correo electrónico", CredencialesUsuarioState.cred_email),
                         card_text("Contraseña", CredencialesUsuarioState.cred_password),
                         width="100%",
                         place_items="center",
@@ -33,7 +33,7 @@ def credenciales_dialog() -> rx.Component:
                     columns="2",
                 ),
                 rx.divider(),
-                rx.center(rx.text("!!! Copia las credenciales no se volveran a mostrar ¡¡¡", size="1", weight="light" ,color_scheme="amber"),width="100%"), 
+                rx.center(rx.text("Copia las credenciales: no se volverán a mostrar.", size="1", weight="light" ,color_scheme="amber"),width="100%"), 
                 rx.button(
                     "Copiar y cerrar",
                     color_scheme="jade",
@@ -73,7 +73,7 @@ def alert_reset_password(id_usuario, email, alias, rol) -> rx.Component:
                 ),
                 rx.alert_dialog.description(
                     rx.vstack(
-                        rx.text("Desea generar una nueva contraseña. La actual dejara de funcionar.", size="1"),
+                        rx.text("¿Deseas generar una nueva contraseña? La actual dejará de funcionar.", size="1"),
                         spacing="3",
                         width="100%",
                     ),
@@ -114,7 +114,7 @@ def alert_estado(id_usuario, activo, email) -> rx.Component:
                 ),
                 rx.alert_dialog.description(
                     rx.vstack(
-                        rx.text("Desea realizar la acción para cambiar el estado de la cuenta.", size="1"), 
+                        rx.text("¿Deseas cambiar el estado de la cuenta?", size="1"), 
                         rx.center(rx.text(f"{email}", weight="medium", size="1"), width="100%"),
                         spacing="3",
                         width="100%",

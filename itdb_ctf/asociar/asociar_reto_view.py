@@ -12,7 +12,7 @@ def override_content() -> rx.Component:
             rx.grid(
                 rx.text("Modo puntaje", weight="light"),
                 rx.text("Puntaje inicial", weight="light"),
-                rx.text("Puntaje minimo", weight="light"),
+                rx.text("Puntaje mínimo", weight="light"),
                 style={"font-size": ".7em"},
                 place_items="center",
                 columns="3",
@@ -47,17 +47,17 @@ def override_content() -> rx.Component:
                 AsociarRetoState.evento_dinamico,
                 rx.grid(
                     select_catalog("Modo de reto", "Seleccionar...", AsociarRetoState.modos, AsociarRetoState.set_id_modo_puntaje, AsociarRetoState.id_modo_puntaje, AsociarRetoState.override),
-                    input_box("Punataje inicial", AsociarRetoState.inicial_def.to_string(), AsociarRetoState.inicial_def, AsociarRetoState.set_puntaje_inicial, "number", AsociarRetoState.override),
+                    input_box("Puntaje inicial", AsociarRetoState.inicial_def.to_string(), AsociarRetoState.inicial_def, AsociarRetoState.set_puntaje_inicial, "number", AsociarRetoState.override),
                     rx.cond(
                         AsociarRetoState.reto_dinamico,
-                        input_box("Punataje minimo", rx.cond(AsociarRetoState.minimo_def, AsociarRetoState.minimo_def.to_string(), "0"), AsociarRetoState.minimo_def, AsociarRetoState.set_puntaje_minimo, "number", AsociarRetoState.override),
+                        input_box("Puntaje mínimo", rx.cond(AsociarRetoState.minimo_def, AsociarRetoState.minimo_def.to_string(), "0"), AsociarRetoState.minimo_def, AsociarRetoState.set_puntaje_minimo, "number", AsociarRetoState.override),
                     ),
                     width="80%",
                     spacing="2",
                 ),
                 rx.grid(
-                    rx.text("Estatico por modo de evento", size="2", weight="regular"),
-                    input_box("Punataje inicial", AsociarRetoState.inicial_def.to_string(), AsociarRetoState.inicial_def, AsociarRetoState.set_puntaje_inicial, "number", AsociarRetoState.override),
+                    rx.text("Estático por modo de evento", size="2", weight="regular"),
+                    input_box("Puntaje inicial", AsociarRetoState.inicial_def.to_string(), AsociarRetoState.inicial_def, AsociarRetoState.set_puntaje_inicial, "number", AsociarRetoState.override),
                     width="80%",
                     spacing="2",
                 ),
@@ -152,8 +152,8 @@ def item_carrito(item: dict) -> rx.Component:
         rx.text(
             rx.cond(
                 item['puntaje_minimo'],
-                f"{item['puntaje_inicial']}.pts {item['puntaje_inicial']}.pts",
-                f"{item['puntaje_inicial']}.pts ---",
+                f"{item['puntaje_inicial']} pts · {item['puntaje_minimo']} pts",
+                f"{item['puntaje_inicial']} pts",
             ),
             size="2", weight="regular"
         ),
@@ -202,8 +202,8 @@ def filtros() -> rx.Component:
             rx.heading("Asociar retos en eventos", size="4"),
             rx.tablet_and_desktop(
                 rx.grid(
-                    input_box("Buscar por titulo", "Titutlo...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
-                    select_catalog("Categorias", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
+                    input_box("Buscar por título", "Título...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
+                    select_catalog("Categorías", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
                     select_catalog("Dificultad", "Seleccionar...", AsociarRetoState.dificultades, AsociarRetoState.set_id_dificultad_filtro),
                     select_catalog("Modo puntaje", "Seleccionar...", AsociarRetoState.modos, AsociarRetoState.set_id_modo_filtro),
                     checked("Aislados", AsociarRetoState.aislados_bool, AsociarRetoState.set_aislados_bool),   
@@ -216,9 +216,9 @@ def filtros() -> rx.Component:
             ),
             rx.mobile_only(
                 rx.grid(
-                    input_box("Buscar por titulo", "Titutlo...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
+                    input_box("Buscar por título", "Título...", AsociarRetoState.busqueda, AsociarRetoState.set_busqueda, "text"),
                     rx.grid(
-                    select_catalog("Categorias", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
+                    select_catalog("Categorías", "Seleccionar...", AsociarRetoState.categorias, AsociarRetoState.set_id_categoria_filtro),
                     select_catalog("Dificultad", "Seleccionar...", AsociarRetoState.dificultades, AsociarRetoState.set_id_dificultad_filtro),
                     select_catalog("Modo puntaje", "Seleccionar...", AsociarRetoState.modos, AsociarRetoState.set_id_modo_filtro),
                     checked("Aislados", AsociarRetoState.aislados_bool, AsociarRetoState.set_aislados_bool),   
@@ -246,7 +246,7 @@ def contenido() -> rx.Component:
             rx.cond(
                 AsociarRetoState.id_evento_dest != "",
                 rx.foreach(AsociarRetoState.candidatos, fila_candidato),
-                rx.text("seleccione evento de destino", color_scheme="gray", size="2"),
+                rx.text("Seleccione el evento de destino", color_scheme="gray", size="2"),
             ),
             spacing="3",
             width="100%",

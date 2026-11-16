@@ -138,7 +138,7 @@ def contenido() -> rx.Component:
                     rx.foreach(InscribirState.candidatos, fila_candidato),
                     width="100%", spacing="3",
                 ),
-                rx.text("seleccione evento para incribir", color_scheme="gray", size="2"),
+                rx.text("Seleccione el evento para inscribir", color_scheme="gray", size="2"),
             ),
             width="100%",
             spacing="5",
@@ -180,7 +180,7 @@ def prev_csv(titulo, items, color, motivo=False) -> rx.Component:
 def archivo_csv() -> rx.Component:
     return rx.card(
         rx.vstack(
-            rx.heading("Gestion de inscripciones", size="3", weight="bold"),
+            rx.heading("Gestión de inscripciones", size="3", weight="bold"),
             select_catalog("Evento", "Seleccionar", InscribirState.eventos, InscribirState.set_id_evento_csv, InscribirState.id_evento_csv),
             rx.cond(
                 InscribirState.csv_nombre != "",
@@ -196,14 +196,14 @@ def archivo_csv() -> rx.Component:
                             width="100%",
                         ),
                     ),
-                    button("Analizar csv", "jade", [InscribirState.analizar_csv], size="1"),
+                    button("Analizar CSV", "jade", [InscribirState.analizar_csv], size="1"),
                     width="100%",
                     grid_template_columns="65% 1fr",
                     spacing="2",
                 ),
             ),
             rx.upload(
-                rx.text("Arrastrar o hacer click para Subir csv", size="1"),
+                rx.text("Arrastra o haz clic para subir el CSV", size="1"),
                 id="csv_inscripcion",
                 max_files=1,
                 accept={"text/csv": [".csv"]},
@@ -229,17 +229,17 @@ def archivo_csv() -> rx.Component:
 
 def reporte_csv() -> rx.Component:
     return rx.vstack(
-        rx.heading("Reporte de inscripción por csv", size="3", weight="bold"),
+        rx.heading("Reporte de inscripción por CSV", size="3", weight="bold"),
         rx.text(
-            """Revisa antes de confirmar. Los nuevos se crearan como cuentas Google
-que se completan cuando el estudiante inicia sesion.""",
+            """Revisa antes de confirmar. Los nuevos se crearán como cuentas Google
+que se completan cuando el estudiante inicia sesión.""",
             white_space="pre-wrap", size="1", weight="light", color_scheme="gray",
         ),
         rx.vstack(
             rx.divider(),
             prev_csv("Nuevos (se crean e inscriben)", InscribirState.prev_nuevos, "jade"),
             rx.divider(),
-            prev_csv("Existente (se inscriben)", InscribirState.prev_existentes, "blue"),
+            prev_csv("Existentes (se inscriben)", InscribirState.prev_existentes, "blue"),
             rx.divider(),
             prev_csv("Omitidos", InscribirState.prev_omitidos, "ruby", True),
             width="100%",
@@ -287,7 +287,7 @@ def dialog_csv() -> rx.Component:
 def card_csv() -> rx.Component:
     return rx.card(
         rx.grid(
-            rx.text("Incribir estudiantes por lote", size="2", weight="medium"),
+            rx.text("Inscribir estudiantes por lote", size="2", weight="medium"),
             dialog_csv(),
             width="100%",
             spacing="2",

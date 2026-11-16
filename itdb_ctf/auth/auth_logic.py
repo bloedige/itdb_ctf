@@ -9,6 +9,9 @@ DOMINIO=os.environ["ALLOWED_EMAIL_DOMAIN"]
 class DominiNoPermitido(Exception):
     """El correo no pertenece al dominio institucional."""
 
+class CuentaNoPermitida(Exception):
+    """La cuenta existe pero no puede entrar con Google (es local o está inactiva)."""
+
 def validar_dominio (email: str) -> None:
     if not email.lower().endswith("@"+DOMINIO.lower()):
         raise DominiNoPermitido(email)
@@ -55,6 +58,9 @@ def obtener_crear_usuario(info: dict) -> Usuario:
     with Session(engine) as s:
         usuario = s.exec(select(Usuario).where(Usuario.email_inst==email)).first()
         if usuario:
+            google = s.exec(select(MetodoAuth).where(MetodoAuth.etiqueta=="google")).one()
+            if usuario.id_metodo_auth != google.id_metodo_auth or not usuario.activo:
+                raise CuentaNoPermitida(email)
             if es_placeholder(usuario):
                 paterno, materno = separar_apellidos(info.get("family_name"))
                 usuario.nombre=info.get("given_name", "")

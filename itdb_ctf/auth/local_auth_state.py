@@ -20,7 +20,7 @@ class LocalAuthState(AuthState):
         ip = self.router.session.client_ip or "desconocida"
         bloqueado, faltan = login_bloqueado(ip, self.email)
         if bloqueado:
-            return rx.toast.error(f"Demasiados intentos fallidos. Reintentá en {faltan} s.")
+            return rx.toast.error(f"Demasiados intentos fallidos. Reintenta en {faltan} s.")
         usuario = verificar_credenciales(self.email,self.password)
         if not usuario:
             registrar_fallo_login(ip, self.email)

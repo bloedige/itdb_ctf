@@ -24,7 +24,7 @@ def pista_content(pista:dict) -> rx.Component:
         ),
         rx.grid(
             rx.text(f"Pista {pista['costo']} pts.", weight="bold", size="3"),
-            rx.text("¿Desea adquirir la pista?", weight="regular", width="100%", size="2"),
+            rx.text("¿Deseas adquirir la pista?", weight="regular", width="100%", size="2"),
             spacing="3",
             place_items="center",
             width="100%",
@@ -42,7 +42,7 @@ def dialog_pista(pista:dict, state_comprar_pista) -> rx.Component:
                 ~pista['adquirido'],
                 rx.flex(
                     rx.dialog.close(button("Cancelar", "gray", [], size="2")),
-                    button("confirmar", "jade", [lambda: state_comprar_pista(pista['id_reto'],pista['id_pista'])], size="2"),
+                    button("Confirmar", "jade", [lambda: state_comprar_pista(pista['id_reto'],pista['id_pista'])], size="2"),
                     spacing="3",
                     justify="end",
                 ),

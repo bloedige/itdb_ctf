@@ -149,7 +149,7 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
     def open_dialog(self, id_reto: int, titulo: str, m_def: str, pi_def: int, pm_def: int | None = None):
         if not self.id_evento_dest:
             self.dialog_bool = False
-            return rx.toast.warning("Seleccione evento detino.")
+            return rx.toast.warning("Seleccione el evento destino.")
         self.id_dialog = id_reto
         self.titulo_dialog = titulo
         self.override_bool = False
@@ -171,7 +171,7 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
 
     def confirmar_agregar(self):
         if any(item['id'] == self.id_dialog for item in self.carrito):
-            return rx.toast.error(f"El reto {self.titulo_dialog} ya se encuetra en el carrito")
+            return rx.toast.error(f"El reto {self.titulo_dialog} ya se encuentra en el carrito")
 
         inicial_in = int(self.puntaje_inicial) if self.puntaje_inicial.isdigit() else None
         minimo_in = int(self.puntaje_minimo) if self.puntaje_minimo.isdigit() else None
@@ -201,18 +201,18 @@ class AsociarRetoState(SuscriptorMixin, AuthState):
         }]
         self.cargar_candidatos()
         self.dialog_bool = False
-        return rx.toast.success(f"se agrego {self.titulo_dialog} " + (f" con: {inicial} {minimo} pts. (Override)" if self.override_bool else f"con: {inicial} {minimo} pts. (Default)"))
+        return rx.toast.success(f"se agregó {self.titulo_dialog} " + (f" con: {inicial} {minimo} pts. (Override)" if self.override_bool else f"con: {inicial} {minimo} pts. (Default)"))
 
     def validar_campos(self, inicial, minimo, modo):
         if not self.evento_dinamico and modo:
-            return False, "Evento estatico solo admite puntaje unico"
+            return False, "Evento estático solo admite puntaje único."
         if inicial is None or inicial <= 0:
-            return False, "El puntaje inicial obligatorio mayor 0."
+            return False, "Puntaje inicial obligatorio mayor a 0."
         if modo and self.evento_dinamico:
             if minimo is None or minimo <= 0:
-                return False, "Puntaje minimo obligatorio mayor a 0 en modo dinamico."
+                return False, "Puntaje mínimo obligatorio mayor a 0 en modo dinámico."
             if minimo >= inicial:
-                return False, "Puntaje minimo debe ser menor a el inicial."
+                return False, "Puntaje mínimo debe ser menor al inicial."
         return True, ""
 
     @rx.event
@@ -327,7 +327,7 @@ class GestionarRetoState(SuscriptorMixin, AuthState):
                 self.cargar_gestion()
                 return rx.toast.success("Reto desvinculado de evento")
             else:
-                return rx.toast.error("No se encontro asociación")
+                return rx.toast.error("No se encontró la asociación.")
         except ValueError as e:
             self.cargar_gestion()
             return rx.toast.error(str(e))
@@ -370,7 +370,7 @@ class EditarAsociarState(AuthState):
         if guard: return guard
         contiene = asociar.obtener_contiene(id_contine)
         if not contiene:
-            return rx.toast.error("No se encontro el registro.")
+            return rx.toast.error("No se encontró el registro.")
         self.titulo_edit = titulo
         self.id_evento = contiene["id_evento"]
         self.id_edit = contiene["id_contiene"]
@@ -386,14 +386,14 @@ class EditarAsociarState(AuthState):
 
     def validar_edit(self, inicial, minimo, modo_dinamico) -> tuple[bool, str]:
         if not self.evento_edit_dinamico and modo_dinamico:
-            return False, "Evento estatico solo admite puntaje unico."
+            return False, "Evento estático solo admite puntaje único."
         if inicial is None or inicial <= 0:
-            return False, "El puntaje inicial obligatorio mayor a 0."
+            return False, "Puntaje inicial obligatorio mayor a 0."
         if modo_dinamico and self.evento_edit_dinamico:
             if minimo is None or minimo <= 0:
-                return False, "Puntaje minimo obligatorio mayor a 0 en modo dinamico."
+                return False, "Puntaje mínimo obligatorio mayor a 0 en modo dinámico."
             if minimo >= inicial:
-                return False, "Puntaje minimo debe ser menor al inicial."
+                return False, "Puntaje mínimo debe ser menor al inicial."
         return True, ""
 
     async def guardar_edit_contiene(self):

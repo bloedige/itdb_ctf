@@ -93,7 +93,7 @@ class CrearUsuarioState(AuthState):
                 self.mensaje = msg
                 return False
         if not formato_email_valido(self.email):
-            self.mensaje = "Correo no valido"
+            self.mensaje = "Correo no válido."
             return False
         return True
         
@@ -245,7 +245,7 @@ class EditarUsuarioState(AuthState):
                 self.mensaje = msg
                 return False
         if not formato_email_valido(self.email):
-            self.mensaje = "Correo invalido"
+            self.mensaje = "Correo inválido."
             return False
         return True
     
@@ -279,7 +279,7 @@ class EditarUsuarioState(AuthState):
             self.open_close_dialog()
             self.limpiar()
             self.set_drop_mensaje()
-            return rx.toast.success("Datos de cuenta actualizado")
+            return rx.toast.success("Datos de la cuenta actualizados.")
             
     def limpiar(self):
         self.id_usuario_edit = 0
@@ -293,5 +293,5 @@ class EditarUsuarioState(AuthState):
         except ValueError as e:
             return rx.toast.error(str(e))
         credenciales = await self.get_state(CredencialesUsuarioState)
-        credenciales.open_credenciales("Contraseña Restablecida",email,alias,password,rol)
+        credenciales.open_credenciales("Contraseña restablecida.",email,alias,password,rol)
     

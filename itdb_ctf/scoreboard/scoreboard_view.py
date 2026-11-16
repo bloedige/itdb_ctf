@@ -4,11 +4,11 @@ from itdb_ctf.components.evolucion_chart import evolucion_chart
 
 def grafica_evolucion() -> rx.Component:
     return rx.box(
-        rx.text("Evolucion de puntaje", size="2", weight="medium", color_scheme="gray"),
+        rx.text("Evolución de puntaje", size="2", weight="medium", color_scheme="gray"),
         rx.cond(
             ScoreboardState.evolucion_vacia,
             rx.center(
-                rx.text("Sin datos de evolucion todavia.", size="2",
+                rx.text("Sin datos de evolución todavía.", size="2",
                         weight="light", color_scheme="gray"),
                 height="320px", width="100%",
             ),
@@ -57,15 +57,15 @@ def fila_ranking(fila:dict) -> rx.Component:
 def scoreboard_view() -> rx.Component:
     return rx.grid(
         rx.grid(
-            rx.heading("Scoreboard", size="5"),
+            rx.heading("Scoreboard", size="5", justify_self="start"),
             rx.cond(
                 ScoreboardState.solves,
                 grafica_evolucion(),
             ),
             rx.grid(
-                rx.text("Pocisión",weight="regular", size="3"),
-                rx.text("Paticipante",weight="regular", size="3"),
-                rx.text("puntaje",weight="regular", size="3"),
+                rx.text("Posición",weight="regular", size="3"),
+                rx.text("Participante",weight="regular", size="3"),
+                rx.text("Puntaje",weight="regular", size="3"),
                 place_items="center",
                 spacing="2",
                 grid_template_columns="1fr 50% 1fr",
@@ -74,7 +74,7 @@ def scoreboard_view() -> rx.Component:
             rx.foreach(ScoreboardState.ranking, fila_ranking),
             rx.cond(
                 ScoreboardState.no_solves,
-                rx.text("Aun no hay puntajes",weight="light", size="3", color="gray"),
+                rx.text("Aún no hay puntajes.",weight="light", size="3", color="gray"),
             ),
             spacing="3",
             place_items="center",

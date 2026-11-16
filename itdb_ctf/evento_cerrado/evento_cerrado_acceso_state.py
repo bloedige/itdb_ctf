@@ -60,7 +60,7 @@ class EventoCerradoAccesoState(AuthState):
         else:
             ok, msg = acceso_evento_cerrado(id_ev, self.id_usuario)
         self.acceso = ok
-        self.motivo = msg or "No tenés acceso a este evento."
+        self.motivo = msg or "No tienes acceso a este evento."
 
     @rx.event(background=True)
     async def escuchar_acceso(self):

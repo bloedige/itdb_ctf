@@ -74,7 +74,7 @@ def login_institucional() -> rx.Component:
    
 def login_local() -> rx.Component:
     return rx.grid(
-        input_box("Correo electronico", "usuario@itdonbosco.org",LocalAuthState.email, LocalAuthState.set_email, "email"),
+        input_box("Correo electrónico", "usuario@itdonbosco.org",LocalAuthState.email, LocalAuthState.set_email, "email"),
         input_box("Contraseña", "", LocalAuthState.password, LocalAuthState.set_password, "password"),
         rx.button("Ingresar", on_click=LocalAuthState.entrar_local, width="100%", padding=".5em", color_scheme="amber"),
         width="100%",

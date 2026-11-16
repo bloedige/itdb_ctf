@@ -7,12 +7,12 @@ from itdb_ctf.usuario.credenciales_usuario_view import credenciales_dialog
 
 def form_content() -> rx.Component:
     return rx.vstack(
-        rx.heading("Crear cueta usuario", size="3"),
+        rx.heading("Crear cuenta de usuario", size="3"),
         input_box("Nombre", "Nombre...", CrearUsuarioState.nombre, CrearUsuarioState.set_nombre, "text"),
         input_box("Paterno", "Paterno...", CrearUsuarioState.paterno, CrearUsuarioState.set_paterno, "text"),
         input_box("Materno", "Materno...", CrearUsuarioState.materno, CrearUsuarioState.set_materno, "text"),
         input_box("Alias", "Alias...", CrearUsuarioState.alias, CrearUsuarioState.set_alias, "text"),
-        input_box("Correo electronico", "itdb@itdonbosco.org....", CrearUsuarioState.email, CrearUsuarioState.set_email, "email"),
+        input_box("Correo electrónico", "itdb@itdonbosco.org....", CrearUsuarioState.email, CrearUsuarioState.set_email, "email"),
         select_catalog("Rol", "Seleccionar...", CrearUsuarioState.roles, CrearUsuarioState.set_id_rol, CrearUsuarioState.id_rol),
         rx.cond(
             CrearUsuarioState.mensaje != "",
@@ -35,7 +35,7 @@ def form_crear_usuario_view() -> rx.Component:
         rx.dialog.trigger(
             rx.button(
                 rx.icon("plus"),
-                "Crear Usuario",
+                "Crear usuario",
                 size="2",
                 variant="solid",
                 color_scheme="jade",

@@ -114,7 +114,7 @@ class InscribirState(SuscriptorMixin, AuthState):
         if not self.id_evento_car:
             return rx.toast.warning("Seleccione un evento")
         if not self.carrito:
-            return rx.toast.warning("sin usuarios para incribir a evento")
+            return rx.toast.warning("Sin usuarios para inscribir en el evento.")
         ids = [c['id_usuario'] for c in self.carrito]
         ok, errors = insc.inscribir_lote(ids, int(self.id_evento_car))
         self.carrito = []
@@ -140,7 +140,7 @@ class InscribirState(SuscriptorMixin, AuthState):
             return rx.toast.error("Subir archivo csv.")
         correos = insc.parsear_cvs(self.csv_contenido)
         if not correos:
-            return rx.toast.error("CSV sin correos validos.")
+            return rx.toast.error("CSV sin correos válidos.")
         reporte = insc.analizar_correos(correos, int(self.id_evento_csv))
         self.prev_nuevos = reporte["nuevos"]
         self.prev_existentes = reporte["existentes"]
@@ -155,7 +155,7 @@ class InscribirState(SuscriptorMixin, AuthState):
         self.cargar_candidatos()
         if errors:
             return rx.toast.warning(f"{ok} inscritos, {len(errors)} con error")
-        return rx.toast.success(f"{ok} incritos desde CSV")
+        return rx.toast.success(f"{ok} inscritos desde CSV")
 
     def cerrar_csv(self):
         self.open_close_dialog_csv()
@@ -228,7 +228,7 @@ class GestionarInscripcionState(SuscriptorMixin, AuthState):
         except ValueError as e:
             return rx.toast.error(str(e))
         self.cargar_participantes()
-        return rx.toast.success("Inscripcion anulada")
+        return rx.toast.success("Inscripción anulada")
 
     def descalificar(self, id_paticipa: int):
         guard = self.requiere_admin()
@@ -238,4 +238,4 @@ class GestionarInscripcionState(SuscriptorMixin, AuthState):
         except ValueError as e:
             return rx.toast.error(str(e))
         self.cargar_participantes()
-        return rx.toast.success("Partciapnte descalificado" if est == "descalificado" else "Participante rehabilitado")
+        return rx.toast.success("Participante descalificado" if est == "descalificado" else "Participante rehabilitado")

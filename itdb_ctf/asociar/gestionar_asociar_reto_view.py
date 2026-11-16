@@ -10,17 +10,17 @@ def edit_content() -> rx.Component:
             rx.cond(
                 EditarAsociarState.evento_edit_dinamico,
                 rx.grid(
-                    select_catalog("Modo de reto", "seleccionar...", GestionarRetoState.modos, EditarAsociarState.set_id_modo_edit, EditarAsociarState.id_modo_edit),
-                    input_box("Punataje inicial", EditarAsociarState.inicial_def, EditarAsociarState.puntaje_inicial_edit, EditarAsociarState.set_puntaje_inicial_edit, "number"),
+                    select_catalog("Modo de reto", "Seleccionar...", GestionarRetoState.modos, EditarAsociarState.set_id_modo_edit, EditarAsociarState.id_modo_edit),
+                    input_box("Puntaje inicial", EditarAsociarState.inicial_def, EditarAsociarState.puntaje_inicial_edit, EditarAsociarState.set_puntaje_inicial_edit, "number"),
                     rx.cond(
                         EditarAsociarState.reto_edit_dinamico,
-                        input_box("Punataje inicial", rx.cond(EditarAsociarState.minimo_def, EditarAsociarState.minimo_def, "0"), EditarAsociarState.puntaje_minimo_edit, EditarAsociarState.set_puntaje_minimo_edit, "number"),
+                        input_box("Puntaje mínimo", rx.cond(EditarAsociarState.minimo_def, EditarAsociarState.minimo_def, "0"), EditarAsociarState.puntaje_minimo_edit, EditarAsociarState.set_puntaje_minimo_edit, "number"),
                     ),
                     spacing="3",
                     width="80%",
                 ),
                 rx.grid(
-                    input_box("Punataje inicial", EditarAsociarState.inicial_def, EditarAsociarState.puntaje_inicial_edit, EditarAsociarState.set_puntaje_inicial_edit, "number"),
+                    input_box("Puntaje inicial", EditarAsociarState.inicial_def, EditarAsociarState.puntaje_inicial_edit, EditarAsociarState.set_puntaje_inicial_edit, "number"),
                     spacing="3",
                     width="80%",
                 ),
@@ -134,8 +134,8 @@ def filtros() -> rx.Component:
             rx.grid(
                 select_catalog("Eventos (futuros, activos)", "Seleccionar...", GestionarRetoState.eventos_gest, GestionarRetoState.set_id_evento_gest),
                 rx.grid(
-                    input_box("Buscar por titulo", "Titutlo...", GestionarRetoState.busqueda_gest, GestionarRetoState.set_busqueda_gest, "text"),
-                    select_catalog("Categorias", "Seleccionar...", GestionarRetoState.categorias, GestionarRetoState.set_id_categoria_gest_filtro, GestionarRetoState.id_categoria_gest_filtro),
+                    input_box("Buscar por título", "Título...", GestionarRetoState.busqueda_gest, GestionarRetoState.set_busqueda_gest, "text"),
+                    select_catalog("Categorías", "Seleccionar...", GestionarRetoState.categorias, GestionarRetoState.set_id_categoria_gest_filtro, GestionarRetoState.id_categoria_gest_filtro),
                     select_catalog("Dificultad", "Seleccionar...", GestionarRetoState.dificultades, GestionarRetoState.set_id_dificultad_gest_filtro, GestionarRetoState.id_dificultad_gest_filtro),
                     select_catalog("Modo puntaje", "Seleccionar...", GestionarRetoState.modos, GestionarRetoState.set_id_modo_gest_filtro, GestionarRetoState.id_modo_gest_filtro),
                     place_items="center",
@@ -161,7 +161,7 @@ def contenido() -> rx.Component:
             rx.cond(
                 GestionarRetoState.id_evento_gest != "",
                 rx.foreach(GestionarRetoState.retos_gest, fila_gestion),
-                rx.text("seleccione evento a gestionar", color_scheme="gray", size="2"),
+                rx.text("Seleccione el evento a gestionar", color_scheme="gray", size="2"),
             ),
             spacing="3",
         ),
