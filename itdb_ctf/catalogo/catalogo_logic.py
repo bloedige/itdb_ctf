@@ -60,10 +60,12 @@ def listar_retos(id_usuario:int, id_evento:int, id_categoria:int | None = None, 
     
 def listar_pistas(id_usuario:int, id_evento:int, id_reto:int) -> list[dict]:
     with Session(engine) as s:
-        adquiridos = set(s.exec(select(Compra.id_pista).where(
+        adquiridos = set(s.exec(select(Compra.id_pista)
+            .join(Pista, Pista.id_pista == Compra.id_pista)
+            .where(
             Compra.id_usuario == id_usuario,
             Compra.id_evento == id_evento,
-            Compra.id_reto == id_reto)).all())
+            Pista.id_reto == id_reto)).all())
         pistas = s.exec(select(Pista).where(
             Pista.id_reto == id_reto, Pista.activo == True).order_by(Pista.costo)).all()
         return [

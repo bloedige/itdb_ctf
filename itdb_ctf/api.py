@@ -11,7 +11,7 @@ from fastapi.responses import RedirectResponse, FileResponse
 
 from itdb_ctf.auth.oauth import url_de_autorizacion, canjear_codigo
 from itdb_ctf.auth.auth_logic import obtener_crear_usuario, DominiNoPermitido, CuentaNoPermitida
-from itdb_ctf.auth.jwt_utils import emitir_jwt, validar_jwt
+from itdb_ctf.auth.jwt_utils import emitir_jwt, validar_jwt, COOKIE_MAX_AGE, COOKIE_SECURE
 
 frontend_url = os.environ.get("PUBLIC_URL","http://localhost:3000")
 
@@ -38,7 +38,7 @@ async def callback(request: Request, code: str, state: str):
     token = emitir_jwt(usuario)
     resp = RedirectResponse(f"{frontend_url}/informacion")
 
-    resp.set_cookie("token", token, max_age= 3600)
+    resp.set_cookie("token", token, max_age=COOKIE_MAX_AGE, secure=COOKIE_SECURE, samesite="lax")
     resp.delete_cookie("oauth_state")
     return resp
 

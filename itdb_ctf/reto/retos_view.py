@@ -163,8 +163,7 @@ def form_crear_reto_view()->rx.Component:
             close_dialog_button(CrearRetosState.open_close_dialog),
             width="70vw",
             max_width="70vw",
-            height="70vh",
-            max_height="70vh",
+            height="auto",
             colums="3",
            
         ),
@@ -407,8 +406,7 @@ def form_editar_reto_view() -> rx.Component:
             close_dialog_button(EditarRetosState.open_close_dialog),
             width="70vw",
             max_width="70vw",
-            height="70vh",
-            max_height="70vh",
+            height="auto",
         ),
         open=EditarRetosState.dialog_bool,
     )

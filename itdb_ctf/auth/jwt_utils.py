@@ -4,7 +4,11 @@ import jwt
 
 SECRET=os.environ["JWT_SECRET_KEY"]
 ALGORITHM=os.environ.get("JWT_ALGORITHM","HS256")
-EXPIRE_MIN=int(os.environ.get("JWT_EXPIRE_MINUTE","60"))
+EXPIRE_MIN=int(os.environ.get("JWT_EXPIRE_MINUTES","60"))
+
+# La cookie dura lo mismo que el token; Secure solo cuando el sitio se sirve por HTTPS
+COOKIE_MAX_AGE=EXPIRE_MIN*60
+COOKIE_SECURE=os.environ.get("PUBLIC_URL","http://localhost:3000").startswith("https://")
 
 def emitir_jwt(usuario):
     now = datetime.datetime.now(datetime.timezone.utc)

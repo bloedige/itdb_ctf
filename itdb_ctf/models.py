@@ -141,7 +141,6 @@ class Compra(SQLModel, table=True):
     __tablename__="compra"
     id_compra: Optional[int] = Field(default=None, primary_key=True)
     id_usuario: int = Field(foreign_key="usuario.id_usuario")
-    id_reto: int = Field(foreign_key="reto.id_reto")
     id_evento: int = Field(foreign_key="evento.id_evento")
     id_pista: int = Field(foreign_key="pista.id_pista")
     puntos_usados: int = Field(default=0)

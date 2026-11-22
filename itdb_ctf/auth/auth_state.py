@@ -2,15 +2,15 @@ import reflex as rx
 from sqlmodel import Session
 from itdb_ctf.models import Usuario, Rol
 from itdb_ctf.db import engine
-from itdb_ctf.auth.jwt_utils import validar_jwt
+from itdb_ctf.auth.jwt_utils import validar_jwt, COOKIE_MAX_AGE, COOKIE_SECURE
 
 ROLES_STAFF = {"superadmin","admin","autor"}
 ROLES_ADMIN = {"superadmin","admin"} #agrege esto 
 
 
 class AuthState(rx.State):
-    # El JWT guardado como cookie (1 hora).
-    token: str = rx.Cookie(name="token", max_age=3600)
+    # El JWT guardado como cookie (misma duración que el token).
+    token: str = rx.Cookie(name="token", max_age=COOKIE_MAX_AGE, secure=COOKIE_SECURE, same_site="lax")
 
  # --- VARIABLES CALCULADAS (@rx.var): solo LEEN, no hacen acciones ---
 

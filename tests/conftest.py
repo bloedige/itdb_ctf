@@ -198,7 +198,7 @@ def comprar(id_usuario: int, id_reto: int, id_evento: int, id_pista: int, puntos
     """Inserta una compra de pista directamente (fecha opcional para el freeze)."""
     with Session(engine) as s:
         s.add(Compra(
-            id_usuario=id_usuario, id_reto=id_reto, id_evento=id_evento,
+            id_usuario=id_usuario, id_evento=id_evento,
             id_pista=id_pista, puntos_usados=puntos, fec_compra=fecha or ahora(),
         ))
         s.commit()

@@ -19,25 +19,23 @@
 12           ad = s.exec(select(Compra).where(                                                           # 4
 13               Compra.id_usuario == id_usuario,                                                        # 4
 14               Compra.id_evento == id_evento,                                                          # 4
-15               Compra.id_reto == id_reto,                                                              # 4
-16               Compra.id_pista == id_pista)).first()                                                   # 4
-17           if ad:                                                                                      # 5
-18               return False, "Pista adquirida"                                                         # 6
-19           saldo = puntaje_total_usuario(s, id_usuario, id_evento)                                     # 7
-20           if pista.costo > saldo:                                                                     # 8
-21               return False, "Puntos insuficientes para adquirir la pista"                             # 9
-22           s.add(Compra(                                                                               # 10
-23               id_pista=id_pista,                                                                      # 10
-24               id_reto =id_reto,                                                                       # 10
-25               id_usuario = id_usuario,                                                                # 10
-26               id_evento = id_evento,                                                                  # 10
-27               puntos_usados = pista.costo,                                                            # 10
-28           ))                                                                                          # 10
-29           s.commit()                                                                                  # 10
-30           # el saldo del comprador cambió -> refrescar scoreboard + su vista de retos
-31           canales.publicar_scoreboard(id_evento)                                                      # 10
-32           canales.publicar_evento(id_evento)                                                          # 10
-33           return True, "Pista adquirida."                                                             # 10
+15               Compra.id_pista == id_pista)).first()                                                   # 4
+16           if ad:                                                                                      # 5
+17               return False, "Pista adquirida"                                                         # 6
+18           saldo = puntaje_total_usuario(s, id_usuario, id_evento)                                     # 7
+19           if pista.costo > saldo:                                                                     # 8
+20               return False, "Puntos insuficientes para adquirir la pista"                             # 9
+21           s.add(Compra(                                                                               # 10
+22               id_pista=id_pista,                                                                      # 10
+23               id_usuario = id_usuario,                                                                # 10
+24               id_evento = id_evento,                                                                  # 10
+25               puntos_usados = pista.costo,                                                            # 10
+26           ))                                                                                          # 10
+27           s.commit()                                                                                  # 10
+28           # el saldo del comprador cambió -> refrescar scoreboard + su vista de retos
+29           canales.publicar_scoreboard(id_evento)                                                      # 10
+30           canales.publicar_evento(id_evento)                                                          # 10
+31           return True, "Pista adquirida."                                                             # 10
                                                                                                          # 11 (fin)
 ```
 
@@ -261,24 +259,22 @@ Código completo de la función, renglón por renglón tal como está en el arch
 6            ad = s.exec(select(Compra).where(                                                           # 4
 7                Compra.id_usuario == id_usuario,                                                        # 4
 8                Compra.id_evento == id_evento,                                                          # 4
-9                Compra.id_reto == id_reto,                                                              # 4
-10               Compra.id_pista == id_pista)).first()                                                   # 4
-11           if ad:                                                                                      # 5
-12               return False, "Pista adquirida"                                                         # 6
-13           saldo = puntaje_total_usuario(s, id_usuario, id_evento)                                     # 7
-14           if pista.costo > saldo:                                                                     # 8
-15               return False, "Puntos insuficientes para adquirir la pista"                             # 9
-16           s.add(Compra(                                                                               # 10
-17               id_pista=id_pista,                                                                      # 10
-18               id_reto =id_reto,                                                                       # 10
-19               id_usuario = id_usuario,                                                                # 10
-20               id_evento = id_evento,                                                                  # 10
-21               puntos_usados = pista.costo,                                                            # 10
-22           ))                                                                                          # 10
-23           s.commit()                                                                                  # 10
-24           # el saldo del comprador cambió -> refrescar scoreboard + su vista de retos
-25           canales.publicar_scoreboard(id_evento)                                                      # 10
-26           canales.publicar_evento(id_evento)                                                          # 10
-27           return True, "Pista adquirida."                                                             # 10
+9                Compra.id_pista == id_pista)).first()                                                   # 4
+10           if ad:                                                                                      # 5
+11               return False, "Pista adquirida"                                                         # 6
+12           saldo = puntaje_total_usuario(s, id_usuario, id_evento)                                     # 7
+13           if pista.costo > saldo:                                                                     # 8
+14               return False, "Puntos insuficientes para adquirir la pista"                             # 9
+15           s.add(Compra(                                                                               # 10
+16               id_pista=id_pista,                                                                      # 10
+17               id_usuario = id_usuario,                                                                # 10
+18               id_evento = id_evento,                                                                  # 10
+19               puntos_usados = pista.costo,                                                            # 10
+20           ))                                                                                          # 10
+21           s.commit()                                                                                  # 10
+22           # el saldo del comprador cambió -> refrescar scoreboard + su vista de retos
+23           canales.publicar_scoreboard(id_evento)                                                      # 10
+24           canales.publicar_evento(id_evento)                                                          # 10
+25           return True, "Pista adquirida."                                                             # 10
                                                                                                          # 11 (fin)
 ```
